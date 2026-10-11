@@ -1,0 +1,31 @@
+{
+  "listen": "127.0.0.1:8087",
+  "require_https": true,
+  "trusted_proxy_cidrs": ["127.0.0.1/32", "::1/128"],
+  "token_key": "REPLACE_WITH_BASE64_OF_32_RANDOM_BYTES",
+  "source": {
+    "host": "127.0.0.1", "port": 3306, "database": "suntest",
+    "user": "suntest", "password": "", "tls": "false",
+    "max_open": 16, "max_idle": 8
+  },
+  "sessions": {
+    "host": "127.0.0.1", "port": 3306, "database": "suntest",
+    "user": "suntest", "password": "", "tls": "false",
+    "max_open": 16, "max_idle": 8
+  },
+  "session_prefix": "bg_client_",
+  "max_inflight": 128,
+  "hash_workers": 8,
+  "hash_wait_seconds": 12,
+  "request_timeout_seconds": 15,
+  "query_timeout_seconds": 2,
+  "transaction_timeout_seconds": 3,
+  "phone_refresh_seconds": 30,
+  "max_phone_entries": 250000,
+  "login_per_minute": 120,
+  "refresh_per_minute": 240,
+  "read_per_minute": 120,
+  "access_ttl_seconds": 1800,
+  "refresh_idle_days": 180,
+  "retry_seconds": 120
+}
