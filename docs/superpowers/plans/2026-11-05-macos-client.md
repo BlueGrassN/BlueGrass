@@ -25,8 +25,10 @@
 - CI includes all assets/helpers and executable permissions for each advertised architecture.
 
 ## Tasks
-1. [ ] Add a Mac launcher importing the shared desktop UI; introduce narrowly scoped platform capabilities and add tests for labels, unsupported TUN, helper resolution, and update behavior. Run shared Flutter analysis and tests.
-2. [ ] Add the Darwin Go system-proxy backend, ownership/recovery tests, native-host wiring, and Darwin helper compilation. Preserve existing native protocol contracts.
-3. [ ] Implement Swift Keychain, preferences, window/menu lifecycle, login items, URL/file actions, notifications, and native contracts; add native macOS tests and build them in CI.
-4. [ ] Add pinned-toolchain GitHub Actions, scripts for assets/helpers/signing/package metadata, and artifact test instructions. Validate locally and run on GitHub.
-5. [ ] Review the integrated change, resolve build/test failures, verify downloadable artifacts, and record exact evidence and remaining device tests.
+1. [x] Add a Mac launcher importing the shared desktop UI; introduce narrowly scoped platform capabilities and add tests for labels, unsupported TUN, helper resolution, and update behavior. Run shared Flutter analysis and tests.
+2. [x] Add the Darwin Go system-proxy backend, ownership/recovery tests, native-host wiring, and Darwin helper compilation. Preserve existing native protocol contracts.
+3. [x] Implement Swift Keychain, preferences, window/menu lifecycle, login items, URL/file actions, notifications, and native contracts; add native macOS tests and build them in CI.
+4. [x] Add pinned-toolchain GitHub Actions, scripts for assets/helpers/signing/package metadata, and artifact test instructions. Validate locally and run on GitHub.
+5. [x] Review the integrated change, resolve build/test failures, verify downloadable artifacts, and record exact evidence and remaining device tests.
+
+Completed development-package evidence: [macOS build verification](../../development/macos-build-verification.md). Both architectures passed GitHub run 41986960439 at code revision f0e981d19d42c4009d4c5fe4cb4b228633e62c02. Actual Mac UI/network acceptance remains the user's next step; signed TUN and notarization are outside this certificate-free development package.
