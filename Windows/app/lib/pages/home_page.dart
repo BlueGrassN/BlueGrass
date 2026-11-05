@@ -730,7 +730,7 @@ extension _HomePage on _ShellState {
               c.demo
                   ? '系统代理仅影响遵循系统代理设置的应用。'
                   : DesktopPlatform.current.isMac
-                  ? '系统代理仅影响遵循代理设置的应用。连接后通过所选节点检测实际出口。'
+                  ? 'TUN 连接需要管理员授权；系统代理仅影响遵循代理设置的应用。连接后检测实际出口。'
                   : '系统代理仅影响遵循代理设置的应用；TUN 接管需后台服务。连接后通过所选节点检测实际出口。',
               style: AppTextStyle.footnote.of(
                 context,

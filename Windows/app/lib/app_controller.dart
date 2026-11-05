@@ -17,6 +17,7 @@ import 'diagnostic_client.dart';
 import 'crash_reports.dart';
 import 'app_version.dart';
 import 'control_http_transport.dart';
+import 'macos_control_http_transport.dart';
 import 'update_client.dart';
 import 'api_endpoint.dart';
 import 'desktop_platform.dart';
@@ -61,9 +62,6 @@ class AppController extends ChangeNotifier {
               ? null
               : Uri.parse(const String.fromEnvironment('BLUEGRASS_API_PROXY')),
         );
-    // macOS has system proxy only; its host intentionally has no physically
-    // bound Windows control socket. Dart HTTPS uses an explicit DIRECT path by
-    // default, independent of the system proxy we own, with normal TLS checks.
     final nativeTransport = DesktopPlatform.current.isMac
         ? null
         : ControlHttpTransport(
@@ -71,7 +69,19 @@ class AppController extends ChangeNotifier {
             protectionActive: () => controller.actualMode == 'tun',
             unprotectedTransport: directTransport,
           );
-    final HttpTransport transport = nativeTransport ?? directTransport;
+    final macTransport = DesktopPlatform.current.isMac
+        ? MacControlHttpTransport(
+            resolveHost: (host) => controller._resolveControlHost(host),
+            // A failed recovery/authorization may leave protected settings
+            // even before the broker can report its actual mode.
+            protectionActive: () =>
+                controller.actualMode == 'tun' ||
+                controller.actualMode == 'none' && controller.recoveryRequired,
+            unprotectedTransport: directTransport,
+          )
+        : null;
+    final HttpTransport transport =
+        macTransport ?? nativeTransport ?? directTransport;
     controller = AppController(
       history: history,
       reminders: reminders,
@@ -84,15 +94,19 @@ class AppController extends ChangeNotifier {
       ),
       nativeFactory: nativeFactory ?? NativeClient.new,
     );
-    controller._disposeTransport = nativeTransport?.dispose;
+    controller._disposeTransport =
+        macTransport?.dispose ?? nativeTransport?.dispose;
     controller._configureApi = () async {
       final endpoint = await loadApiEndpoint(
         store: WindowsSessionStore('api_endpoint_v1'),
         transport: bootstrapTransport,
         // Recover an existing protected session before any ordinary DNS/HTTP.
-        allowNetwork: controller.actualMode != 'tun',
+        allowNetwork:
+            controller.actualMode != 'tun' &&
+            !(DesktopPlatform.current.isMac && controller.recoveryRequired),
       );
       await nativeTransport?.configure(endpoint);
+      await macTransport?.configure(endpoint);
       controller.source = ApiV2DataSource(
         baseUri: endpoint,
         store: WindowsSessionStore('session_v1'),
@@ -1435,7 +1449,8 @@ class AppController extends ChangeNotifier {
   bool _modeApplied(Map<String, dynamic> snapshot) => preferences.mode == 'tun'
       ? snapshot['actualMode'] == 'tun' &&
             snapshot['protectionIntent'] == true &&
-            snapshot['protection'] == 'wfp_forwarding' &&
+            snapshot['protection'] ==
+                DesktopPlatform.current.tunnelForwardingState &&
             snapshot['systemProxyApplied'] == false
       : snapshot['actualMode'] == 'system_proxy' &&
             snapshot['systemProxyApplied'] == true;
@@ -1776,6 +1791,18 @@ class AppController extends ChangeNotifier {
       return 'STORAGE-001 · ${DesktopPlatform.current.name} 功能不可用，请重启客户端。';
     }
     if (error is NativeClientException) {
+      if (DesktopPlatform.current.isMac) {
+        switch (error.code) {
+          case 'AUTHORIZATION_CANCELLED':
+            return 'PROT-001 · 已取消管理员授权；需要连接 TUN 时请重试。';
+          case 'AUTHORIZATION_TIMEOUT':
+            return 'PROT-001 · 管理员授权已超时，请重新连接并完成系统授权。';
+          case 'PRIVILEGED_HELPER_INVALID':
+            return 'PROT-001 · TUN 组件校验失败，请重新下载并替换完整的 macOS 开发应用。';
+          case 'RECOVERY_REQUIRED':
+            return 'PROT-001 · 网络设置恢复尚未确认，请点击断开连接并完成系统授权。';
+        }
+      }
       if (DesktopPlatform.current.isMac &&
           const {
             'SERVICE_UNAVAILABLE',

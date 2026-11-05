@@ -3,7 +3,6 @@
 
 import argparse
 from datetime import datetime, timezone
-import hashlib
 import json
 import os
 from pathlib import Path
@@ -12,6 +11,8 @@ import re
 import shutil
 import subprocess
 import sys
+
+from verify_native import sha256, verify_native
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -22,6 +23,7 @@ REQUIRED_PAYLOAD = (
     'Contents/Info.plist',
     'Contents/MacOS/BlueGrass',
     'Contents/MacOS/BlueGrass.Native',
+    'Contents/MacOS/BlueGrass.Tunnel',
     'Contents/MacOS/BlueGrass.Diagnostics',
     'Contents/MacOS/BlueGrass.ProxySettings',
     'Contents/Frameworks/FlutterMacOS.framework/FlutterMacOS',
@@ -67,12 +69,21 @@ def run(args, *, cwd=ROOT, env=None, capture=False):
     return result.stdout.strip() if capture else None
 
 
-def sha256(path):
-    digest = hashlib.sha256()
-    with path.open('rb') as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
-            digest.update(chunk)
-    return digest.hexdigest()
+def build_native_helpers(executables, environment):
+    worker = executables / 'BlueGrass.Tunnel'
+    run(['go', 'build', '-trimpath', '-ldflags=-s -w', '-o', worker,
+         './cmd/bluegrass-tunnel'], cwd=CORE, env=environment)
+    worker.chmod(0o755)
+    # These signed bytes are the authorization identity. Never modify or
+    # re-sign this executable during subsequent helper/outer app signing.
+    run(['codesign', '--force', '--sign', '-', '--timestamp=none', worker])
+    worker_sha256 = sha256(worker)
+    run(['go', 'build', '-trimpath',
+         '-ldflags=-s -w -X bluegrass/native/core/mactunipc.ExpectedWorkerSHA256=' + worker_sha256,
+         '-o', executables / 'BlueGrass.Native', './cmd/bluegrass-native'], cwd=CORE, env=environment)
+    run(['go', 'build', '-trimpath', '-ldflags=-s -w',
+         '-o', executables / 'BlueGrass.Diagnostics', './cmd/bluegrass-diagnostics'], cwd=CORE, env=environment)
+    return worker_sha256
 
 
 def build(args):
@@ -106,12 +117,7 @@ def build(args):
         raise ValueError(f'Built app was not found: {app}')
     executables = app / 'Contents/MacOS'
     environment.update({'GOOS': 'darwin', 'GOARCH': target, 'CGO_ENABLED': '0'})
-    for command, filename in (
-        ('bluegrass-native', 'BlueGrass.Native'),
-        ('bluegrass-diagnostics', 'BlueGrass.Diagnostics'),
-    ):
-        run(['go', 'build', '-trimpath', '-ldflags=-s -w', '-o', executables / filename,
-             './cmd/' + command], cwd=CORE, env=environment)
+    worker_sha256 = build_native_helpers(executables, environment)
 
     swift_package = ROOT / 'Mac/native/ProxySettings'
     run(['swift', 'test', '--package-path', swift_package])
@@ -133,14 +139,15 @@ def build(args):
 
     validate_payload(app)
     helper_info = run(['go', 'version', '-m', executables / 'BlueGrass.Native'], capture=True)
-    if XRAY_VERSION not in helper_info or 'github.com/sagernet/sing-box' in helper_info:
+    worker_info = run(['go', 'version', '-m', executables / 'BlueGrass.Tunnel'], capture=True)
+    if any(XRAY_VERSION not in info or 'github.com/sagernet/sing-box' in info for info in (helper_info, worker_info)):
         raise ValueError('Packaged native host does not match the required Xray dependency')
     for relative in REQUIRED_PAYLOAD:
         path = app / relative
         if path.parent == executables or path.name in {'FlutterMacOS', 'App'}:
             run(['xcrun', 'lipo', path, '-verify_arch', args.arch])
     for path in executables.iterdir():
-        if path.is_file():
+        if path.is_file() and path.name != 'BlueGrass.Tunnel':
             path.chmod(0o755)
     # Sign nested code before the outer app. Do not label ad-hoc signatures as Developer ID.
     for path in sorted((app / 'Contents/Frameworks').rglob('*.dylib')):
@@ -152,6 +159,7 @@ def build(args):
     run(['codesign', '--force', '--sign', '-', '--timestamp=none', '--entitlements',
          APP_ROOT / 'macos/Runner/Release.entitlements', app])
     run(['codesign', '--verify', '--deep', '--strict', '--verbose=2', app])
+    verify_native(app, expected_worker_sha256=worker_sha256)
 
     output = ROOT / 'Mac/dist' / args.arch
     output.mkdir(parents=True, exist_ok=True)
@@ -160,6 +168,7 @@ def build(args):
         raise ValueError('Refusing to overwrite an existing package; use a new build number or output directory')
     # ditto preserves .app symlinks, executable permissions and macOS metadata.
     run(['ditto', '-c', '-k', '--sequesterRsrc', '--keepParent', app, archive])
+    verify_native(app, expected_worker_sha256=worker_sha256)
     shutil.copy2(ROOT / 'Mac/docs/TESTING.md', output / 'TESTING.md')
     metadata = {
         'application': 'BlueGrass', 'version': version, 'build': args.build_number,
@@ -167,12 +176,17 @@ def build(args):
         'commit': run(['git', 'rev-parse', 'HEAD'], capture=True),
         'built_at_utc': datetime.now(timezone.utc).isoformat(),
         'signing': 'ad-hoc development; not notarized',
-        'tun_available': False, 'system_proxy_device_test': 'pending user testing',
+        'tun_available': True,
+        'tun_authorization': 'administrator-password development',
+        'tun_worker_sha256': worker_sha256,
+        'tun_device_test': 'pending user testing',
+        'system_proxy_device_test': 'pending user testing',
         'archive': archive.name, 'sha256': sha256(archive),
         'flutter': json.loads(run(['flutter', '--version', '--machine'], capture=True)),
         'go': run(['go', 'version'], capture=True),
         'xcode': run(['xcodebuild', '-version'], capture=True),
         'native_modules': helper_info,
+        'worker_modules': worker_info,
     }
     (output / 'BUILD.json').write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     (output / 'SHA256SUMS.txt').write_text(f'{metadata["sha256"]}  {archive.name}\n', encoding='utf-8')

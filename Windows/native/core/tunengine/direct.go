@@ -139,7 +139,7 @@ func selectPhysicalInterface(entry netip.Addr, adapters []systemAdapter, routes 
 			continue
 		}
 		for _, a := range adapters {
-			if a.LUID != r.LUID || !a.Up || !validInterface(a.Name) {
+			if a.LUID != r.LUID || !a.Up || !physicalInterfaceName(a.Name) {
 				continue
 			}
 			metric := uint64(r.Metric) + uint64(a.Metric4)

@@ -96,6 +96,84 @@ func clearCache(path string, open cacheOpener) error {
 	return nil
 }
 
+// ClearCacheMappings is the Mac logical-disconnect/release operation. Call it
+// with the same trusted Config.CachePath after every engine has closed. It
+// forgets all names/addresses but retains validated per-pool allocation
+// highwaters, so cached DNS answers cannot be reassigned after reconnect.
+// Empty paths/databases are no-ops. ClearCache retains its legacy full-reset
+// semantics for existing Windows callers.
+func ClearCacheMappings(path string) error { return clearCacheMappings(path, openProtectedCache) }
+
+func clearCacheMappings(path string, open cacheOpener) error {
+	if path == "" {
+		return nil
+	}
+	if !validCachePath(path) {
+		return errFakeIPCache
+	}
+	db, err := open(path)
+	if err != nil {
+		return errFakeIPCache
+	}
+	err = db.Update(func(tx *bolt.Tx) error {
+		if err := cacheLayout(tx); err != nil {
+			return err
+		}
+		meta := tx.Bucket(cacheMeta)
+		if meta == nil {
+			return nil // Do not create an incomplete schema in a fresh DB.
+		}
+		state, err := retainedCacheState(meta)
+		if err != nil {
+			return err
+		}
+		// Validate mappings against the retained highwater before erasing them.
+		// Otherwise clearing could conceal evidence of a regressed allocator.
+		validator := &persistentFakeIPStore{prepared: preparedConfig{fake4: state.Pool}, maxEntries: fakeIPMaxEntries}
+		if err := validator.validateMappings(tx); err != nil {
+			return err
+		}
+		return resetCacheMappings(tx)
+	})
+	closeErr := db.close()
+	if err != nil || closeErr != nil {
+		return errFakeIPCache
+	}
+	return nil
+}
+
+func retainedCacheState(meta *bolt.Bucket) (cacheState, error) {
+	var state cacheState
+	raw := meta.Get(cacheStateKey)
+	if len(raw) == 0 || len(raw) > 1024 || json.Unmarshal(raw, &state) != nil || state.Version != 1 || len(state.Namespace) != 64 || state.Touched <= 0 ||
+		state.Pool != netip.MustParsePrefix("198.18.0.0/16") && state.Pool != netip.MustParsePrefix("198.19.0.0/16") {
+		return state, errFakeIPCache
+	}
+	if _, err := hex.DecodeString(state.Namespace); err != nil {
+		return state, errFakeIPCache
+	}
+	err := meta.ForEach(func(key, value []byte) error {
+		if value == nil {
+			return errFakeIPCache
+		}
+		switch string(key) {
+		case string(cacheStateKey):
+			return nil
+		case "198.18.0.0/16", "198.19.0.0/16":
+			if len(value) != 4 {
+				return errFakeIPCache
+			}
+			if highwater := binary.BigEndian.Uint32(value); highwater < 1 || highwater > 65534 {
+				return errFakeIPCache
+			}
+			return nil
+		default:
+			return errFakeIPCache
+		}
+	})
+	return state, err
+}
+
 type cacheState struct {
 	Version   int          `json:"version"`
 	Namespace string       `json:"namespace"`

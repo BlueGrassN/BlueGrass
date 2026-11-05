@@ -17,20 +17,21 @@ are retained for compatibility. The native host must implement their shared
 
 ## Capabilities and transport
 
-- macOS TUN switches stay visible, disabled and off, with the reason
-  “开发版本暂不支持 TUN，请使用系统代理模式。” Restored TUN preferences normalize to
-  system proxy in memory; the next ordinary settings save persists that mode.
-  Programmatic preference updates, direct controller connection attempts and
-  native-client TUN startup/requests are rejected before a helper starts.
+- macOS uses the same enabled TUN switches and persisted preferences as Windows.
+  Connection starts the adjacent `BlueGrass.Native --tun` broker, which requests
+  system administrator authorization. Mac uses the real PF protection labels;
+  Windows keeps its WFP labels. Mode changes remain locked during a connection.
 - Neither the Windows updater nor its presentation/background lifecycle is
   created on macOS. Even an injected updater is ignored by the app, and direct
   `UpdateClient` calls reject every operation before spawning. About explains
   manual download and replacement of development builds.
-- Production macOS API requests use `IoHttpTransport`, with normal certificate
-  verification and an explicit DIRECT path by default. This avoids depending on
-  the system proxy the app owns. The fixed anonymous HTTPS bootstrap also uses
-  the existing bounded direct transport, validates/caches the API origin and
-  retains the production fallback. macOS never invokes unsupported
+- Production macOS API requests use `MacControlHttpTransport`: normal system-proxy
+  sessions use the existing explicit DIRECT API path, while TUN requests obtain
+  numeric addresses and physical route permits from the authenticated native
+  broker. TLS verifies the original hostname using platform trust. Pending DNS,
+  TLS handshakes and HTTP streams are cancelled with the request. Missing pins or
+  unknown recovery never fall back to ordinary traffic. Anonymous configuration
+  bootstrap runs only after unprotected network state is confirmed. macOS never invokes unsupported
   `controlHttpConfigure`, `controlHttpSend` or `controlHttpCancel`. Windows
   retains `ControlHttpTransport` and its protected socket path.
 - `BlueGrass.Native` and `BlueGrass.Diagnostics` resolve beside the main
@@ -87,7 +88,7 @@ flutter test --no-pub --reporter expanded
 
 The Mac platform tests explicitly exercise macOS and Windows branches. They
 cover production bootstrap/API login without native control HTTP, save-file
-success/cancellation, helper adjacency/names, TUN guards, crash queue platform,
+success/cancellation, helper adjacency/names, authorized TUN/recovery, crash queue platform,
 shared navigation in narrow/wide light/dark layouts, labels/fonts and updater
 startup/resume exclusion. The complete existing Windows Flutter suite remains
 the Windows regression gate; run it on Windows, where its process fixtures and

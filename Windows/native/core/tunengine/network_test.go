@@ -7,7 +7,7 @@ import (
 
 func networkFixture() ([]systemAdapter, []systemRoute) {
 	return []systemAdapter{
-		{Name: "Ethernet", LUID: 1, Index: 3, Up: true, Metric4: 20, Metric6: 30,
+		{Name: "en0", LUID: 1, Index: 3, Up: true, Metric4: 20, Metric6: 30,
 			Addresses: []netip.Prefix{netip.MustParsePrefix("192.168.1.50/24")}, DNS: []netip.Addr{netip.MustParseAddr("192.168.1.1")}},
 	}, []systemRoute{
 		{LUID: 1, Prefix: netip.MustParsePrefix("0.0.0.0/0"), NextHop: netip.MustParseAddr("192.168.1.1"), Metric: 5},

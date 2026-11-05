@@ -139,6 +139,12 @@ func (h *Host) sampleTraffic() {
 }
 
 func (h *Host) snapshot() map[string]any {
+	// Some platform managers close forwarding independently when ownership or
+	// the physical network changes. Synchronize the controller before publishing
+	// a reply; cached connection/exit claims cannot outlive that closed gate.
+	if monitor, ok := h.engine.(interface{ NetworkChanged() bool }); ok && monitor.NetworkChanged() {
+		_ = h.NetworkChanged()
+	}
 	h.collectDiagnostic()
 	var s control.NativeSnapshot
 	if h.controller != nil {
@@ -172,7 +178,7 @@ func (h *Host) snapshot() map[string]any {
 			result["connection"] = "paused"
 			result["actualMode"] = "tun"
 			result["protectionIntent"] = true
-			result["protection"] = "wfp_blocking"
+			result["protection"] = h.tunnelProtectionState(false)
 		}
 		return result
 	}
@@ -195,9 +201,9 @@ func (h *Host) snapshot() map[string]any {
 	if h.tunnel != nil {
 		result["protectionIntent"] = h.tunnel.Active()
 		if s.BusinessGateOpen && h.tunnel.Active() {
-			result["protection"] = "wfp_forwarding"
+			result["protection"] = h.tunnelProtectionState(true)
 		} else {
-			result["protection"] = "wfp_blocking"
+			result["protection"] = h.tunnelProtectionState(false)
 		}
 	} else if s.BusinessGateOpen {
 		result["protection"] = "local_gate_forwarding"

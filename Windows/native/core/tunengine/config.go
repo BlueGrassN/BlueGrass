@@ -18,7 +18,6 @@ import (
 )
 
 const (
-	InterfaceName = "BlueGrass"
 	// A release installation constant, never an IPC/profile-controlled bypass.
 	UIExecutable    = `C:\Program Files\BlueGrass\bluegrass.exe`
 	PublicDNSServer = "1.1.1.1"

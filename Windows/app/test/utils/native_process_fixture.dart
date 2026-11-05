@@ -20,7 +20,9 @@ Future<void> main(List<String> args) async {
   var connectedStatusReads = 0;
   Map<String, dynamic>? context;
   Map<String, dynamic>? previousContext;
-  var connection = scenario == 'recovered-tun' ? 'paused' : 'disconnected';
+  var connection = scenario.endsWith('recovered-tun')
+      ? 'paused'
+      : 'disconnected';
   String? firstId;
   final commands = <String>[];
   final waiting = Completer<void>();
@@ -47,7 +49,9 @@ Future<void> main(List<String> args) async {
         (connection != 'disconnected' ||
             scenario == 'disconnect-protected-tun' &&
                 request['command'] == 'Disconnect'),
-    'protection': connection == 'connected' ? 'wfp_forwarding' : 'wfp_blocking',
+    'protection': scenario.startsWith('mac-')
+        ? (connection == 'connected' ? 'pf_forwarding' : 'pf_blocking')
+        : (connection == 'connected' ? 'wfp_forwarding' : 'wfp_blocking'),
     if (networkChanged) 'errorCode': 'NETWORK_CHANGED',
     'verifiedExitIpv4': connection == 'connected' ? observedExit : null,
     'proxyAddress': '127.0.0.1:49152',

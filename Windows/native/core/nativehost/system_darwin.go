@@ -104,7 +104,7 @@ func RepairCurrentUserProxy() (bool, error) {
 }
 
 // RunSystemProxy reuses the private JSON-lines host and the pinned local Xray
-// engine. There is deliberately no tunnel or persistent-protection capability.
+// engine, first handing retained administrator TUN protection back to its owner.
 func RunSystemProxy(input io.Reader, output io.Writer) error {
 	m, release, err := lockDarwinProxy()
 	if err != nil {
@@ -114,6 +114,9 @@ func RunSystemProxy(input io.Reader, output io.Writer) error {
 	recoveryErr := m.Recover()
 	if recoveryErr != nil && !errors.Is(recoveryErr, winproxy.ErrOwnershipLost) {
 		return recoveryErr
+	}
+	if handled, err := recoverDarwinTunnelIfPresent(input, output); handled || err != nil {
+		return err
 	}
 	h, err := New(localProxyPort)
 	if err != nil {

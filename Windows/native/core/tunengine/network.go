@@ -84,7 +84,7 @@ func systemSnapshot(adapters []systemAdapter, routes []systemRoute) NetworkSnaps
 	ambiguousDefault := false
 	for _, r := range canonicalRoutes {
 		a := byLUID[r.LUID]
-		if !a.Up || !r.Prefix.IsValid() {
+		if !a.Up || !r.Prefix.IsValid() || !snapshotPhysicalInterface(a.Name) {
 			continue
 		}
 		metric := uint64(r.Metric)

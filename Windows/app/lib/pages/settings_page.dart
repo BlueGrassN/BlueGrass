@@ -45,9 +45,9 @@ extension _SettingsPage on _ShellState {
         ),
         SettingsSection(
           title: '网络连接',
-          footer: DesktopPlatform.current.supportsTun
-              ? 'TUN 模式：关闭时使用系统代理模式。'
-              : DesktopPlatform.tunUnavailable,
+          footer: DesktopPlatform.current.isMac
+              ? 'TUN 连接时由系统请求管理员授权；密码不会保存在客户端。关闭后使用系统代理模式。'
+              : 'TUN 模式：关闭时使用系统代理模式。',
           children: [
             SettingsControlRow(
               icon: Icons.alt_route_rounded,

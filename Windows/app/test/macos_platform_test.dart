@@ -30,7 +30,7 @@ void main() {
   tearDown(() => debugDefaultTargetPlatformOverride = null);
 
   for (final (target, seconds) in [
-    (TargetPlatform.macOS, 90),
+    (TargetPlatform.macOS, 120),
     (TargetPlatform.windows, 45),
   ]) {
     test('$target native request default is ${seconds}s with 5s shutdown', () {
@@ -222,12 +222,14 @@ void main() {
     },
   );
 
-  test('Mac refuses TUN before starting any child', () async {
+  test('Mac starts its authorized TUN broker', () async {
     var launches = 0;
     final native = NativeClient(
       startProcess: (exe, args) async {
         launches++;
-        throw StateError('must not launch');
+        expect(exe, endsWith('BlueGrass.Native'));
+        expect(args, ['--tun']);
+        throw StateError('path capture');
       },
     );
     await expectLater(
@@ -236,15 +238,15 @@ void main() {
         isA<NativeClientException>().having(
           (e) => e.code,
           'code',
-          'UNSUPPORTED_COMMAND',
+          'NATIVE_START_FAILED',
         ),
       ),
     );
-    expect(launches, 0);
+    expect(launches, 1);
   });
 
   test(
-    'Mac refuses a direct native Connect TUN request before launch',
+    'Mac Connect requires a running broker and preserves startup failure',
     () async {
       var launches = 0;
       final native = NativeClient(
@@ -259,11 +261,11 @@ void main() {
           isA<NativeClientException>().having(
             (e) => e.code,
             'code',
-            'UNSUPPORTED_COMMAND',
+            'NATIVE_START_FAILED',
           ),
         ),
       );
-      expect(launches, 0);
+      expect(launches, 1);
     },
   );
 
@@ -353,7 +355,7 @@ void main() {
   );
 
   test(
-    'Mac normalizes stale TUN preferences and refuses programmatic TUN',
+    'Mac retains TUN preferences and accepts the shared connection flow',
     () async {
       final writes = <Preferences>[];
       final c = AppController(
@@ -365,19 +367,19 @@ void main() {
       );
       addTearDown(c.dispose);
       await c.initialize();
-      expect(c.preferences.mode, 'system_proxy');
+      expect(c.preferences.mode, 'tun');
+      await c.updatePreferences(c.preferences.copyWith(mode: 'system_proxy'));
       await c.updatePreferences(c.preferences.copyWith(mode: 'tun'));
-      expect(c.preferences.mode, 'system_proxy');
-      expect(writes.where((p) => p.mode == 'tun'), isEmpty);
-      expect(c.message, contains('开发版本暂不支持 TUN'));
+      expect(c.preferences.mode, 'tun');
+      expect(writes.where((p) => p.mode == 'tun'), isNotEmpty);
       expect(jsonDecode(c.diagnosticJson())['platform'], 'macos');
       await c.login('fixture', 'fixture');
       c.preferences = c.preferences.copyWith(mode: 'tun');
       await c.connect();
       expect(
         c.connected,
-        isFalse,
-        reason: 'direct preference assignment must not bypass the capability',
+        isTrue,
+        reason: 'the explicit preview exercises the shared TUN flow only',
       );
     },
   );
@@ -410,9 +412,9 @@ void main() {
           final tun = tester.widget<Switch>(
             find.byKey(const ValueKey('tun-mode-button')),
           );
-          expect(tun.onChanged, isNull);
+          expect(tun.onChanged, isNotNull);
           expect(tun.value, isFalse);
-          expect(find.textContaining('开发版本暂不支持 TUN'), findsWidgets);
+          expect(find.textContaining('开发版本暂不支持 TUN'), findsNothing);
           for (final title in ['我的 IP', '诊断', '设置', '关于']) {
             await tester.tap(find.text(title).last);
             await tester.pumpAndSettle();
@@ -426,7 +428,7 @@ void main() {
                       find.widgetWithText(SwitchListTile, 'TUN 模式'),
                     )
                     .onChanged,
-                isNull,
+                isNotNull,
               );
             }
           }

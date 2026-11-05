@@ -6,6 +6,7 @@ import (
 	"unicode"
 
 	"bluegrass/native/core/engine"
+	"bluegrass/native/core/mactun"
 	"bluegrass/native/core/winprotect"
 )
 
@@ -17,7 +18,7 @@ type logicalSessionJournal interface {
 }
 
 func logicalSessionError(err error) string {
-	if errors.Is(err, winprotect.ErrOwner) {
+	if errors.Is(err, winprotect.ErrOwner) || errors.Is(err, mactun.ErrOwner) {
 		return "OWNER_MISMATCH"
 	}
 	return "RECOVERY_REQUIRED"

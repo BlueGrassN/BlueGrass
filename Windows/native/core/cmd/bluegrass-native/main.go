@@ -1,11 +1,18 @@
 package main
 
 import (
+	"bluegrass/native/core/mactunipc"
 	"bluegrass/native/core/nativehost"
 	"os"
 )
 
 func main() {
+	if len(os.Args) == 2 && os.Args[1] == "--tun-worker-info" {
+		if _, err := os.Stdout.Write(mactunipc.WorkerInfo()); err != nil {
+			os.Exit(1)
+		}
+		return
+	}
 	run := nativehost.Run
 	if len(os.Args) == 2 && os.Args[1] == "--system-proxy" {
 		run = nativehost.RunSystemProxy

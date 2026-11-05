@@ -12,7 +12,9 @@ enum DesktopPlatform {
       defaultTargetPlatform == TargetPlatform.macOS ? macos : windows;
 
   bool get isMac => this == macos;
-  bool get supportsTun => !isMac;
+  bool get supportsTun => true;
+  String get tunnelBlockingState => isMac ? 'pf_blocking' : 'wfp_blocking';
+  String get tunnelForwardingState => isMac ? 'pf_forwarding' : 'wfp_forwarding';
   bool get supportsWindowsUpdater => !isMac;
   String get name => isMac ? 'macOS' : 'Windows';
   String get diagnosticId => isMac ? 'macos' : 'windows';
@@ -28,7 +30,7 @@ enum DesktopPlatform {
   String get closeWindow => isMac ? '隐藏窗口；从菜单栏菜单退出应用' : '隐藏到系统托盘；从托盘菜单退出应用';
   String get manualUpdate =>
       isMac ? '开发版本需手动下载并替换应用。此版本不会自动检查、下载或安装更新。' : '当前会话未接入更新组件，不会下载或安装更新。';
-  static const tunUnavailable = '开发版本暂不支持 TUN，请使用系统代理模式。';
+  static const tunUnavailable = '当前平台暂不支持 TUN，请使用系统代理模式。';
 
   /// Both helpers live beside the GUI (Contents/MacOS in a macOS bundle).
   /// Only macOS drops .exe, preserving the Windows resolver exactly.

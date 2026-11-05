@@ -42,11 +42,11 @@ class NativeClient {
     Duration? requestTimeout,
     this.shutdownTimeout = const Duration(seconds: 5),
   }) : _startProcess = startProcess ?? _spawn,
-       // Leave room for bounded macOS proxy transactions and their cleanup;
+       // Leave room for bounded macOS authorization/TUN transactions and cleanup;
        // the backend owns helper termination and recovery within this deadline.
        requestTimeout =
            requestTimeout ??
-           Duration(seconds: DesktopPlatform.current.isMac ? 90 : 45) {
+           Duration(seconds: DesktopPlatform.current.isMac ? 120 : 45) {
     if (this.requestTimeout <= Duration.zero ||
         shutdownTimeout <= Duration.zero) {
       throw ArgumentError('IPC timeouts must be positive');
@@ -82,6 +82,9 @@ class NativeClient {
   // Never surface arbitrary native stderr/error strings: they may contain a
   // failed request or node credentials. Unknown codes have one safe fallback.
   static const _errorCodes = {
+    'AUTHORIZATION_CANCELLED',
+    'AUTHORIZATION_TIMEOUT',
+    'PRIVILEGED_HELPER_INVALID',
     'CANCELLED',
     'CLOSED',
     'ENGINE_FAILURE',
@@ -492,7 +495,7 @@ class NativeClient {
       snapshot['gateKnown'] == true &&
       snapshot['businessGateOpen'] == false &&
       snapshot['protectionIntent'] == true &&
-      snapshot['protection'] == 'wfp_blocking' &&
+      snapshot['protection'] == DesktopPlatform.current.tunnelBlockingState &&
       snapshot['systemProxyApplied'] == false;
 
   static bool _sameContext(Map<String, dynamic> a, Map<String, dynamic> b) =>

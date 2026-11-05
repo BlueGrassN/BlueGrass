@@ -5,6 +5,7 @@ import (
 	"errors"
 	tun "github.com/xtls/xray-core/proxy/tun"
 	"net/netip"
+	"runtime"
 	"testing"
 )
 
@@ -27,7 +28,7 @@ func TestNativeDNSUsesUnassignedOnLinkPeer(t *testing.T) {
 			t.Fatal("DNS destination must be a usable address on the owned link")
 		}
 		for _, assigned := range options.Gateway {
-			if netip.MustParsePrefix(assigned).Addr() == dns {
+			if runtime.GOOS != "darwin" && netip.MustParsePrefix(assigned).Addr() == dns {
 				t.Fatal("Windows delivers DNS to an assigned local address instead of the TUN stack")
 			}
 		}
@@ -204,11 +205,11 @@ func TestNativeOpenFailureRetainsUnconfirmedCleanup(t *testing.T) {
 	}
 }
 func TestPhysicalEntryRouteUsesLongestPrefixMetricAndRejectsAmbiguity(t *testing.T) {
-	adapters := []systemAdapter{{Name: "Ethernet", LUID: 1, Up: true, Metric4: 20}, {Name: "Wi-Fi", LUID: 2, Up: true, Metric4: 1}, {Name: InterfaceName, LUID: 3, Up: true}}
+	adapters := []systemAdapter{{Name: "en0", LUID: 1, Up: true, Metric4: 20}, {Name: "en1", LUID: 2, Up: true, Metric4: 1}, {Name: InterfaceName, LUID: 3, Up: true}}
 	routes := []systemRoute{{LUID: 1, Prefix: netip.MustParsePrefix("8.8.8.0/24"), Metric: 10}, {LUID: 2, Prefix: netip.MustParsePrefix("0.0.0.0/0")}, {LUID: 3, Prefix: netip.MustParsePrefix("8.8.8.8/32")}}
 	entry := netip.MustParseAddr("8.8.8.8")
 	name, e := selectPhysicalInterface(entry, adapters, routes)
-	if e != nil || name != "Ethernet" {
+	if e != nil || name != "en0" {
 		t.Fatal(name, e)
 	}
 	routes = append(routes, systemRoute{LUID: 2, Prefix: netip.MustParsePrefix("8.8.8.0/24"), Metric: 29})
