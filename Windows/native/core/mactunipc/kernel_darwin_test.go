@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"golang.org/x/sys/unix"
 )
 
 func TestKernelBirthIdentityIsStableAndMatchesSocket(t *testing.T) {
@@ -21,7 +23,33 @@ func TestKernelBirthIdentityIsStableAndMatchesSocket(t *testing.T) {
 	if err != nil || again != i || i.StartSeconds == 0 {
 		t.Fatalf("%+v %+v %v", i, again, err)
 	}
-	path := filepath.Join(t.TempDir(), "p.sock")
+	// t.TempDir includes this long test name and the runner's /var/folders
+	// prefix, which can exceed Darwin's sockaddr_un.sun_path capacity.
+	// This is a private test fixture, not a production runtime-path fallback.
+	dir, err := os.MkdirTemp("/private/tmp", "bg-ipc-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var owned unix.Stat_t
+	if err = unix.Lstat(dir, &owned); err != nil || owned.Mode&unix.S_IFMT != unix.S_IFDIR || owned.Uid != uint32(os.Getuid()) || owned.Mode&0777 != 0700 {
+		t.Fatalf("unsafe socket fixture directory %s: %v", dir, err)
+	}
+	t.Cleanup(func() {
+		var current unix.Stat_t
+		if err := unix.Lstat(dir, &current); err != nil || current.Dev != owned.Dev || current.Ino != owned.Ino || current.Uid != owned.Uid || current.Mode&unix.S_IFMT != unix.S_IFDIR {
+			t.Errorf("socket fixture directory replaced; refusing cleanup: %s", dir)
+			return
+		}
+		// Deferred listener.Close removes only its socket first. Remove the
+		// same empty owned directory; never recursively delete unexpected files.
+		if err := os.Remove(dir); err != nil {
+			t.Errorf("socket fixture cleanup: %v", err)
+		}
+	})
+	path := filepath.Join(dir, "p.sock")
+	if len(path) >= len((unix.RawSockaddrUnix{}).Path) {
+		t.Fatalf("socket fixture path exceeds sockaddr_un: %d bytes", len(path))
+	}
 	l, err := net.ListenUnix("unix", &net.UnixAddr{Name: path, Net: "unix"})
 	if err != nil {
 		t.Fatal(err)

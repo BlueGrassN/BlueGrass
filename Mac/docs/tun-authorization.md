@@ -144,9 +144,9 @@ to that host. A verified inactive/disconnected host returns `false, nil` with
 the original input untouched. Corruption, unsafe files, owner mismatch or
 uncertain root state fails closed with `RECOVERY_REQUIRED` or another safe
 startup error; it never silently starts system proxy. Once an intent is found,
-recovery monitors kernel HUP/ERR on the inherited stdin pipe without reading any
+recovery monitors kqueue EOF/error on the inherited stdin pipe without reading any
 bytes, so GUI death cancels pending authorization and closes the probe client.
-The monitor polls in bounded 50 ms intervals. It preserves the original input
+The monitor uses `EVFILT_READ` with `EV_CLEAR` and bounded 50 ms waits. It preserves the original input
 even on verified inactive fallback. The production recovery source must expose
 `SyscallConn` (normally `os.Stdin`); unsupported wrappers fail closed when intent
 exists. The absent-intent path returns before installing a monitor or reading.
@@ -273,5 +273,5 @@ root installation, actual utun, PF, route or resolver acceptance. The user must
 verify those on a Mac with the final packaged architecture and signature/hash
 order, including cancellation, broker termination during authorization and an
 active session, restart recovery and explicit release. Do not remove the
-runtime marker, state directory or helper executable as a way to release active
+durable recovery marker, state directory or helper executable as a way to release active
 protection; use the manager's verified release path.

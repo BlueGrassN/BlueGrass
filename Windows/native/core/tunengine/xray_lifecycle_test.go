@@ -61,6 +61,47 @@ func stalledXray(t *testing.T) *xrayOutbound {
 	return out
 }
 
+type physicalGuardProbe func(context.Context, string, string) (net.Conn, error)
+
+func (p physicalGuardProbe) DialContext(ctx context.Context, network, address string) (net.Conn, error) {
+	return p(ctx, network, address)
+}
+
+// This exercises the real Xray/protocolconfig context boundary. A platform
+// missing the system-dialer guard adapter otherwise falls through to ordinary
+// sockets: SOCKS authorization is never reached and handshakes outlive Close.
+// The only fallback endpoint here is a local stalled fixture, never the public
+// logical destination, so a missing adapter cannot cause external test traffic.
+func TestXrayPhysicalGuardIsUsedForTCPAndUDP(t *testing.T) {
+	for _, network := range []string{"tcp", "udp"} {
+		t.Run(network, func(t *testing.T) {
+			out := stalledXray(t)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			type attempt struct{ network, address string }
+			called := make(chan attempt, 8)
+			guard := physicalGuardProbe(func(_ context.Context, network, address string) (net.Conn, error) {
+				called <- attempt{network, address}
+				return nil, errors.New("physical guard probe refused socket")
+			})
+			c, err := out.DialContext(protocolconfig.WithPhysicalDialer(ctx, guard), network, M.ParseSocksaddr("9.9.9.9:443"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer c.Close()
+			select {
+			case attempt := <-called:
+				host, _, err := net.SplitHostPort(attempt.address)
+				if err != nil || attempt.network != "tcp" || host != "127.0.0.1" {
+					t.Fatal("guard received the wrong physical proxy endpoint", attempt, err)
+				}
+			case <-time.After(time.Second):
+				t.Fatal("platform system dialer never consumed the per-flow physical guard")
+			}
+		})
+	}
+}
+
 func TestXrayAdapterDeadlinesAndCallerCancellation(t *testing.T) {
 	for _, network := range []string{"tcp", "udp"} {
 		t.Run(network, func(t *testing.T) {

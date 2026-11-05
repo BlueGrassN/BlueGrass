@@ -69,8 +69,15 @@ func TestNativeActivationRollbackAndClosedGate(t *testing.T) {
 			stack := &fakeNativeStack{}
 			platform := &nativePlatform{}
 			platform.open = func(options *tun.Config) (tun.Tun, uint64, error) {
-				if g.isOpen() || len(options.AutoSystemWfpBlockLeak) != 0 || len(options.AutoSystemRoutingTable) == 0 {
+				if g.isOpen() || len(options.AutoSystemWfpBlockLeak) != 0 || options.AutoOutboundsInterface != "" || options.AutoSystemDnsToGateway {
 					t.Fatal("unsafe activation")
+				}
+				if runtime.GOOS == "darwin" {
+					if len(options.AutoSystemRoutingTable) != 0 {
+						t.Fatal("Darwin manager owns system routes")
+					}
+				} else if len(options.AutoSystemRoutingTable) == 0 {
+					t.Fatal("missing Xray-owned system routes")
 				}
 				if failure == "open" {
 					return nil, 0, errors.New("fixture")

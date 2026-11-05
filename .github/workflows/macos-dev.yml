@@ -75,11 +75,15 @@ jobs:
           (cd Mac/app && flutter test)
           python3 -m unittest discover -s Mac/tools/tests -v
       - name: Test native core, TUN and proxy lifecycle
+        # Collect independent platform failures in the same run. Packaging
+        # still requires every preceding validation to succeed.
+        if: ${{ !cancelled() }}
         working-directory: Windows/native/core
         run: |
           go test -count=1 ./nativehost ./macproxy ./localengine ./protocolconfig ./routingpolicy ./control ./entrydns ./diagnostics ./mactun ./mactunipc ./tunengine
           go test -race -count=1 ./mactunipc
       - name: Test private utun packet flow and isolated PF ownership
+        if: ${{ !cancelled() }}
         working-directory: Windows/native/core
         run: |
           set -eu

@@ -180,7 +180,7 @@ func recoverDarwinTunnel(input io.Reader, output io.Writer, deps darwinRecoveryD
 	if intent.OwnerUID != uint32(os.Getuid()) {
 		return true, darwinRecoveryFailure(input, output, mactunipc.ErrRecovery)
 	}
-	// Poll the inherited pipe for HUP without reading any bytes. A buffered
+	// Watch the inherited pipe for EOF without reading any bytes. A buffered
 	// Hello stays on the original reader if an inactive probe permits fallback.
 	ctx, stopMonitor, err := monitorDarwinRecoveryInput(input)
 	if err != nil {
@@ -256,25 +256,44 @@ func monitorDarwinRecoveryInput(input io.Reader) (context.Context, func(), error
 	if err != nil {
 		return nil, nil, mactunipc.ErrUnavailable
 	}
+	queue, err := unix.Kqueue()
+	if err != nil {
+		return nil, nil, mactunipc.ErrUnavailable
+	}
+	unix.CloseOnExec(queue)
+	var registerErr error
+	err = raw.Control(func(fd uintptr) {
+		if fd > 0x7fffffff {
+			registerErr = mactunipc.ErrUnavailable
+			return
+		}
+		// Darwin poll with an empty events mask does not register a pipe
+		// reader. EVFILT_READ delivers EV_EOF when its final writer closes,
+		// including while a buffered Hello remains unread. EV_CLEAR avoids
+		// repeatedly waking on those same Hello bytes without consuming them.
+		event := unix.Kevent_t{Ident: uint64(fd), Filter: unix.EVFILT_READ, Flags: unix.EV_ADD | unix.EV_CLEAR}
+		_, registerErr = unix.Kevent(queue, []unix.Kevent_t{event}, nil, nil)
+	})
+	if err != nil || registerErr != nil {
+		_ = unix.Close(queue)
+		return nil, nil, mactunipc.ErrUnavailable
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
+		defer unix.Close(queue)
 		for ctx.Err() == nil {
-			var pollErr error
+			var waitErr error
 			var dead bool
-			err := raw.Control(func(fd uintptr) {
-				if fd > 0x7fffffff {
-					pollErr = mactunipc.ErrUnavailable
-					return
-				}
-				// HUP/ERR/NVAL are reported independently of requested events.
-				// Do not request POLLIN: queued Hello bytes must not busy-loop.
-				fds := []unix.PollFd{{Fd: int32(fd)}}
-				_, pollErr = unix.Poll(fds, 50)
-				dead = fds[0].Revents&(unix.POLLHUP|unix.POLLERR|unix.POLLNVAL) != 0
+			err := raw.Control(func(uintptr) {
+				events := make([]unix.Kevent_t, 1)
+				timeout := unix.NsecToTimespec(int64(50 * time.Millisecond))
+				var count int
+				count, waitErr = unix.Kevent(queue, nil, events, &timeout)
+				dead = count > 0 && events[0].Flags&(unix.EV_EOF|unix.EV_ERROR) != 0
 			})
-			if err != nil || (pollErr != nil && pollErr != unix.EINTR) || dead {
+			if err != nil || (waitErr != nil && waitErr != unix.EINTR) || dead {
 				cancel()
 				return
 			}
