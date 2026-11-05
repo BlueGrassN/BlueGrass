@@ -298,30 +298,30 @@ func smokePrepare(owner Identity) (retErr error) {
 			mode = 0700
 		}
 		if err = checkRootDirectory(filepath.Dir(p)); err != nil {
-			return err
+			return smokePreparePathError("check parent directory", filepath.Dir(p), err)
 		}
 		if _, err = os.Lstat(p); errors.Is(err, os.ErrNotExist) {
 			if err = os.Mkdir(p, mode); err != nil {
-				return err
+				return smokePreparePathError("create reserved directory", p, err)
 			}
 			created = append(created, p)
 			id, err := smokeDirectoryIdentity(p)
 			if err != nil {
-				return err
+				return smokePreparePathError("record created directory identity", p, err)
 			}
 			w.Directories[p] = id
 		} else if err != nil {
-			return err
+			return smokePreparePathError("lstat reserved directory", p, err)
 		} else if p == canonicalRuntime || p == StateDirectory {
 			return errors.New("runtime/state appeared during fixture reservation")
 		}
 		if err = checkRootDirectory(p); err != nil {
-			return err
+			return smokePreparePathError("check reserved directory", p, err)
 		}
 	}
 	w.IntentParent, err = smokeDirectoryIdentity(filepath.Dir(IntentPath))
 	if err != nil {
-		return err
+		return smokePreparePathError("record durable intent parent identity", filepath.Dir(IntentPath), err)
 	}
 	raw, err := json.Marshal(w)
 	if err != nil {
@@ -329,7 +329,7 @@ func smokePrepare(owner Identity) (retErr error) {
 	}
 	f, err := rootFile(smokeWitnessPath, unix.O_CREAT|unix.O_EXCL|unix.O_WRONLY)
 	if err != nil {
-		return err
+		return smokePreparePathError("open root-owned witness", smokeWitnessPath, err)
 	}
 	_, writeErr := f.Write(raw)
 	syncErr := f.Sync()
