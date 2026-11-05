@@ -53,6 +53,22 @@ void main() {
     await server.close(force: true);
   });
 
+  test(
+    'loopback TLS fixture passes platform trust with its explicit test CA',
+    () async {
+      final raw = await Socket.connect(
+        InternetAddress.loopbackIPv4,
+        server.port,
+      );
+      final secure = await SecureSocket.secure(
+        raw,
+        host: 'api.example.com',
+        context: trusted,
+      ).timeout(const Duration(seconds: 5));
+      secure.destroy();
+    },
+  );
+
   MacControlHttpTransport transport({
     SecurityContext? securityContext,
     bool Function()? active,

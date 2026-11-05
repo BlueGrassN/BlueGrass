@@ -60,6 +60,7 @@ jobs:
       - name: Prepare shared assets and dependencies
         run: |
           python3 Mac/tools/sync_assets.py
+          go run Windows/app/test/fixtures/control-tls/generate.go -out Windows/app/test/fixtures/control-tls
           (cd Windows/app && flutter pub get)
           (cd Mac/app && flutter pub get)
       - name: Analyze shared and Mac applications
