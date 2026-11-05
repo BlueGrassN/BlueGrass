@@ -6,12 +6,60 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"net"
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"golang.org/x/sys/unix"
 )
+
+// A durable Run directory can retain both files across reboot. Seed the real
+// paths before the signed worker starts; successful subsequent bind/Hello and
+// socket exit prove the server recovered the stale node under its existing lock.
+func smokeStaleRuntimeFixture(owner Identity) error {
+	if _, err := smokeSecurityWitness(owner); err != nil {
+		return err
+	}
+	lock, err := rootFile(canonicalRuntime+"/worker.lock", unix.O_CREAT|unix.O_EXCL|unix.O_RDWR)
+	if err != nil {
+		return err
+	}
+	defer lock.Close()
+	if err = unix.Flock(int(lock.Fd()), unix.LOCK_EX|unix.LOCK_NB); err != nil {
+		return err
+	}
+	contender, err := rootFile(canonicalRuntime+"/worker.lock", unix.O_RDWR)
+	if err != nil {
+		return err
+	}
+	busy := unix.Flock(int(contender.Fd()), unix.LOCK_EX|unix.LOCK_NB)
+	_ = contender.Close()
+	if !errors.Is(busy, unix.EWOULDBLOCK) {
+		return errors.New("live runtime lease did not exclude another owner")
+	}
+	if err = unix.Flock(int(lock.Fd()), unix.LOCK_UN); err != nil {
+		return err
+	}
+	listener, err := net.ListenUnix("unix", &net.UnixAddr{Name: SocketPath, Net: "unix"})
+	if err != nil {
+		return err
+	}
+	listener.SetUnlinkOnClose(false)
+	if err = listener.Close(); err != nil {
+		return err
+	}
+	if !socketNoACL(SocketPath) {
+		return errors.New("stale socket lost root/no-ACL metadata")
+	}
+	c, err := net.DialTimeout("unix", SocketPath, 200*time.Millisecond)
+	if err == nil {
+		_ = c.Close()
+		return errors.New("stale socket unexpectedly has a live listener")
+	}
+	return nil
+}
 
 func smokeSecurityWitness(owner Identity) (smokeWitness, error) {
 	var w smokeWitness

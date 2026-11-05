@@ -14,7 +14,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-const privateRuntime = "/private/var/run/bluegrass-tun"
+const privateRuntime = mactunipc.RuntimeDirectory
 const journalPath = mactunipc.StateDirectory + "/network-v1.json"
 
 func secureDir(path string, mode uint32) error {

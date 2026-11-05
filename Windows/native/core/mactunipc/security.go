@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	RuntimeDirectory = "/var/run/bluegrass-tun"
+	RuntimeDirectory = "/Library/Application Support/BlueGrass/Run"
 	StateDirectory   = "/Library/Application Support/BlueGrass/Tunnel"
 	IntentPath       = "/Library/Application Support/BlueGrass/tun-intent.json"
 	SocketPath       = RuntimeDirectory + "/worker.sock"

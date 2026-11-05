@@ -68,7 +68,7 @@ func TestAbsentDurableIntentStillRefusesLegacyAndUnsafeMarkers(t *testing.T) {
 	}{
 		{"absent", os.ErrNotExist, os.ErrNotExist, false, false},
 		{"unreadable durable", os.ErrPermission, nil, false, true},
-		{"legacy same boot", os.ErrNotExist, nil, true, true},
+		{"unsupported runtime marker", os.ErrNotExist, nil, true, true},
 		{"unsafe legacy parent", os.ErrNotExist, ErrHelperInvalid, false, true},
 	} {
 		t.Run(tt.name, func(t *testing.T) {

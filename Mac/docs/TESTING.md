@@ -43,7 +43,7 @@ TUN 使用按需启动的管理员原生组件，无需 Apple Developer 证书�
 6. 在可中断网络的测试时段，测试强制结束客户端/原生组件。重新打开应用、授权恢复，再点击断开连接。崩溃后 PF 保护可能继续阻止公网；不要通过删除日志、全局清空 PF 或关闭其他防火墙来恢复。
 7. 对比正常退出、菜单栏退出、取消授权和崩溃恢复后的 DNS/路由。其他应用后来修改的设置应被保留；冲突应明确显示恢复未确认。
 
-TUN 的受保护状态位于 `/Library/Application Support/BlueGrass/Tunnel`，可跨重启发现的恢复标记为 `/Library/Application Support/BlueGrass/tun-intent.json`，运行时通信位于 `/var/run/bluegrass-tun`。测试期间保留这些目录及安装的组件。替换旧版或移除应用前，请先在应用中断开并确认网络恢复。当前无常驻开机 LaunchDaemon；系统授权对话框和完整全局接管仍需由你在实际 Mac 验收。
+TUN 的受保护状态位于 `/Library/Application Support/BlueGrass/Tunnel`，可跨重启发现的恢复标记为 `/Library/Application Support/BlueGrass/tun-intent.json`，运行时通信位于 `/Library/Application Support/BlueGrass/Run`。测试期间保留这些目录及安装的组件。替换旧版或移除应用前，请先在应用中断开并确认网络恢复。当前无常驻开机 LaunchDaemon；系统授权对话框和完整全局接管仍需由你在实际 Mac 验收。
 
 反馈请附：macOS 版本、芯片类型、`BUILD.json` 中 commit/build、操作步骤和错误码。勿提供账号密码或节点密钥。崩溃/强制结束后的网络恢复、不同网络服务与权限状态均属于需实机确认的项目。
 

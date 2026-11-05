@@ -104,12 +104,9 @@ usec=$6
 rootdir /
 rootdir /Library
 newdir /Library/PrivilegedHelperTools 755
-rootdir /private
-rootdir /private/var
-rootdir /private/var/run
-newdir /private/var/run/bluegrass-tun 755
 rootdir '/Library/Application Support'
 newdir '/Library/Application Support/BlueGrass' 755
+newdir '/Library/Application Support/BlueGrass/Run' 755
 newdir '/Library/Application Support/BlueGrass/Tunnel' 700
 dst=/Library/PrivilegedHelperTools/BlueGrass.Tunnel-$sha
 [ ! -L "$src" ] && [ -f "$src" ] || fail

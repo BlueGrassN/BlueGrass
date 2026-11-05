@@ -9,7 +9,7 @@ import (
 func readIntent(open func(string) (io.ReadCloser, error)) (*Intent, error) {
 	f, err := open(IntentPath)
 	if errors.Is(err, os.ErrNotExist) {
-		// No shipped TUN version needs migration. A same-boot development
+		// No shipped TUN version needs migration. An unsupported development
 		// marker cannot be silently treated as permission to bypass recovery.
 		legacy, legacyErr := open(RuntimeDirectory + "/intent.json")
 		if legacyErr == nil {

@@ -99,56 +99,63 @@ func TestDarwinRootBootstrapSmoke(t *testing.T) {
 			t.Fatal("root security fixture failed before installation")
 		}
 	}
-	ctx, cancel := authorizationContext(context.Background())
-	defer cancel()
-	command, err := InstallationCommand(source, ExpectedWorkerSHA256, owner)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// Only the authorizer changes. The shell command, pre/post-copy checks,
-	// installed signed worker, numeric identity and socket protocol are real.
-	conn, err = authorizeAndDial(ctx, func(ctx context.Context) error {
-		cmd := exec.CommandContext(ctx, "/usr/bin/sudo", "-n", "--", "/bin/sh", "-c", command)
-		cmd.Env = smokeEnvironment()
-		cmd.Stdout = io.Discard
-		cmd.Stderr = io.Discard
-		cmd.WaitDelay = 100 * time.Millisecond
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("fixed sudo installer failed: %w", err)
+	if !t.Run("StaleRuntimeRecovery", func(t *testing.T) {
+		if err = smokeRootFixture("stale", owner); err != nil {
+			t.Fatal(err)
 		}
-		return nil
-	}, dialWorker)
-	if err != nil {
-		t.Fatal(err)
-	}
-	u, pid, err := socketPeer(conn.(*net.UnixConn))
-	if err != nil || u != 0 {
-		t.Fatal("worker peer is not kernel-authenticated root")
-	}
-	worker, err = processIdentity(pid)
-	if err != nil || worker.UID != 0 || worker.StartSeconds == 0 {
-		t.Fatal("root worker kernel birth identity unavailable")
-	}
-	client := &Client{conn: conn, timeout: FrameTimeout}
-	// A ready frame + successful Hello proves the root server accepted this
-	// ordinary process's actual UID/PID/birth identity, not asserted JSON fields.
-	for _, command := range []string{"Hello", "Disconnect"} {
-		request, _ := json.Marshal(map[string]string{"id": "bootstrap-" + command, "command": command})
-		reply, err := client.Exchange(request)
+		ctx, cancel := authorizationContext(context.Background())
+		defer cancel()
+		command, err := InstallationCommand(source, ExpectedWorkerSHA256, owner)
 		if err != nil {
-			t.Fatalf("%s: %v", command, err)
+			t.Fatal(err)
 		}
-		if err = smokeDisconnectedReply(reply, "bootstrap-"+command); err != nil {
-			t.Fatalf("%s: %v", command, err)
+		// Only the authorizer changes. The shell command, pre/post-copy checks,
+		// installed signed worker, numeric identity and socket protocol are real.
+		conn, err = authorizeAndDial(ctx, func(ctx context.Context) error {
+			cmd := exec.CommandContext(ctx, "/usr/bin/sudo", "-n", "--", "/bin/sh", "-c", command)
+			cmd.Env = smokeEnvironment()
+			cmd.Stdout = io.Discard
+			cmd.Stderr = io.Discard
+			cmd.WaitDelay = 100 * time.Millisecond
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("fixed sudo installer failed: %w", err)
+			}
+			return nil
+		}, dialWorker)
+		if err != nil {
+			t.Fatal(err)
 		}
+		u, pid, err := socketPeer(conn.(*net.UnixConn))
+		if err != nil || u != 0 {
+			t.Fatal("worker peer is not kernel-authenticated root")
+		}
+		worker, err = processIdentity(pid)
+		if err != nil || worker.UID != 0 || worker.StartSeconds == 0 {
+			t.Fatal("root worker kernel birth identity unavailable")
+		}
+		client := &Client{conn: conn, timeout: FrameTimeout}
+		// A ready frame + successful Hello proves the root server accepted this
+		// ordinary process's actual UID/PID/birth identity, not asserted JSON fields.
+		for _, command := range []string{"Hello", "Disconnect"} {
+			request, _ := json.Marshal(map[string]string{"id": "bootstrap-" + command, "command": command})
+			reply, err := client.Exchange(request)
+			if err != nil {
+				t.Fatalf("%s: %v", command, err)
+			}
+			if err = smokeDisconnectedReply(reply, "bootstrap-"+command); err != nil {
+				t.Fatalf("%s: %v", command, err)
+			}
+		}
+		if err = client.Close(); err != nil {
+			t.Fatal(err)
+		}
+		if err = smokeWaitWorkerExit(worker); err != nil {
+			t.Fatal(err)
+		}
+		t.Log("signed worker recovered stale socket/lock, authenticated UID/PID/kernel birth; Hello and explicit Disconnect stayed inactive; worker/socket exited")
+	}) {
+		t.Fatal("signed worker bootstrap with durable stale runtime failed")
 	}
-	if err = client.Close(); err != nil {
-		t.Fatal(err)
-	}
-	if err = smokeWaitWorkerExit(worker); err != nil {
-		t.Fatal(err)
-	}
-	t.Log("signed worker authenticated UID/PID/kernel birth; Hello and explicit Disconnect stayed inactive; worker/socket exited")
 }
 
 func smokeDisconnectedReply(data []byte, id string) error {
@@ -260,6 +267,8 @@ func TestDarwinRootBootstrapFixture(t *testing.T) {
 		err = smokeACLFixture(owner)
 	case "durable":
 		err = smokeDurableFixture(owner)
+	case "stale":
+		err = smokeStaleRuntimeFixture(owner)
 	default:
 		t.Fatal("unknown fixed fixture action")
 	}

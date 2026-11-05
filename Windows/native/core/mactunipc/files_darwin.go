@@ -15,9 +15,9 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// /var is Apple's root-owned symlink to private/var. Walk the canonical,
-// fixed chain instead of accepting arbitrary symlinks in protected paths.
-const canonicalRuntime = "/private/var/run/bluegrass-tun"
+// Use the checked Library parent directly, with no /var symlink or daemon-
+// writable /private/var/run ancestor. Socket/lease files may survive reboot.
+const canonicalRuntime = RuntimeDirectory
 
 func checkRootDirectory(path string) error {
 	fd, err := openRootDirectory(path)
@@ -85,9 +85,6 @@ func rootFile(path string, flags int) (*os.File, error) {
 // indication that it is safe to start a different network mode.
 func ReadIntent() (*Intent, error) {
 	return readIntent(func(path string) (io.ReadCloser, error) {
-		if path == RuntimeDirectory+"/intent.json" {
-			path = canonicalRuntime + "/intent.json"
-		}
 		return rootFile(path, unix.O_RDONLY)
 	})
 }

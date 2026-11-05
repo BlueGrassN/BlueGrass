@@ -101,7 +101,7 @@ journal recorded. Explicit user Disconnect/Release belongs to the manager.
 `mactunipc` imports no `nativehost` code. It exports:
 
 ```go
-const RuntimeDirectory = "/var/run/bluegrass-tun"
+const RuntimeDirectory = "/Library/Application Support/BlueGrass/Run"
 const StateDirectory = "/Library/Application Support/BlueGrass/Tunnel"
 const IntentPath = "/Library/Application Support/BlueGrass/tun-intent.json"
 
@@ -131,10 +131,19 @@ recovery; remove it only after verified release. The marker contains no account
 or node credentials. State/journal files live under the root-owned state
 directory; the manager is responsible for their confidentiality and durability.
 The marker's root-owned `0755` parent and `0644` marker survive reboot. Discovery
-reads this durable path even when the runtime/socket directory is absent. Runtime
-holds only transient IPC/session files. A legacy runtime `intent.json` blocks
-fallback with `RECOVERY_REQUIRED` when no durable marker exists; it is never
-adopted or migrated automatically. There were no shipped TUN versions to migrate.
+reads this durable path even when the runtime/socket directory is absent. The
+installer creates/checks `/Library/Application Support`, then `BlueGrass`, then
+`Run` (`0755`), then `Tunnel` (`0700`), retaining strict root/mode/ACL checks.
+No `/var` symlink or daemon-group-writable `/private/var/run` ancestor is used.
+`Run` is also durable: its socket and lock can remain after reboot or a crash.
+The worker validates and exclusively locks the existing root-owned single-link
+lock file before removing only a checked root-owned no-ACL socket and rebinding.
+A live lock owner, symlink, foreign owner, unsafe mode/ACL or non-socket node is
+rejected; the intent and journal are preserved. The lock file is reused and
+contains no node credentials. Unsupported `Run/intent.json` blocks fallback with
+`RECOVERY_REQUIRED` when no durable marker exists; it is never adopted or migrated
+automatically. No shipped TUN versions require migration from the retired `/var`
+location.
 
 The lead adds `recoverDarwinTunnelIfPresent(input, output)` before initializing
 system proxy in `nativehost/system_darwin.go`. An absent marker returns
@@ -221,14 +230,23 @@ the worker; no extra environment switch is required and failures never skip:
   only the witnessed fresh runtime directory aside, verifies durable discovery
   while runtime is absent, rejects a corrupt durable marker, and permits a fresh
   start only after both markers are absent. It restores the same runtime inode.
+- `TestDarwinRootBootstrapSmoke/StaleRuntimeRecovery`: verifies that a held real
+  runtime lock excludes another descriptor, then leaves the lock unlocked and a
+  root-owned closed Unix socket on disk. The actual signed worker must reuse the
+  lease, remove/rebind the stale socket, complete Hello/Disconnect, and exit with
+  its socket removed. This exercises durable Run contents left across reboot.
 
-These are root filesystem tests simulating volatile-directory loss, not an actual
-runner reboot. The regular `go test ./mactunipc` gate additionally runs
+These are root filesystem tests simulating a missing runtime directory and stale
+post-reboot IPC entries, not an actual runner reboot. The regular
+`go test ./mactunipc` gate additionally runs
 `TestSecurityAttributesRejectACLAndUncertainMetadata`,
 `TestDurableIntentDiscoveryDoesNotConsultRuntime`,
 `TestAbsentDurableIntentStillRefusesLegacyAndUnsafeMarkers`, and
 `TestInstallerACLFilterRequiresCleanCompleteListing`. The awk test is mandatory
 on Darwin and only skips on other hosts without awk.
+`TestRuntimeDiscoveryStaysUnderProtectedLibraryParent` checks absent-marker
+discovery stays under the strict Library parent and the socket fits Darwin's
+Unix address limit.
 
 A separate test-only sudo fixture reserves fresh fixed directories, keeps a
 root-owned ownership witness (UID/PID/birth, hash, directory device/inode), and
