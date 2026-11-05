@@ -264,6 +264,102 @@ func TestExternalManualProxyNeverReactivatesOriginalPAC(t *testing.T) {
 		t.Fatal("restoration changed external manual/PAC policy")
 	}
 }
+
+func TestBypassOnlyCompetitionRestoresBothOwnedEndpointsBeforeCleanup(t *testing.T) {
+	m, d := fixture()
+	d.s.Active = []string{"wifi"}
+	if err := m.Apply("127.0.0.1:12808", ""); err != nil {
+		t.Fatal(err)
+	}
+	d.s.Services["wifi"]["ExceptionsList"] = []any{"external.example"}
+	if !errors.Is(m.Relinquish(), winproxy.ErrRecoveryRequired) {
+		t.Fatal("forgot endpoints after bypass competition")
+	}
+	if err := m.Restore(); !errors.Is(err, winproxy.ErrOwnershipLost) {
+		t.Fatal(err)
+	}
+	for _, prefix := range []string{"HTTP", "HTTPS"} {
+		if d.s.Services["wifi"][prefix+"Proxy"] == "127.0.0.1" {
+			t.Fatalf("stranded %s loopback", prefix)
+		}
+	}
+	if !equal(d.s.Services["wifi"]["ExceptionsList"], []string{"external.example"}) {
+		t.Fatal("external bypass overwritten")
+	}
+	if d.r != nil {
+		t.Fatal("fully resolved endpoints left recovery active")
+	}
+	if err := NewWithDriver(d).Recover(); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.Relinquish(); err != nil {
+		t.Fatal(err)
+	}
+	if active, err := m.State(); active || err != nil {
+		t.Fatal("false active cleanup", active, err)
+	}
+}
+func TestHTTPCompetitionRestoresHTTPSWithoutReactivatingPACOnRecovery(t *testing.T) {
+	m, d := fixture()
+	d.s.Active = []string{"wifi"}
+	if err := m.Apply("127.0.0.1:12808", ""); err != nil {
+		t.Fatal(err)
+	}
+	d.s.Services["wifi"]["HTTPProxy"] = "external.example"
+	d.s.Services["wifi"]["HTTPPort"] = float64(8080)
+	if !errors.Is(m.Relinquish(), winproxy.ErrRecoveryRequired) {
+		t.Fatal("forgot still-owned HTTPS")
+	}
+	if err := NewWithDriver(d).Recover(); !errors.Is(err, winproxy.ErrOwnershipLost) {
+		t.Fatal(err)
+	}
+	s := d.s.Services["wifi"]
+	if s["HTTPSProxy"] == "127.0.0.1" || !equal(s["HTTPEnable"], 1) || s["HTTPProxy"] != "external.example" || !equal(s["HTTPPort"], 8080) || !equal(s["ProxyAutoConfigEnable"], 0) {
+		t.Fatal("stranded HTTPS or changed external manual/PAC behavior")
+	}
+	if d.r != nil {
+		t.Fatal("safe endpoint cleanup was not finalized")
+	}
+	if err := m.Recover(); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.Relinquish(); err != nil {
+		t.Fatal(err)
+	}
+}
+func TestAmbiguousLoopbackRetainsJournalAcrossRecoveryAndRelinquish(t *testing.T) {
+	m, d := fixture()
+	d.s.Active = []string{"wifi"}
+	if err := m.Apply("127.0.0.1:12808", ""); err != nil {
+		t.Fatal(err)
+	}
+	// A competing enable value prevents grouped restoration, but the endpoint
+	// still belongs to BlueGrass. No cleanup path may forget this leftover.
+	d.s.Services["wifi"]["HTTPEnable"] = false
+	if err := m.Restore(); !errors.Is(err, winproxy.ErrRecoveryRequired) || d.r == nil {
+		t.Fatal("forgot ambiguous loopback", err)
+	}
+	if err := m.Relinquish(); !errors.Is(err, winproxy.ErrRecoveryRequired) || d.r == nil {
+		t.Fatal("relinquished unresolved loopback", err)
+	}
+	if err := NewWithDriver(d).Recover(); !errors.Is(err, winproxy.ErrRecoveryRequired) || d.r == nil {
+		t.Fatal("recovery falsely succeeded", err)
+	}
+	if d.s.Services["wifi"]["HTTPSProxy"] == "127.0.0.1" {
+		t.Fatal("failed to restore independently owned HTTPS")
+	}
+	d.s.Services["wifi"]["HTTPProxy"] = "external.example"
+	d.s.Services["wifi"]["HTTPPort"] = float64(8080)
+	if err := m.Recover(); !errors.Is(err, winproxy.ErrOwnershipLost) {
+		t.Fatal(err)
+	}
+	if d.r != nil {
+		t.Fatal("journal persisted after endpoint was resolved")
+	}
+	if err := m.Relinquish(); err != nil {
+		t.Fatal(err)
+	}
+}
 func TestCompetingWriterBetweenReadAndWriteIsNeverOverwritten(t *testing.T) {
 	m, d := fixture()
 	d.race = true

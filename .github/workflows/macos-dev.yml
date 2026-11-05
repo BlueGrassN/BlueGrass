@@ -70,6 +70,7 @@ jobs:
         run: |
           (cd Windows/packages/domain && dart pub get && dart test)
           (cd Windows/packages/data_source && dart pub get && dart test)
+          (cd Windows/app && flutter test test/macos_platform_test.dart)
           (cd Mac/app && flutter test)
           python3 -m unittest discover -s Mac/tools/tests -v
       - name: Test native core and proxy lifecycle

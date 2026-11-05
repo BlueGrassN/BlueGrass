@@ -283,12 +283,46 @@ func owned(s Snapshot, r *Record) bool {
 // its enable flag too; restoring individual matching keys could disable another
 // application's proxy or re-enable its PAC/SOCKS configuration.
 var ownershipGroups = [][]string{
-	// Selection modes interact: restoring an old PAC after losing HTTP ownership
-	// can override the competing manual proxy. Preserve the service's complete
-	// proxy policy when any observed part changes, including bypass behavior.
-	{"HTTPEnable", "HTTPProxy", "HTTPPort", "HTTPSEnable", "HTTPSProxy", "HTTPSPort",
-		"SOCKSEnable", "SOCKSProxy", "SOCKSPort", "ProxyAutoConfigEnable", "ProxyAutoConfigURLString",
-		"ProxyAutoDiscoveryEnable", "ExceptionsList", "ExcludeSimpleHostnames"},
+	{"HTTPEnable", "HTTPProxy", "HTTPPort"},
+	{"HTTPSEnable", "HTTPSProxy", "HTTPSPort"},
+	{"SOCKSEnable", "SOCKSProxy", "SOCKSPort"},
+	{"ProxyAutoConfigEnable", "ProxyAutoConfigURLString"},
+	{"ProxyAutoDiscoveryEnable"},
+	{"ExceptionsList", "ExcludeSimpleHostnames"},
+}
+
+func externalManualPolicy(current Settings, c Change) bool {
+	for _, keys := range ownershipGroups[:3] {
+		if !sameGroup(current, c.Applied, keys) && !sameGroup(current, c.Original, keys) {
+			return true
+		}
+	}
+	return false
+}
+
+// Re-enabling old PAC, discovery, or SOCKS can override a competing manual
+// endpoint. Leave those selection modes unchanged after manual ownership loss.
+func preserveSelection(keys []string, current Settings, c Change) bool {
+	return externalManualPolicy(current, c) && (keys[0] == "ProxyAutoConfigEnable" || keys[0] == "ProxyAutoDiscoveryEnable" || keys[0] == "SOCKSEnable")
+}
+
+// Group ownership may be ambiguous (for example an external enable flag with
+// our unchanged endpoint). Do not erase the only recovery record while any
+// endpoint still points to the listener we are about to close. Fully original
+// settings are resolved, even if the original itself used that address.
+func unresolvedLoopback(s Snapshot, r *Record) bool {
+	for id, c := range r.Entries {
+		current := s.Services[id]
+		for _, keys := range ownershipGroups[:2] {
+			if sameGroup(c.Original, c.Applied, keys) || sameGroup(current, c.Original, keys) {
+				continue
+			}
+			if sameGroup(current, c.Applied, keys[1:]) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func sameGroup(a, b Settings, keys []string) bool {
@@ -367,6 +401,10 @@ func (m *Manager) restore() error {
 				lost = true
 				continue
 			}
+			if preserveSelection(keys, current, c) {
+				lost = true
+				continue
+			}
 			for _, k := range keys {
 				if value, present := c.Original[k]; present {
 					desired.Services[id][k] = value
@@ -392,6 +430,9 @@ func (m *Manager) restore() error {
 	if !equal(actual, desired) {
 		return winproxy.ErrVerificationFailed
 	}
+	if unresolvedLoopback(actual, r) {
+		return winproxy.ErrRecoveryRequired
+	}
 	if err = m.driver.Delete(); err != nil {
 		return err
 	}
@@ -414,9 +455,12 @@ func (m *Manager) Relinquish() error {
 	if err != nil {
 		return err
 	}
+	if unresolvedLoopback(s, r) {
+		return winproxy.ErrRecoveryRequired
+	}
 	for id, c := range r.Entries {
 		for _, keys := range ownershipGroups {
-			if !sameGroup(c.Original, c.Applied, keys) && sameGroup(s.Services[id], c.Applied, keys) {
+			if !sameGroup(c.Original, c.Applied, keys) && sameGroup(s.Services[id], c.Applied, keys) && !preserveSelection(keys, s.Services[id], c) {
 				return winproxy.ErrRecoveryRequired
 			}
 		}

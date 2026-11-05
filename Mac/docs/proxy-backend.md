@@ -80,22 +80,35 @@ settings. Fast user switching is not an accepted multi-user isolation guarantee.
    deletion fails. A transport timeout terminates the helper and leaves the
    durable journal for the next recovery attempt.
 
-Restoration treats **each service's complete proxy policy as one ownership
-group**: HTTP and HTTPS host/port/enable, SOCKS host/port/enable, PAC enable/URL,
-autodiscovery, and bypass behavior. If that group still matches the applied
-snapshot, it returns to the original values, including removing originally
-absent keys. An already restored group is left alone. Any competing policy change
-preserves the entire service's current policy, while other owned services are
-restored. This prevents both disabling an external manual proxy by restoring
-only HTTPEnable and overriding it by reactivating an obsolete original PAC.
+Restoration uses coherent ownership groups: HTTP host/port/enable, HTTPS
+host/port/enable, SOCKS host/port/enable, PAC enable/URL, autodiscovery, and bypass.
+A group still matching its applied snapshot returns to the original values,
+including removing originally absent keys. Already restored groups are left
+alone. An external HTTP replacement therefore preserves that endpoint and its
+enable flag while independently owned HTTPS is restored. A bypass-only change
+preserves the external bypass group while restoring both owned endpoints.
+
+Selection modes also interact across groups. When a manual group differs from
+both the original and applied snapshots, restoring old PAC/autodiscovery/SOCKS
+selection could override the external endpoint. Those selection groups remain
+unchanged in that case: an external manual proxy never reactivates obsolete PAC.
+After readback, a separate endpoint check refuses journal deletion if an
+unresolved HTTP/HTTPS host+port still matches the BlueGrass listener (unless its
+whole group is already exactly original). Restore and Recover return
+`RECOVERY_REQUIRED`, preserve the journal, and restore any other independently
+owned endpoints. Relinquish has the same guard, even if an external enable value
+made full-group ownership ambiguous. Disconnect, Close, and repair cannot
+acknowledge this state as successfully cleaned up. Once the endpoint is restored
+or replaced externally, recovery can safely finish and relinquish the record.
 The preferences lock protects compare-and-set from cooperating settings writers;
 a stale comparison is rejected before any write. Unrelated proxy fields are
 copied from the current native configuration while staging changes.
 
 Ownership loss maps to the existing `winproxy.ErrOwnershipLost`. The host's
 existing repair/relinquish path can acknowledge that external settings were
-preserved. A backup cannot be relinquished while a changed policy group still
-matches its BlueGrass-applied value. Identical values written by another process cannot be
+preserved. A backup cannot be relinquished while an unresolved BlueGrass endpoint
+remains, or another changed group still requires restoration (excluding selection
+groups deliberately preserved to protect external manual policy). Identical values written by another process cannot be
 distinguished from BlueGrass ownership, the same equality convention used by the
 Windows manager. Corrupt or unreadable journals require recovery; they never
 establish an applied/connected claim.

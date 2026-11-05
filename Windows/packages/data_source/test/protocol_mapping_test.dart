@@ -10,13 +10,9 @@ import 'api_v2_data_source_test.dart'
 import 'session_coordinator_test.dart' show tokens, now;
 
 void main() {
-  final vectors =
-      jsonDecode(
-            File(
-              '../../contracts/fixtures/protocol/config-v1.json',
-            ).readAsStringSync(),
-          )
-          as Map;
+  final vectors = jsonDecode(
+    File('../../contracts/fixtures/protocol/config-v1.json').readAsStringSync(),
+  ) as Map;
   for (final fixture in vectors['valid'] as List) {
     for (final list in [false, true]) {
       test(
@@ -54,7 +50,21 @@ void main() {
           expect(actual.password, '');
           expect(actual.expectedExitIpv4, isNull);
           expect(s.capabilities.authoritativeExpectedExit, isFalse);
-          expect(prepareProfile(actual, now), isA<Ready>());
+          final profile = prepareProfile(actual, now);
+          if (config.type == 'tuic' || config.type == 'anytls') {
+            // Preserve valid API metadata while respecting the pinned Xray
+            // runtime's protocol support (ADR 0049).
+            expect(
+              profile,
+              isA<Rejected>().having(
+                (value) => value.error.code,
+                'code',
+                'ELIG-008',
+              ),
+            );
+          } else {
+            expect(profile, isA<Ready>());
+          }
         },
       );
     }
