@@ -138,7 +138,7 @@ def build(args):
     for relative in REQUIRED_PAYLOAD:
         path = app / relative
         if path.parent == executables or path.name in {'FlutterMacOS', 'App'}:
-            run(['xcrun', 'lipo', '-verify_arch', args.arch, path])
+            run(['xcrun', 'lipo', path, '-verify_arch', args.arch])
     for path in executables.iterdir():
         if path.is_file():
             path.chmod(0o755)
