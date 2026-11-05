@@ -1,0 +1,11 @@
+name: bluegrass_data_source
+description: BlueGrass client API v1 transport and recoverable session management.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+dependencies:
+  bluegrass_domain:
+    path: ../domain
+dev_dependencies:
+  test: ^1.26.0

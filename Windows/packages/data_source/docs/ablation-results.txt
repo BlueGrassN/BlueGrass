@@ -1,0 +1,4 @@
+single-flight: behavior regression detected (exit 1)
+generation isolation: behavior regression detected (exit 1)
+durable pending record: behavior regression detected (exit 1)
+restore single-flight: behavior regression detected (exit 1)

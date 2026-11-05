@@ -1,0 +1,114 @@
+{
+  "format": 1,
+  "version": "loyalsoldier-202610232206_v1",
+  "xray_module": "v1.260327.1-0.20261017152356-92ccc939aaf4",
+  "sources": [
+    {
+      "name": "geosite.dat",
+      "repository": "Loyalsoldier/v2ray-rules-dat",
+      "tag": "202610232206",
+      "commit": "b8ee45341f4995e9bcfd5babe667412841a43ffa",
+      "url": "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/download/202610232206/geosite.dat",
+      "api_url": "https://api.github.com/repos/Loyalsoldier/v2ray-rules-dat/releases/assets/670547158",
+      "sha256": "9cb5ab39ce601ad17d4077909b4d4e943c212af7baa658a612adc64e1c201ca4",
+      "license": "GPL-3.0; upstream component notices retained"
+    },
+    {
+      "name": "geoip.dat",
+      "repository": "Loyalsoldier/v2ray-rules-dat",
+      "tag": "202610232206",
+      "commit": "b8ee45341f4995e9bcfd5babe667412841a43ffa",
+      "url": "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/download/202610232206/geoip.dat",
+      "api_url": "https://api.github.com/repos/Loyalsoldier/v2ray-rules-dat/releases/assets/670547231",
+      "sha256": "a6271d3c96361d96156e6d3f7cf1550ef21b00d2f951deb772f464db91e89ac5",
+      "license": "GPL-3.0 (rules-dat); CC-BY-SA-4.0 and GPL-3.0 (Loyalsoldier/geoip declarations); CN IPv4 input MIT (gaoyifan/china-operator-ip)"
+    }
+  ],
+  "licenses": [
+    {
+      "name": "LICENSE-Loyalsoldier-v2ray-rules-dat-GPL-3.0.txt",
+      "url": "https://api.github.com/repos/Loyalsoldier/v2ray-rules-dat/contents/LICENSE?ref=b8ee45341f4995e9bcfd5babe667412841a43ffa",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "license": "GPL-3.0"
+    },
+    {
+      "name": "LICENSE-geosite-MIT.txt",
+      "url": "https://api.github.com/repos/v2fly/domain-list-community/contents/LICENSE?ref=9cad4889b6f1c51bd84cb8a0d95dbc1a992251a4",
+      "sha256": "b9d84a22870d3f21c91a4c6e410c9cc51d00902f5233ad0c84011479244bf7d2",
+      "license": "MIT"
+    },
+    {
+      "name": "LICENSE-Loyalsoldier-domain-list-custom-MIT.txt",
+      "url": "https://api.github.com/repos/Loyalsoldier/domain-list-custom/contents/LICENSE?ref=efacb51b8950ae673ebb6dcb9e7ecdd1decb1b6d",
+      "sha256": "35f18e0331a1ecd1835400c50e3b367c2ce09f6c13d91c4a0f3cb11f71d3bbc3",
+      "license": "MIT"
+    },
+    {
+      "name": "LICENSE-dnsmasq-china-list-WTFPL-2.0.txt",
+      "url": "https://api.github.com/repos/felixonmars/dnsmasq-china-list/contents/LICENSE?ref=eb9dc5e02c20f9dbcb81e2f868c6cbfc5fc1727f",
+      "sha256": "f9e00539c44942d94e3c6d20f0c90e63e810ea181b10f16a252c93e4ea5cefd7",
+      "license": "WTFPL"
+    },
+    {
+      "name": "LICENSE-GFWList-LGPL-2.1.txt",
+      "url": "https://api.github.com/repos/gfwlist/gfwlist/contents/COPYING.txt?ref=8b765c742ae7b57ef3dde1e41b49b294c182c922",
+      "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+      "license": "LGPL-2.1"
+    },
+    {
+      "name": "LICENSE-gfwlist2dnsmasq-GPL-3.0.txt",
+      "url": "https://api.github.com/repos/cokebar/gfwlist2dnsmasq/contents/LICENSE?ref=202e52fb5ea2260abc9f162b3a78e58ec9187005",
+      "sha256": "589ed823e9a84c56feb95ac58e7cf384626b9cbf4fda2a907bc36e103de1bad2",
+      "license": "GPL-3.0"
+    },
+    {
+      "name": "LICENSE-Loyalsoldier-geoip-CC-BY-SA-4.0.txt",
+      "url": "https://api.github.com/repos/Loyalsoldier/geoip/contents/LICENSE?ref=084eb113e458b82374919dabefbc49cd2c2dd079",
+      "sha256": "5e436ff8ffbb77d8607220e9bce20c8915d860010feeb6c1ebef5a85688e9b39",
+      "license": "CC-BY-SA-4.0"
+    },
+    {
+      "name": "LICENSE-Loyalsoldier-geoip-GPL-3.0.txt",
+      "url": "https://api.github.com/repos/Loyalsoldier/geoip/contents/LICENSE-GPL?ref=084eb113e458b82374919dabefbc49cd2c2dd079",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "license": "GPL-3.0"
+    },
+    {
+      "name": "LICENSE-china-operator-ip-MIT.txt",
+      "url": "https://api.github.com/repos/gaoyifan/china-operator-ip/contents/LICENSE?ref=b2b8edc0ddd9cf2bc638ec77587301bbf84b8db9",
+      "sha256": "8f4d03a581484143945a9fac471c3b669d5aada68361fd1f25886c3ddbdd786a",
+      "license": "MIT"
+    },
+    {
+      "name": "LICENSE-Xray-MPL-2.0.txt",
+      "url": "https://api.github.com/repos/XTLS/Xray-core/contents/LICENSE?ref=92ccc939aaf4f8965f369cf0b142e005aeaa11d5",
+      "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5",
+      "license": "MPL-2.0"
+    }
+  ],
+  "assets": {
+    "geoip-cn-v4.dat": {
+      "sha256": "9f2c27d565691f334ede744e267ebbe5cb9ad6a81f5d779552017d189b8e10ef",
+      "bytes": 65228,
+      "entries": {
+        "CN": 6522,
+        "source_CIDRs_including_IPv6": 10011
+      }
+    },
+    "geosite-cn-foreign.dat": {
+      "sha256": "6e0213910bbee514dd2934c10017064ac44e6d42110ccd80ac0e121f586a2c12",
+      "bytes": 2496765,
+      "entries": {
+        "CN": 110243,
+        "CN/Domain": 109681,
+        "CN/Full": 554,
+        "CN/Regex": 8,
+        "GEOLOCATION-!CN": 27463,
+        "GEOLOCATION-!CN/Domain": 26550,
+        "GEOLOCATION-!CN/Full": 762,
+        "GEOLOCATION-!CN/Regex": 151
+      }
+    }
+  },
+  "transform": "Select CN and GEOLOCATION-!CN domains; discard attributes after selection; deduplicate identical type/value pairs and sort by type/value. Preserve all four Xray matcher types. Select CN IPv4 CIDRs only; mask, sort, deduplicate, remove contained prefixes. Marshal deterministic protobuf. No runtime downloads."
+}

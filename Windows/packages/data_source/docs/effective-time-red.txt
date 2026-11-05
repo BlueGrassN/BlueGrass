@@ -1,0 +1,114 @@
+00:00 +0: loading test/effective_time_test.dart
+00:00 +0: HTTPS login time advances monotonically through wall clock jumps
+00:00 +0 -1: HTTPS login time advances monotonically through wall clock jumps [E]
+  NoSuchMethodError: Class 'ApiV2DataSource' has no instance getter 'effectiveNowUtc'.
+  Receiver: Instance of 'ApiV2DataSource'
+  Tried calling: effectiveNowUtc
+  dart:core                            Object.noSuchMethod
+  test\effective_time_test.dart 41:25  effective
+  test\effective_time_test.dart 51:12  main.<fn>
+  
+00:00 +0 -1: backward server anchor cannot revive a known expired resource
+00:00 +0 -2: backward server anchor cannot revive a known expired resource [E]
+  NoSuchMethodError: Class 'ApiV2DataSource' has no instance getter 'effectiveNowUtc'.
+  Receiver: Instance of 'ApiV2DataSource'
+  Tried calling: effectiveNowUtc
+  dart:core                            Object.noSuchMethod
+  test\effective_time_test.dart 41:25  effective
+  test\effective_time_test.dart 74:20  main.<fn>
+  
+00:00 +0 -2: newer authenticated server anchor advances effective time
+00:00 +0 -3: newer authenticated server anchor advances effective time [E]
+  NoSuchMethodError: Class 'ApiV2DataSource' has no instance getter 'effectiveNowUtc'.
+  Receiver: Instance of 'ApiV2DataSource'
+  Tried calling: effectiveNowUtc
+  dart:core                            Object.noSuchMethod
+  test\effective_time_test.dart 41:25  effective
+  test\effective_time_test.dart 92:12  main.<fn>
+  
+00:00 +0 -3: errors and malformed server times cannot update the anchor
+00:00 +0 -4: errors and malformed server times cannot update the anchor [E]
+  NoSuchMethodError: Class 'ApiV2DataSource' has no instance getter 'effectiveNowUtc'.
+  Receiver: Instance of 'ApiV2DataSource'
+  Tried calling: effectiveNowUtc
+  dart:core                             Object.noSuchMethod
+  test\effective_time_test.dart 41:25   effective
+  test\effective_time_test.dart 107:14  main.<fn>
+  
+00:00 +0 -4: failed or malformed login cannot create a trusted anchor
+00:00 +0 -5: failed or malformed login cannot create a trusted anchor [E]
+  NoSuchMethodError: Class 'ApiV2DataSource' has no instance getter 'effectiveNowUtc'.
+  Receiver: Instance of 'ApiV2DataSource'
+  Tried calling: effectiveNowUtc
+  dart:core                             Object.noSuchMethod
+  test\effective_time_test.dart 41:25   effective
+  test\effective_time_test.dart 118:14  main.<fn>
+  
+00:00 +0 -5: loopback HTTP never supplies trusted server time
+00:00 +0 -6: loopback HTTP never supplies trusted server time [E]
+  NoSuchMethodError: Class 'ApiV2DataSource' has no instance getter 'effectiveNowUtc'.
+  Receiver: Instance of 'ApiV2DataSource'
+  Tried calling: effectiveNowUtc
+  dart:core                             Object.noSuchMethod
+  test\effective_time_test.dart 41:25   effective
+  test\effective_time_test.dart 131:12  main.<fn>
+  
+00:00 +0 -6: restoring cached credentials does not restore an old time anchor
+00:00 +0 -7: restoring cached credentials does not restore an old time anchor [E]
+  NoSuchMethodError: Class 'ApiV2DataSource' has no instance getter 'effectiveNowUtc'.
+  Receiver: Instance of 'ApiV2DataSource'
+  Tried calling: effectiveNowUtc
+  dart:core                             Object.noSuchMethod
+  test\effective_time_test.dart 41:25   effective
+  test\effective_time_test.dart 146:12  main.<fn>
+  
+00:00 +0 -7: refresh during restore anchors only the accepted current account
+00:00 +0 -8: refresh during restore anchors only the accepted current account [E]
+  NoSuchMethodError: Class 'ApiV2DataSource' has no instance getter 'effectiveNowUtc'.
+  Receiver: Instance of 'ApiV2DataSource'
+  Tried calling: effectiveNowUtc
+  dart:core                             Object.noSuchMethod
+  test\effective_time_test.dart 41:25   effective
+  test\effective_time_test.dart 163:12  main.<fn>
+  
+00:00 +0 -8: new login discards previous account floor and ignores its delayed read
+00:00 +0 -9: new login discards previous account floor and ignores its delayed read [E]
+  NoSuchMethodError: Class 'ApiV2DataSource' has no instance getter 'effectiveNowUtc'.
+  Receiver: Instance of 'ApiV2DataSource'
+  Tried calling: effectiveNowUtc
+  dart:core                             Object.noSuchMethod
+  test\effective_time_test.dart 41:25   effective
+  test\effective_time_test.dart 186:12  main.<fn>
+  
+  TimeoutException after 0:00:30.000000: Test timed out after 30 seconds. See https://pub.dev/packages/test#timeouts
+  dart:isolate  _RawReceivePort._handleMessage
+  
+00:30 +0 -9: late login and logout reply cannot resurrect a cleared time anchor
+00:30 +0 -10: late login and logout reply cannot resurrect a cleared time anchor [E]
+  NoSuchMethodError: Class 'ApiV2DataSource' has no instance getter 'effectiveNowUtc'.
+  Receiver: Instance of 'ApiV2DataSource'
+  Tried calling: effectiveNowUtc
+  dart:core                             Object.noSuchMethod
+  test\effective_time_test.dart 41:25   effective
+  test\effective_time_test.dart 207:12  main.<fn>
+  
+00:30 +0 -10: terminal authentication failure clears the anchor immediately
+00:30 +0 -11: terminal authentication failure clears the anchor immediately [E]
+  NoSuchMethodError: Class 'ApiV2DataSource' has no instance getter 'effectiveNowUtc'.
+  Receiver: Instance of 'ApiV2DataSource'
+  Tried calling: effectiveNowUtc
+  dart:core                             Object.noSuchMethod
+  test\effective_time_test.dart 41:25   effective
+  test\effective_time_test.dart 222:12  main.<fn>
+  
+00:30 +0 -11: Some tests failed.
+
+Failing tests:
+  test/effective_time_test.dart: HTTPS login time advances monotonically through wall clock jumps
+  test/effective_time_test.dart: backward server anchor cannot revive a known expired resource
+  test/effective_time_test.dart: errors and malformed server times cannot update the anchor
+  test/effective_time_test.dart: failed or malformed login cannot create a trusted anchor
+  ... and 7 more
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

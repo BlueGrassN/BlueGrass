@@ -1,0 +1,679 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bluegrass.invalid/contracts/domain/resource.schema.json",
+  "$ref": "#/$defs/ResourceKey",
+  "$defs": {
+    "ResourceKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environment",
+        "dataSource",
+        "accountKey",
+        "kind",
+        "sourceId"
+      ],
+      "properties": {
+        "environment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataSource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "accountKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "subscription",
+            "asset"
+          ]
+        },
+        "sourceId": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "NodeRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "name",
+        "protocol",
+        "host",
+        "port"
+      ],
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/ResourceKey"
+        },
+        "name": {
+          "type": "string"
+        },
+        "protocol": {
+          "enum": [
+            "socks5",
+            "shadowsocks",
+            "vmess",
+            "vless",
+            "trojan",
+            "http",
+            "https",
+            "hysteria2",
+            "tuic",
+            "anytls"
+          ]
+        },
+        "host": {
+          "type": "string",
+          "minLength": 1
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "countryCode": {
+          "type": "string"
+        },
+        "countryName": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "expiresAtUtc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "expectedExitIpv4": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "isForwarded": {
+          "type": "boolean"
+        },
+        "protocolConfig": {
+          "$ref": "protocol.schema.json#/$defs/ProtocolConfig"
+        },
+        "routingMode": {
+          "description": "Independent of TUN/system-proxy ingress. Omitted legacy value means global.",
+          "enum": ["global", "bypass_cn"]
+        }
+      },
+      "format": "bluegrass-protocol-binding",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "socks5"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "socks5"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "shadowsocks"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "shadowsocks"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "vmess"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "vmess"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "vless"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "vless"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "trojan"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "trojan"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "http"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "http"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "https"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "https"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "hysteria2"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "hysteria2"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "tuic"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "tuic"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "anytls"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "anytls"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ConnectionProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "protocol",
+        "entry",
+        "auth",
+        "validUntilUtc",
+        "configVersion",
+        "configFingerprint",
+        "mode"
+      ],
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/ResourceKey"
+        },
+        "protocol": {
+          "enum": [
+            "socks5",
+            "shadowsocks",
+            "vmess",
+            "vless",
+            "trojan",
+            "http",
+            "https",
+            "hysteria2",
+            "tuic",
+            "anytls"
+          ]
+        },
+        "entry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "host",
+            "port"
+          ],
+          "properties": {
+            "host": {
+              "type": "string",
+              "minLength": 1
+            },
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535
+            }
+          }
+        },
+        "auth": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "username",
+            "password"
+          ],
+          "properties": {
+            "username": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            }
+          }
+        },
+        "expectedExitIpv4": {
+          "description": "Optional ignored compatibility metadata; never gates connection or compares to observed IP. New GUI profiles omit it.",
+          "type": ["string", "null"]
+        },
+        "validUntilUtc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "configVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "configFingerprint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "enum": [
+            "system_proxy",
+            "tun"
+          ]
+        },
+        "protocolConfig": {
+          "$ref": "protocol.schema.json#/$defs/ProtocolConfig"
+        }
+      },
+      "format": "bluegrass-protocol-binding",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "socks5"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "socks5"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "shadowsocks"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "shadowsocks"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "vmess"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "vmess"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "vless"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "vless"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "trojan"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "trojan"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "http"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "http"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "https"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "https"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "hysteria2"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "hysteria2"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "tuic"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "tuic"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "protocol": {
+                "const": "anytls"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "protocolConfig"
+            ],
+            "properties": {
+              "protocolConfig": {
+                "properties": {
+                  "type": {
+                    "const": "anytls"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

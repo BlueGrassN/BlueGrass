@@ -1,0 +1,97 @@
+00:00 +0: loading test\api_v2_data_source_test.dart
+00:00 +0: test\api_v2_data_source_test.dart: Retry-After HTTP-date is relative to injected clock
+00:00 +1: test\effective_time_test.dart: login persistence delay advances from response receipt, not acceptance
+00:00 +2: test\effective_time_test.dart: login persistence delay advances from response receipt, not acceptance
+00:00 +3: test\effective_time_test.dart: login persistence delay advances from response receipt, not acceptance
+00:00 +4: test\effective_time_test.dart: login persistence delay advances from response receipt, not acceptance
+00:00 +5: test\effective_time_test.dart: login persistence delay advances from response receipt, not acceptance
+00:00 +6: test\effective_time_test.dart: login persistence delay advances from response receipt, not acceptance
+00:00 +7: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +8: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +9: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +10: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +11: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +12: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +13: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +14: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +15: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +16: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +17: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +18: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +19: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +20: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +21: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +22: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +23: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +24: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +25: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +26: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +27: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +28: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +29: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +30: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +31: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +32: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +33: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +34: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +35: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +36: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +37: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +38: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +39: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +40: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +41: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +42: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +43: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +44: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +45: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +46: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +47: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +48: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +49: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +50: test\http_transport_test.dart: explicit loopback proxy forwards only this transport without OS changes
+00:00 +51: test\effective_time_test.dart: backward server anchor cannot revive a known expired resource
+00:00 +52: test\effective_time_test.dart: backward server anchor cannot revive a known expired resource
+00:00 +53: test\effective_time_test.dart: backward server anchor cannot revive a known expired resource
+00:00 +54: test\http_transport_test.dart: explicit proxy rejects remote hosts credentials and non HTTP schemes
+00:00 +55: test\http_transport_test.dart: explicit proxy rejects remote hosts credentials and non HTTP schemes
+00:00 +56: test\http_transport_test.dart: explicit proxy rejects remote hosts credentials and non HTTP schemes
+00:00 +57: test\http_transport_test.dart: explicit proxy rejects remote hosts credentials and non HTTP schemes
+00:00 +58: test\session_coordinator_test.dart: terminal credentials_changed requires reauthentication
+00:00 +59: test\session_coordinator_test.dart: terminal credentials_changed requires reauthentication
+00:00 +60: test\resource_queries_test.dart: asset empty page preserves cursor and never proves removal
+00:00 +61: test\resource_queries_test.dart: asset empty page preserves cursor and never proves removal
+00:00 +62: test\effective_time_test.dart: failed or malformed login cannot create a trusted anchor
+00:00 +63: test\effective_time_test.dart: failed or malformed login cannot create a trusted anchor
+00:00 +64: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +65: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +66: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +67: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +68: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +69: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +70: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +71: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +72: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +73: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +74: test\effective_time_test.dart: refresh during restore anchors only the accepted current account
+00:00 +75: test\session_coordinator_test.dart: expired refresh token clears auth without network request
+00:00 +76: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +77: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +78: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +79: test\session_coordinator_test.dart: stale_refresh rereads committed replacement or requires login: false
+00:00 +80: test\effective_time_test.dart: late login and logout reply cannot resurrect a cleared time anchor
+00:00 +81: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +82: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +83: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +84: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +85: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +86: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +87: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +88: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +89: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +90: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +91: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +92: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +93: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +94: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +95: All tests passed!

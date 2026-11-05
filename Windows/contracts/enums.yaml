@@ -1,0 +1,8 @@
+schemaVersion: 1
+scope: partial K-02, normalized Dart model plus session-bound Go request subset
+resourceKind: [subscription, asset]
+connectionPhase: [idle, connecting, connected, pausing, paused, stopping, failed]
+protectionState: [unknown, inactive, blocking, forwarding]
+reminderStage: [sevenDays, threeDays, oneDay, expired]
+submissionStatus: [pending, accepted, failed, cancelled]
+commandsCovered: [Connect, Pause, Disconnect, ReleaseProtection, ApplyResourceUpdate]

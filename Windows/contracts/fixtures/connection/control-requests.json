@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "caseId": "session_bound_control_requests",
+  "adr": [
+    "D-07",
+    "D-08",
+    "D-12",
+    "D-15"
+  ],
+  "nowUtc": "2026-10-11T00:00:00Z",
+  "requests": [
+    {
+      "context": {
+        "schemaVersion": 1,
+        "clientEpoch": "client-1",
+        "runtimeEpoch": "runtime-1",
+        "logicalSessionId": "session-A",
+        "attemptId": "attempt-A",
+        "resourceKey": {
+          "environment": "fixture",
+          "dataSource": "api-v1",
+          "accountKey": "fake-account",
+          "kind": "subscription",
+          "sourceId": "A"
+        }
+      },
+      "requestId": "fixture-request-1",
+      "sequence": 1,
+      "command": "Connect",
+      "params": {
+        "profile": {
+          "key": {
+            "environment": "fixture",
+            "dataSource": "api-v1",
+            "accountKey": "fake-account",
+            "kind": "subscription",
+            "sourceId": "A"
+          },
+          "protocol": "socks5",
+          "entry": {
+            "host": "entry.example.invalid",
+            "port": 1080
+          },
+          "auth": {
+            "username": "FAKE-USER",
+            "password": "FAKE-NONSECRET"
+          },
+          "validUntilUtc": null,
+          "configVersion": 1,
+          "configFingerprint": "fixture-config-v1",
+          "mode": "system_proxy"
+        }
+      }
+    },
+    {
+      "context": {
+        "schemaVersion": 1,
+        "clientEpoch": "client-1",
+        "runtimeEpoch": "runtime-1",
+        "logicalSessionId": "session-A",
+        "attemptId": "attempt-A",
+        "resourceKey": {
+          "environment": "fixture",
+          "dataSource": "api-v1",
+          "accountKey": "fake-account",
+          "kind": "subscription",
+          "sourceId": "A"
+        }
+      },
+      "requestId": "fixture-request-2",
+      "sequence": 2,
+      "command": "Pause",
+      "params": {}
+    },
+    {
+      "context": {
+        "schemaVersion": 1,
+        "clientEpoch": "client-1",
+        "runtimeEpoch": "runtime-1",
+        "logicalSessionId": "session-A",
+        "attemptId": "attempt-A",
+        "resourceKey": {
+          "environment": "fixture",
+          "dataSource": "api-v1",
+          "accountKey": "fake-account",
+          "kind": "subscription",
+          "sourceId": "A"
+        }
+      },
+      "requestId": "fixture-request-3",
+      "sequence": 3,
+      "command": "ApplyResourceUpdate",
+      "params": {
+        "update": {
+          "revision": 2,
+          "validUntilUtc": "2026-10-14T00:00:00Z",
+          "unavailable": false
+        }
+      }
+    },
+    {
+      "context": {
+        "schemaVersion": 1,
+        "clientEpoch": "client-1",
+        "runtimeEpoch": "runtime-1",
+        "logicalSessionId": "session-A",
+        "attemptId": "attempt-A",
+        "resourceKey": {
+          "environment": "fixture",
+          "dataSource": "api-v1",
+          "accountKey": "fake-account",
+          "kind": "subscription",
+          "sourceId": "A"
+        }
+      },
+      "requestId": "fixture-request-4",
+      "sequence": 4,
+      "command": "Disconnect",
+      "params": {}
+    },
+    {
+      "context": {
+        "schemaVersion": 1,
+        "clientEpoch": "client-1",
+        "runtimeEpoch": "runtime-1",
+        "logicalSessionId": "session-A",
+        "attemptId": "attempt-A",
+        "resourceKey": {
+          "environment": "fixture",
+          "dataSource": "api-v1",
+          "accountKey": "fake-account",
+          "kind": "subscription",
+          "sourceId": "A"
+        }
+      },
+      "requestId": "fixture-request-5",
+      "sequence": 5,
+      "command": "ReleaseProtection",
+      "params": {}
+    }
+  ],
+  "expectedCommands": [
+    "Connect",
+    "Pause",
+    "ApplyResourceUpdate",
+    "Disconnect",
+    "ReleaseProtection"
+  ]
+}

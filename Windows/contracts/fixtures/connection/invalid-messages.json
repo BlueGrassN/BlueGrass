@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "caseId": "unknown_field_rejected",
+      "adr": [
+        "D-12"
+      ],
+      "definition": "ControlRequest",
+      "input": {
+        "context": {
+          "schemaVersion": 1,
+          "clientEpoch": "client-1",
+          "runtimeEpoch": "runtime-1",
+          "logicalSessionId": "session-A",
+          "attemptId": "attempt-A",
+          "resourceKey": {
+            "environment": "fixture",
+            "dataSource": "api-v1",
+            "accountKey": "fake-account",
+            "kind": "subscription",
+            "sourceId": "A"
+          }
+        },
+        "requestId": "fixture-request-1",
+        "sequence": 1,
+        "command": "Connect",
+        "params": {
+          "profile": {
+            "key": {
+              "environment": "fixture",
+              "dataSource": "api-v1",
+              "accountKey": "fake-account",
+              "kind": "subscription",
+              "sourceId": "A"
+            },
+            "protocol": "socks5",
+            "entry": {
+              "host": "entry.example.invalid",
+              "port": 1080
+            },
+            "auth": {
+              "username": "FAKE-USER",
+              "password": "FAKE-NONSECRET"
+            },
+            "expectedExitIpv4": "8.8.8.8",
+            "validUntilUtc": null,
+            "configVersion": 1,
+            "configFingerprint": "fixture-config-v1",
+            "mode": "system_proxy"
+          }
+        },
+        "extra": true
+      },
+      "expectedValid": false
+    },
+    {
+      "caseId": "unsupported_schema_version",
+      "adr": [
+        "D-12"
+      ],
+      "definition": "ControlRequest",
+      "input": {
+        "context": {
+          "schemaVersion": 2,
+          "clientEpoch": "client-1",
+          "runtimeEpoch": "runtime-1",
+          "logicalSessionId": "session-A",
+          "attemptId": "attempt-A",
+          "resourceKey": {
+            "environment": "fixture",
+            "dataSource": "api-v1",
+            "accountKey": "fake-account",
+            "kind": "subscription",
+            "sourceId": "A"
+          }
+        },
+        "requestId": "fixture-request-1",
+        "sequence": 1,
+        "command": "Connect",
+        "params": {
+          "profile": {
+            "key": {
+              "environment": "fixture",
+              "dataSource": "api-v1",
+              "accountKey": "fake-account",
+              "kind": "subscription",
+              "sourceId": "A"
+            },
+            "protocol": "socks5",
+            "entry": {
+              "host": "entry.example.invalid",
+              "port": 1080
+            },
+            "auth": {
+              "username": "FAKE-USER",
+              "password": "FAKE-NONSECRET"
+            },
+            "expectedExitIpv4": "8.8.8.8",
+            "validUntilUtc": null,
+            "configVersion": 1,
+            "configFingerprint": "fixture-config-v1",
+            "mode": "system_proxy"
+          }
+        }
+      },
+      "expectedValid": false
+    },
+    {
+      "caseId": "unknown_command_rejected",
+      "adr": [
+        "D-12"
+      ],
+      "definition": "ControlRequest",
+      "input": {
+        "context": {
+          "schemaVersion": 1,
+          "clientEpoch": "client-1",
+          "runtimeEpoch": "runtime-1",
+          "logicalSessionId": "session-A",
+          "attemptId": "attempt-A",
+          "resourceKey": {
+            "environment": "fixture",
+            "dataSource": "api-v1",
+            "accountKey": "fake-account",
+            "kind": "subscription",
+            "sourceId": "A"
+          }
+        },
+        "requestId": "fixture-request-1",
+        "sequence": 1,
+        "command": "UnknownCommand",
+        "params": {
+          "profile": {
+            "key": {
+              "environment": "fixture",
+              "dataSource": "api-v1",
+              "accountKey": "fake-account",
+              "kind": "subscription",
+              "sourceId": "A"
+            },
+            "protocol": "socks5",
+            "entry": {
+              "host": "entry.example.invalid",
+              "port": 1080
+            },
+            "auth": {
+              "username": "FAKE-USER",
+              "password": "FAKE-NONSECRET"
+            },
+            "expectedExitIpv4": "8.8.8.8",
+            "validUntilUtc": null,
+            "configVersion": 1,
+            "configFingerprint": "fixture-config-v1",
+            "mode": "system_proxy"
+          }
+        }
+      },
+      "expectedValid": false
+    },
+    {
+      "caseId": "missing_profile_rejected",
+      "adr": [
+        "D-07"
+      ],
+      "definition": "ControlRequest",
+      "input": {
+        "context": {
+          "schemaVersion": 1,
+          "clientEpoch": "client-1",
+          "runtimeEpoch": "runtime-1",
+          "logicalSessionId": "session-A",
+          "attemptId": "attempt-A",
+          "resourceKey": {
+            "environment": "fixture",
+            "dataSource": "api-v1",
+            "accountKey": "fake-account",
+            "kind": "subscription",
+            "sourceId": "A"
+          }
+        },
+        "requestId": "fixture-request-1",
+        "sequence": 1,
+        "command": "Connect",
+        "params": {}
+      },
+      "expectedValid": false
+    },
+    {
+      "caseId": "wrong_identity_type_rejected",
+      "adr": [
+        "D-12"
+      ],
+      "definition": "ControlRequest",
+      "input": {
+        "context": {
+          "schemaVersion": 1,
+          "clientEpoch": "client-1",
+          "runtimeEpoch": "runtime-1",
+          "logicalSessionId": "session-A",
+          "attemptId": "attempt-A",
+          "resourceKey": {
+            "environment": "fixture",
+            "dataSource": "api-v1",
+            "accountKey": "fake-account",
+            "kind": "subscription",
+            "sourceId": 42
+          }
+        },
+        "requestId": "fixture-request-1",
+        "sequence": 1,
+        "command": "Connect",
+        "params": {
+          "profile": {
+            "key": {
+              "environment": "fixture",
+              "dataSource": "api-v1",
+              "accountKey": "fake-account",
+              "kind": "subscription",
+              "sourceId": "A"
+            },
+            "protocol": "socks5",
+            "entry": {
+              "host": "entry.example.invalid",
+              "port": 1080
+            },
+            "auth": {
+              "username": "FAKE-USER",
+              "password": "FAKE-NONSECRET"
+            },
+            "expectedExitIpv4": "8.8.8.8",
+            "validUntilUtc": null,
+            "configVersion": 1,
+            "configFingerprint": "fixture-config-v1",
+            "mode": "system_proxy"
+          }
+        }
+      },
+      "expectedValid": false
+    }
+  ]
+}

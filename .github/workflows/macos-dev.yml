@@ -1,0 +1,101 @@
+name: macOS development build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['codex/macos-client']
+    paths:
+      - 'Mac/**'
+      - 'Windows/app/**'
+      - 'Windows/packages/**'
+      - 'Windows/contracts/**'
+      - 'Windows/native/core/**'
+      - '.github/workflows/macos-dev.yml'
+  pull_request:
+    paths:
+      - 'Mac/**'
+      - 'Windows/app/**'
+      - 'Windows/packages/**'
+      - 'Windows/contracts/**'
+      - 'Windows/native/core/**'
+      - '.github/workflows/macos-dev.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-dev-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.47.7'
+  GO_VERSION: '1.27.2'
+
+jobs:
+  macos:
+    name: macOS ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x86_64
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: Windows/native/core/go.sum
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Prepare shared assets and dependencies
+        run: |
+          python3 Mac/tools/sync_assets.py
+          (cd Windows/app && flutter pub get)
+          (cd Mac/app && flutter pub get)
+      - name: Analyze shared and Mac applications
+        run: |
+          (cd Windows/app && flutter analyze)
+          (cd Mac/app && flutter analyze)
+      - name: Test shared business rules and Mac UI
+        run: |
+          (cd Windows/packages/domain && dart pub get && dart test)
+          (cd Windows/packages/data_source && dart pub get && dart test)
+          (cd Mac/app && flutter test)
+          python3 -m unittest discover -s Mac/tools/tests -v
+      - name: Test native core and proxy lifecycle
+        working-directory: Windows/native/core
+        run: go test ./nativehost ./macproxy ./localengine ./protocolconfig ./routingpolicy ./control ./entrydns ./diagnostics
+      - name: Build and verify development package
+        env:
+          BLUEGRASS_BUILD_NUMBER: ${{ github.run_number }}
+        run: python3 Mac/tools/build.py --arch '${{ matrix.arch }}' --build-number "$BLUEGRASS_BUILD_NUMBER"
+      - name: Test macOS platform contracts
+        working-directory: Mac/app
+        run: >-
+          xcodebuild test
+          -workspace macos/Runner.xcworkspace
+          -scheme Runner
+          -configuration Debug
+          -destination 'platform=macOS'
+          -derivedDataPath build/native-tests
+          CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual
+          DEVELOPMENT_TEAM= MACOSX_DEPLOYMENT_TARGET=13.0
+          -quiet
+      - name: Upload installable development package
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: BlueGrass-macOS-${{ matrix.arch }}-dev
+          path: Mac/dist/${{ matrix.arch }}/*
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

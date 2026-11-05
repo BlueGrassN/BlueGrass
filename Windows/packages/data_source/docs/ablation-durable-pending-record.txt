@@ -1,0 +1,22 @@
+00:00 +0: loading test/session_coordinator_test.dart
+00:00 +0: pending_uuid_is_durable_before_refresh_network
+00:00 +0 -1: pending_uuid_is_durable_before_refresh_network [E]
+  Expected: <Instance of 'Map'>
+    Actual: <null>
+     Which: is not an instance of 'Map'
+  
+  package:matcher                                                    expect
+  test\session_coordinator_test.dart 70:7                            main.<fn>.<fn>
+  package:bluegrass_data_source/src/session_coordinator.dart 294:33  SessionCoordinator._rotate
+  package:bluegrass_data_source/src/session_coordinator.dart 250:14  SessionCoordinator._startRefresh
+  package:bluegrass_data_source/src/session_coordinator.dart 243:12  SessionCoordinator.validAccessToken
+  test\session_coordinator_test.dart 82:20                           main.<fn>
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/session_coordinator_test.dart: pending_uuid_is_durable_before_refresh_network
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.
+

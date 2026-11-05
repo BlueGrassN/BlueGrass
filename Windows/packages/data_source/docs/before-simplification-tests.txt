@@ -1,0 +1,67 @@
+00:00 +0: loading test\api_v2_data_source_test.dart
+00:00 +0: test\api_v2_data_source_test.dart: Retry-After HTTP-date is relative to injected clock
+00:00 +1: test\api_v2_data_source_test.dart: Retry-After HTTP-date is relative to injected clock
+00:00 +2: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +3: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +4: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +5: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +6: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +7: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +8: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +9: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +10: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +11: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +12: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +13: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +14: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +15: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +16: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +17: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +18: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +19: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +20: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +21: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +22: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +23: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +24: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +25: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +26: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +27: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +28: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +29: test\http_transport_test.dart: real io response and redirect never follows or forwards credentials
+00:00 +30: test\session_coordinator_test.dart: terminal credentials_changed requires reauthentication
+00:00 +31: test\api_v2_data_source_test.dart: missing node field city is contract failure
+00:00 +32: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +33: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +34: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +35: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +36: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +37: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +38: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +39: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +40: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +41: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +42: test\http_transport_test.dart: bounded response includes streamed bodies without content length
+00:00 +43: test\api_v2_data_source_test.dart: resource or transient failure node_unavailable keeps session and hides server message
+00:00 +44: test\session_coordinator_test.dart: expired refresh token clears auth without network request
+00:00 +45: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +46: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +47: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +48: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +49: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +50: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +51: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +52: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +53: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +54: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +55: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +56: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +57: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +58: test\http_transport_test.dart: total request timeout aborts stalled server
+00:00 +59: test\session_coordinator_test.dart: concurrent_requests_share_one_refresh and persist before request
+00:00 +60: test\session_coordinator_test.dart: crash_before_token_save_recovers_same_request
+00:00 +61: test\session_coordinator_test.dart: late_refresh_cannot_overwrite_login
+00:00 +62: test\session_coordinator_test.dart: late_login_cannot_resurrect_logout
+00:00 +63: test\session_coordinator_test.dart: restore callers await pending recovery instead of exposing a premature customer
+00:00 +64: test\session_coordinator_test.dart: crash_after_token_save restores replacement without reusing old refresh
+00:00 +65: All tests passed!

@@ -1,0 +1,14 @@
+{
+  "schemaVersion":1,
+  "context":{"schemaVersion":1,"clientEpoch":"client-1","runtimeEpoch":"runtime-1","logicalSessionId":"session-A","attemptId":"attempt-A","resourceKey":{"environment":"fixture","dataSource":"api-v1","accountKey":"fake-account","kind":"subscription","sourceId":"A"}},
+  "base":{"counterEpoch":"counter-1","sequence":1,"monotonicNanos":1000000000,"uploadBytes":"9007199254740993","downloadBytes":"18446744073709550000","available":true,"complete":true},
+  "cases":[
+    {"caseId":"large_counter_roundtrip_is_exact","adr":["D-41"],"patch":{"sequence":2,"monotonicNanos":2000000000,"uploadBytes":"9007199254741093","downloadBytes":"18446744073709550010"},"expectedUploadSpeed":100,"expectedDownloadSpeed":10,"expectedComplete":true,"expectedAvailable":true},
+    {"caseId":"counter_epoch_change_is_incomplete","adr":["D-41"],"patch":{"counterEpoch":"counter-2","sequence":2,"monotonicNanos":2000000000,"uploadBytes":"5","downloadBytes":"8"},"expectedUploadSpeed":null,"expectedDownloadSpeed":null,"expectedComplete":false,"expectedAvailable":true},
+    {"caseId":"missing_sample_is_incomplete","adr":["D-41"],"patch":{"sequence":3,"monotonicNanos":3000000000},"expectedUploadSpeed":null,"expectedDownloadSpeed":null,"expectedComplete":false,"expectedAvailable":true},
+    {"caseId":"counter_regression_is_incomplete","adr":["D-41"],"patch":{"sequence":2,"monotonicNanos":2000000000,"uploadBytes":"1"},"expectedUploadSpeed":null,"expectedDownloadSpeed":null,"expectedComplete":false,"expectedAvailable":true},
+    {"caseId":"unavailable_is_not_zero","adr":["D-41"],"patch":{"sequence":2,"monotonicNanos":2000000000,"available":false},"expectedUploadSpeed":null,"expectedDownloadSpeed":null,"expectedComplete":false,"expectedAvailable":false},
+    {"caseId":"duplicate_sample_is_not_zero_speed","adr":["D-41"],"patch":{},"expectedUploadSpeed":null,"expectedDownloadSpeed":null,"expectedComplete":false,"expectedAvailable":true}
+  ],
+  "invalidCounters":["-1","1.0","1e3","01","18446744073709551616",9007199254740992]
+}
