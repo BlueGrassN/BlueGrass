@@ -1,0 +1,2 @@
+# Preserve SVG bytes so branding manifests stay valid on every platform.
+*.svg -text whitespace=trailing-space,space-before-tab,cr-at-eol

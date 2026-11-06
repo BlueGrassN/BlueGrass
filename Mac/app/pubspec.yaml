@@ -1,0 +1,27 @@
+name: bluegrass_mac
+description: BlueGrass macOS development client using the shared desktop UI.
+publish_to: none
+version: 0.1.0+1
+environment:
+  sdk: ^3.13.5
+dependencies:
+  flutter:
+    sdk: flutter
+  bluegrass_client:
+    path: ../../Windows/app
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+# Flutter 3.47.9 still pins older releases. Keep these exact overrides in
+# sync with Windows/app; recheck the full regression suites on SDK upgrades.
+dependency_overrides:
+  material_color_utilities: 0.13.1
+  test_api: 0.7.15
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/branding/wordmark-light.png
+    - assets/branding/wordmark-dark.png
+    - assets/LICENSE.Xray-core
+    - assets/LICENSE.sing

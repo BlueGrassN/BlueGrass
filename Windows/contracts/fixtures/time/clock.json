@@ -1,0 +1,1 @@
+{"schemaVersion":1,"caseId":"monotonic_clock_does_not_follow_wall_clock","adr":["D-15"],"anchorUtc":"2026-10-11T00:00:00Z","runtimeEpoch":"runtime-1","anchorNanos":"1000000000","sampleNanos":"61000000000","expectedUtc":"2026-10-11T00:01:00Z"}

@@ -1,0 +1,239 @@
+{
+  "counts": {
+    "png": 21,
+    "svg": 4,
+    "ico": 2
+  },
+  "total": 27,
+  "assets": [
+    {
+      "file": "original/bluegrass-leaves-1024.png",
+      "bytes": 55597,
+      "sha256": "b1f01076d495a6e32934119983e1bf8bafe554ec76371ab6b22ff9d2a2682361",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "original/bluegrass-leaves-256.png",
+      "bytes": 7900,
+      "sha256": "7544ebac0846efac2686835d9cec2168d134dc486cefb61136d01c47ceb88078",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "original/bluegrass-leaves.svg",
+      "bytes": 377,
+      "sha256": "a297d25f56a1efec00075f38e6d95bd0c4e915e37802c17a9427773e41c6f597",
+      "viewBox": "0 0 64 64"
+    },
+    {
+      "file": "original/bluegrass-windows-64x64.png",
+      "bytes": 674,
+      "sha256": "07ffddd3e0416a09c2b157d5b00dee5be1bf9b304a2f1a512c9b3c5d9e13fe17",
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA",
+      "has_transparency": false
+    },
+    {
+      "file": "original/bluegrass-windows-embedded-64x64.png",
+      "bytes": 674,
+      "sha256": "07ffddd3e0416a09c2b157d5b00dee5be1bf9b304a2f1a512c9b3c5d9e13fe17",
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA",
+      "has_transparency": false
+    },
+    {
+      "file": "original/bluegrass-windows-embedded.ico",
+      "bytes": 2686,
+      "sha256": "5c6b41ae03c40037ec3024527d3f48b36a736a792ac34a3d199c4d164cbeb260",
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA"
+    },
+    {
+      "file": "original/bluegrass-windows.ico",
+      "bytes": 2686,
+      "sha256": "b9b59622d7976c0e096637fb0a06711459b7a42bf533b32bb8877c37cc92a13c",
+      "width": 64,
+      "height": 64,
+      "mode": "RGBA"
+    },
+    {
+      "file": "ui/bluegrass-grass-dark-256@1x.png",
+      "bytes": 4855,
+      "sha256": "6e69e80916373afcc3aeea189841bee66921050e0ab9fb2f7af476bea1e66daf",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-grass-dark-256@4x.png",
+      "bytes": 33471,
+      "sha256": "ec27bbc1ded0a5687bcb7150e7625b92814626aa50edd3a9037044e9b9fec6a5",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-grass-dark.svg",
+      "bytes": 580,
+      "sha256": "e7e2cc0fab99dd241c4cb67861a413b5357310e24690e2dca5f567e742547f04",
+      "viewBox": "0 0 512 512"
+    },
+    {
+      "file": "ui/bluegrass-grass-light-256@1x.png",
+      "bytes": 5265,
+      "sha256": "da2ad899aa6a78c78a537918e711bf3d0d1d2e74d9cb6681dd1571ca5b7fc855",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-grass-light-256@4x.png",
+      "bytes": 32959,
+      "sha256": "efadeadbdb670f4187aa0a01d9b56684f3e1fbb09b65e10c757ad8976ac5d6ea",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-grass-light.svg",
+      "bytes": 580,
+      "sha256": "063623fbe2757cadc474912d47ed3185feef86372616b4324fbcec9233d36dd8",
+      "viewBox": "0 0 512 512"
+    },
+    {
+      "file": "ui/bluegrass-wordmark-dark-23@1x.png",
+      "bytes": 2419,
+      "sha256": "a3d38ca000d62fb0bcc88508639c07456f7b1a5093a1851c1e77451b3ece3b8a",
+      "width": 149,
+      "height": 39,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-wordmark-dark-23@4x.png",
+      "bytes": 9192,
+      "sha256": "80ceee1bb811ff1a90fe9b18254f1bdcf9f535e58ba07edc24178b7df945d790",
+      "width": 595,
+      "height": 156,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-wordmark-dark-25@1x.png",
+      "bytes": 2585,
+      "sha256": "baf0e02b717aa34017660df4c4ed8ce259b75013516cadd339345adba673469b",
+      "width": 161,
+      "height": 41,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-wordmark-dark-25@4x.png",
+      "bytes": 10051,
+      "sha256": "ce954672caa7700f409b739269e68de6c53c4f68b312f5cf2d93c6019a3d8506",
+      "width": 643,
+      "height": 164,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-wordmark-dark-28@1x.png",
+      "bytes": 2753,
+      "sha256": "680d1d4fafe89a1c902787a00d9f3647b36b0c1b6b591dfd777cd19b6639a28c",
+      "width": 179,
+      "height": 44,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-wordmark-dark-28@4x.png",
+      "bytes": 11329,
+      "sha256": "f58501f5086b76edad285e52000d7031b4156ef2d363063e5b040fa3f046a746",
+      "width": 714,
+      "height": 176,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-wordmark-dark-icon.png",
+      "bytes": 13032,
+      "sha256": "7aafa4e8a8fdd785666851187a07d65f115625535564756c54ff9fe4e9d74d04",
+      "width": 714,
+      "height": 176,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-wordmark-dark-icon.svg",
+      "bytes": 3922,
+      "sha256": "8023fc56492df10efdcef680afec9cb6805d887ed4108b6ff7b477f178423cb4",
+      "viewBox": "0 0 178.5 44"
+    },
+    {
+      "file": "ui/bluegrass-wordmark-light-23@1x.png",
+      "bytes": 2785,
+      "sha256": "3859c63f0c6ee10c0b87b7a27552b621db161b1536d08a676dee42744504c4a1",
+      "width": 149,
+      "height": 39,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-wordmark-light-23@4x.png",
+      "bytes": 10620,
+      "sha256": "391b609e25a5a554a4adf8342a653a2882c085d673b04fd5b40138489afca12f",
+      "width": 595,
+      "height": 156,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-wordmark-light-25@1x.png",
+      "bytes": 3054,
+      "sha256": "f200103c8e9b355f19ae6ab2a4712f867582c9a43317b3ab03180b42f509aaa5",
+      "width": 161,
+      "height": 41,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-wordmark-light-25@4x.png",
+      "bytes": 11501,
+      "sha256": "024621fff7338a9e9e6268c66e4cef9a2e8a141c35c4c8aee9bdb352d0d2ce4a",
+      "width": 643,
+      "height": 164,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-wordmark-light-28@1x.png",
+      "bytes": 3192,
+      "sha256": "b174967d416d0bc849c88fbdd9af89315b95ba4b0242c8660d1a8a19bbf7a256",
+      "width": 179,
+      "height": 44,
+      "mode": "RGBA",
+      "has_transparency": true
+    },
+    {
+      "file": "ui/bluegrass-wordmark-light-28@4x.png",
+      "bytes": 12974,
+      "sha256": "ef52f6eb7a28b0374168bdf715ee0d7473e5a349f85af35fc2356e76d6ac58f1",
+      "width": 714,
+      "height": 176,
+      "mode": "RGBA",
+      "has_transparency": true
+    }
+  ]
+}

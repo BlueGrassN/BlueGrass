@@ -1,0 +1,57 @@
+# Merge ONLY into client-api.sunip.cc's existing HTTPS server {}; preserve root, TLS and ACME configuration.
+# Use with the site-prefix fragment in the SAME site file. Do not edit other sites or nginx.conf.
+# Replace existing proxy rules; remove unused PHP/static/rewrite rules in this API site only.
+# These prefixes protect the root-level private config, binary and deployment archives.
+location ^~ /config {
+    return 404;
+}
+
+location ^~ /client-api {
+    return 404;
+}
+
+access_log /www/wwwlogs/client-api.sunip.cc.api.access.log client_api_sunip_cc_safe;
+client_max_body_size 4k;
+client_body_timeout 10s;
+limit_req_status 429;
+limit_conn_status 429;
+
+location ^~ /api/client/v1/ {
+    limit_req zone=client_api_sunip_cc_ip burst=20 nodelay;
+    limit_req zone=client_api_sunip_cc_total burst=100 nodelay;
+    limit_conn client_api_sunip_cc_conn_ip 16;
+    limit_conn client_api_sunip_cc_conn_total 128;
+    error_page 429 = @client_api_sunip_cc_rate_limited;
+    error_page 413 = @client_api_sunip_cc_payload_large;
+
+    proxy_pass http://127.0.0.1:8087;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header Connection "";
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_connect_timeout 2s;
+    proxy_send_timeout 20s;
+    proxy_read_timeout 20s;
+    proxy_cache off;
+    proxy_intercept_errors off;
+}
+
+location @client_api_sunip_cc_rate_limited {
+    default_type application/json;
+    add_header Cache-Control "no-store" always;
+    add_header Retry-After "2" always;
+    return 429 '{"success":false,"error":{"code":"rate_limited","message":"Too many requests"}}';
+}
+
+location @client_api_sunip_cc_payload_large {
+    default_type application/json;
+    add_header Cache-Control "no-store" always;
+    return 413 '{"success":false,"error":{"code":"payload_too_large","message":"Payload too large"}}';
+}
+
+# API 以外的普通路径返回 404；保留宝塔证书续期的专用规则。
+location / {
+    return 404;
+}

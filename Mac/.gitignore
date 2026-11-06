@@ -1,0 +1,4 @@
+# Generated packages and Swift build caches stay local.
+/dist/
+/native/**/.build/
+/native/**/.swiftpm/

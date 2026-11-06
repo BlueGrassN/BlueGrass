@@ -2,7 +2,9 @@
 
 ## 两个连接池与权限
 
-`source` 仅读官网业务表；每条新 MySQL 连接设置 `transaction_read_only=1` 和 `READ-COMMITTED`。`sessions` 只写独立 `bg_client_sessions`、`bg_client_refresh_tokens`、`bg_client_device_sessions`。两个池可指向不同数据库/账号，禁止把源码读连接借给会话写操作。
+`source` 仅读官网业务表；每条新 MySQL 连接设置 `transaction_read_only=1` 和 `READ-COMMITTED`。`sessions` 只写 API 自己的 `bg_client_sessions`、`bg_client_refresh_tokens`、`bg_client_device_sessions`。2026-10-12 最新决定生产使用 `127.0.0.1:3306/api_all_sunip_cc` 和单一账号 `v2_test`，两个连接池使用相同账号密码，分别管理、不互借连接。数据库账号只有库级 SELECT 和三张 API 表的指定写权限；source 的只读设置是连接级限制，不表示使用另一个只读账号。
+
+部署必须新建上述 **3 张 API 会话表**，不新建数据库，不改官网原业务表。运行账号 `v2_test` 不持有 DDL 权限，由 DBA 先执行[建表 SQL](../deploy/01-create-client-tables.sql)，再按[账号及授权 SQL](../deploy/02-client-accounts.example.sql)设置全库只读和会话表级写权限。具体步骤见[部署手册](DEPLOYMENT.md)。同库只限制写权限范围，不隔离数据库负载；不为 API 回滚或恢复而覆盖整个生产数据库。
 
 默认每个池最多16条连接、8条空闲，生命周期5分钟、空闲回收1分钟。因此单实例合计上限32，不会为每个用户创建连接。实例数量增加时，应计算：
 
@@ -28,6 +30,7 @@ Hytron 测试时 max_connections=500，不能据此把 Go 的池也设置成500�
 ## 本服务自己的并发写入
 
 - 同一客户、同一 device_id：锁独立设备行，撤销旧会话后签发新会话。其他客户/设备不共享此行锁。
+- 成功登录的来源 IP 存在 `bg_client_sessions.login_ip`，与原会话 INSERT 在同一短事务中提交，不新增写语句、连接或锁。字段为可空 ASCII `VARCHAR(45)`，支持 IPv4/IPv6；历史会话保持 NULL。续期和节点读取不更新它，同设备重新登录产生带新 IP 的新会话。仅用于查询登录来源，不作为授权条件或永久审计日志；随会话清理。
 - 续期：固定顺序锁 session 行，再锁 refresh token 行；事务里只访问会话库，不进行密码计算或读取业务库。
 - 同 request_id 并发重试返回同一加密收据；不同 request_id 重用旧令牌撤销本设备，撤销必须提交后才返回错误。
 - 死锁/锁等待错误仅做最多3次有界重试。COMMIT 网络错误可能已经提交，不能盲目重执行事务；客户端用同 request_id 恢复结果。

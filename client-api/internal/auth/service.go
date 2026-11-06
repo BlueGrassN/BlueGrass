@@ -160,6 +160,9 @@ func (s *Service) Login(ctx context.Context, in model.LoginInput) (model.Tokens,
 	}
 	r.Session.DeviceHash = secure.Digest(strings.ToLower(in.DeviceID))
 	r.Session.DeviceName = in.DeviceName
+	if in.ClientIP.IsValid() {
+		r.Session.LoginIP = in.ClientIP.WithZone("").Unmap().String()
+	}
 	if err = s.store.Create(ctx, r.Session, r.RefreshHash, r.Now); err != nil {
 		return empty, err
 	}

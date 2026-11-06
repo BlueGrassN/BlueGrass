@@ -1,0 +1,130 @@
+[
+  {
+    "file": "ui/bluegrass-wordmark-dark-23@1x.png",
+    "width": 149,
+    "height": 39,
+    "logicalWidth": 148.6077117919922,
+    "logicalHeight": 39.0,
+    "pixelRatio": 1.0
+  },
+  {
+    "file": "ui/bluegrass-wordmark-dark-23@4x.png",
+    "width": 595,
+    "height": 156,
+    "logicalWidth": 148.6077117919922,
+    "logicalHeight": 39.0,
+    "pixelRatio": 4.0
+  },
+  {
+    "file": "ui/bluegrass-wordmark-dark-25@1x.png",
+    "width": 161,
+    "height": 41,
+    "logicalWidth": 160.5344696044922,
+    "logicalHeight": 41.0,
+    "pixelRatio": 1.0
+  },
+  {
+    "file": "ui/bluegrass-wordmark-dark-25@4x.png",
+    "width": 643,
+    "height": 164,
+    "logicalWidth": 160.5344696044922,
+    "logicalHeight": 41.0,
+    "pixelRatio": 4.0
+  },
+  {
+    "file": "ui/bluegrass-wordmark-dark-28@1x.png",
+    "width": 179,
+    "height": 44,
+    "logicalWidth": 178.4246063232422,
+    "logicalHeight": 44.0,
+    "pixelRatio": 1.0
+  },
+  {
+    "file": "ui/bluegrass-wordmark-dark-28@4x.png",
+    "width": 714,
+    "height": 176,
+    "logicalWidth": 178.4246063232422,
+    "logicalHeight": 44.0,
+    "pixelRatio": 4.0
+  },
+  {
+    "file": "ui/bluegrass-grass-dark-256@1x.png",
+    "width": 256,
+    "height": 256,
+    "logicalWidth": 256.0,
+    "logicalHeight": 256.0,
+    "pixelRatio": 1.0
+  },
+  {
+    "file": "ui/bluegrass-grass-dark-256@4x.png",
+    "width": 1024,
+    "height": 1024,
+    "logicalWidth": 256.0,
+    "logicalHeight": 256.0,
+    "pixelRatio": 4.0
+  },
+  {
+    "file": "ui/bluegrass-wordmark-light-23@1x.png",
+    "width": 149,
+    "height": 39,
+    "logicalWidth": 148.6077117919922,
+    "logicalHeight": 39.0,
+    "pixelRatio": 1.0
+  },
+  {
+    "file": "ui/bluegrass-wordmark-light-23@4x.png",
+    "width": 595,
+    "height": 156,
+    "logicalWidth": 148.6077117919922,
+    "logicalHeight": 39.0,
+    "pixelRatio": 4.0
+  },
+  {
+    "file": "ui/bluegrass-wordmark-light-25@1x.png",
+    "width": 161,
+    "height": 41,
+    "logicalWidth": 160.5344696044922,
+    "logicalHeight": 41.0,
+    "pixelRatio": 1.0
+  },
+  {
+    "file": "ui/bluegrass-wordmark-light-25@4x.png",
+    "width": 643,
+    "height": 164,
+    "logicalWidth": 160.5344696044922,
+    "logicalHeight": 41.0,
+    "pixelRatio": 4.0
+  },
+  {
+    "file": "ui/bluegrass-wordmark-light-28@1x.png",
+    "width": 179,
+    "height": 44,
+    "logicalWidth": 178.4246063232422,
+    "logicalHeight": 44.0,
+    "pixelRatio": 1.0
+  },
+  {
+    "file": "ui/bluegrass-wordmark-light-28@4x.png",
+    "width": 714,
+    "height": 176,
+    "logicalWidth": 178.4246063232422,
+    "logicalHeight": 44.0,
+    "pixelRatio": 4.0
+  },
+  {
+    "file": "ui/bluegrass-grass-light-256@1x.png",
+    "width": 256,
+    "height": 256,
+    "logicalWidth": 256.0,
+    "logicalHeight": 256.0,
+    "pixelRatio": 1.0
+  },
+  {
+    "file": "ui/bluegrass-grass-light-256@4x.png",
+    "width": 1024,
+    "height": 1024,
+    "logicalWidth": 256.0,
+    "logicalHeight": 256.0,
+    "pixelRatio": 4.0
+  }
+]

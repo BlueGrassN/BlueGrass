@@ -1,0 +1,40 @@
+00:00 +0: loading test/api_v2_data_source_test.dart
+00:00 +0: future expected_exit_ip null never guessed
+00:00 +1: future expected_exit_ip 8.8.8.8 never guessed
+00:00 +2: future expected_exit_ip ::1 never guessed
+00:00 +3: future expected_exit_ip bad never guessed
+00:00 +4: future expected_exit_ip 999.1.1.1 never guessed
+00:00 +5: future expected_exit_ip 08.8.8.8 never guessed
+00:00 +6: future expected_exit_ip 127.0.0.1 never guessed
+00:00 +6 -1: future expected_exit_ip 127.0.0.1 never guessed [E]
+  Expected: <null>
+    Actual: '127.0.0.1'
+  
+  package:matcher                          expect
+  test\api_v2_data_source_test.dart 197:7  main.<fn>
+  
+00:00 +6 -1: future expected_exit_ip 10.0.0.1 never guessed
+00:00 +6 -2: future expected_exit_ip 10.0.0.1 never guessed [E]
+  Expected: <null>
+    Actual: '10.0.0.1'
+  
+  package:matcher                          expect
+  test\api_v2_data_source_test.dart 197:7  main.<fn>
+  
+00:00 +6 -2: future expected_exit_ip 203.0.113.1 never guessed
+00:00 +6 -3: future expected_exit_ip 203.0.113.1 never guessed [E]
+  Expected: <null>
+    Actual: '203.0.113.1'
+  
+  package:matcher                          expect
+  test\api_v2_data_source_test.dart 197:7  main.<fn>
+  
+00:00 +6 -3: Some tests failed.
+
+Failing tests:
+  test/api_v2_data_source_test.dart: future expected_exit_ip 10.0.0.1 never guessed
+  test/api_v2_data_source_test.dart: future expected_exit_ip 127.0.0.1 never guessed
+  test/api_v2_data_source_test.dart: future expected_exit_ip 203.0.113.1 never guessed
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.

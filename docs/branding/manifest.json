@@ -1,0 +1,139 @@
+{
+  "source": "assets/branding/bluegrass-wordmark-dark-icon.svg",
+  "sourceSha256": "8023fc56492df10efdcef680afec9cb6805d887ed4108b6ff7b477f178423cb4",
+  "renderer": {
+    "sharp": "0.35.5",
+    "librsvg": "2.63.2"
+  },
+  "variants": {
+    "light": "Submitted dark-icon SVG/PNG: #67D2E5 grass, #182B3A wordmark.",
+    "dark": "Identical SVG paths and spacing, #E8EEF3 wordmark from the supplied dark PNG.",
+    "icon": "Original grass path on #182B3A; no wordmark at launcher/tray sizes.",
+    "apple": "Asset staging only; no iOS/macOS app or asset catalog is configured."
+  },
+  "windowsIconSizes": [
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64,
+    128,
+    256
+  ],
+  "outputs": [
+    {
+      "path": "docs/branding/wordmark-light.svg",
+      "sha256": "8023fc56492df10efdcef680afec9cb6805d887ed4108b6ff7b477f178423cb4"
+    },
+    {
+      "path": "docs/branding/wordmark-dark.svg",
+      "sha256": "f615491d679e7b3443835817f71ee1313d81320774ce5a354699e894a0434045"
+    },
+    {
+      "path": "docs/branding/app-icon.svg",
+      "sha256": "a351702bac39426dd69e92ab8b67db5f9710516ed371eb0a1d70516a39cbe0af"
+    },
+    {
+      "path": "Windows/app/assets/brand.svg",
+      "sha256": "a351702bac39426dd69e92ab8b67db5f9710516ed371eb0a1d70516a39cbe0af"
+    },
+    {
+      "path": "Windows/app/assets/branding/wordmark-light.png",
+      "sha256": "33d4d2bf82369c38f26265d2708059ce93a2029e2efe33f9b5e385a546be6161"
+    },
+    {
+      "path": "Windows/app/assets/branding/4.0x/wordmark-light.png",
+      "sha256": "7aafa4e8a8fdd785666851187a07d65f115625535564756c54ff9fe4e9d74d04"
+    },
+    {
+      "path": "Android/assets/branding/wordmark-light.png",
+      "sha256": "33d4d2bf82369c38f26265d2708059ce93a2029e2efe33f9b5e385a546be6161"
+    },
+    {
+      "path": "Android/assets/branding/4.0x/wordmark-light.png",
+      "sha256": "7aafa4e8a8fdd785666851187a07d65f115625535564756c54ff9fe4e9d74d04"
+    },
+    {
+      "path": "iOS/assets/branding/wordmark-light.svg",
+      "sha256": "8023fc56492df10efdcef680afec9cb6805d887ed4108b6ff7b477f178423cb4"
+    },
+    {
+      "path": "Mac/assets/branding/wordmark-light.svg",
+      "sha256": "8023fc56492df10efdcef680afec9cb6805d887ed4108b6ff7b477f178423cb4"
+    },
+    {
+      "path": "Windows/app/assets/branding/wordmark-dark.png",
+      "sha256": "5310ad7e43b2d26e35d23dcae102b9780b4ab28579d49f6892eebf9cf257c240"
+    },
+    {
+      "path": "Windows/app/assets/branding/4.0x/wordmark-dark.png",
+      "sha256": "f58501f5086b76edad285e52000d7031b4156ef2d363063e5b040fa3f046a746"
+    },
+    {
+      "path": "Android/assets/branding/wordmark-dark.png",
+      "sha256": "5310ad7e43b2d26e35d23dcae102b9780b4ab28579d49f6892eebf9cf257c240"
+    },
+    {
+      "path": "Android/assets/branding/4.0x/wordmark-dark.png",
+      "sha256": "f58501f5086b76edad285e52000d7031b4156ef2d363063e5b040fa3f046a746"
+    },
+    {
+      "path": "iOS/assets/branding/wordmark-dark.svg",
+      "sha256": "f615491d679e7b3443835817f71ee1313d81320774ce5a354699e894a0434045"
+    },
+    {
+      "path": "Mac/assets/branding/wordmark-dark.svg",
+      "sha256": "f615491d679e7b3443835817f71ee1313d81320774ce5a354699e894a0434045"
+    },
+    {
+      "path": "iOS/assets/branding/app-icon-1024.png",
+      "sha256": "f4dba47e5c13b424dca9f28bf52bd23ed61f7c95b558f70fdacd95f7bb94d600"
+    },
+    {
+      "path": "Mac/assets/branding/app-icon-1024.png",
+      "sha256": "f4dba47e5c13b424dca9f28bf52bd23ed61f7c95b558f70fdacd95f7bb94d600"
+    },
+    {
+      "path": "Windows/app/windows/runner/resources/app_icon.ico",
+      "sha256": "21229ed89e47c0623957b12787971a1a995dca04cec35ae1630fc837562b9b91"
+    },
+    {
+      "path": "Android/android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "sha256": "6573e5a9770736ee5885776322b457a668eca34683a7123ccee6f0e30c750d6f"
+    },
+    {
+      "path": "Android/android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "sha256": "6a0349d7c37240e7455bb22e8332a47d20cf83b8a67a78eddd46033441d9f728"
+    },
+    {
+      "path": "Android/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "sha256": "a235390d89bd087126537912e3a5b55d9d1dd51b0bbbb5c0527ac8075f370e22"
+    },
+    {
+      "path": "Android/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "sha256": "79e9fbf1f37c07861fc4c4e23428f37b8f95f689c0e1fbc5870ede4568a4f05a"
+    },
+    {
+      "path": "Android/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "sha256": "9d29800bad8b274523afef77689b62e9ccf0caf0ae2ab0a47385aa90eaafdb80"
+    },
+    {
+      "path": "Android/android/app/src/main/res/drawable/ic_bluegrass_foreground.xml",
+      "sha256": "a1c05db2fae22642882179a5e89a42db929f6d8f73b067b85877f9734f22c4e6"
+    },
+    {
+      "path": "Android/android/app/src/main/res/values/launcher_colors.xml",
+      "sha256": "5b1d08795e2996a3e2b9e7753868c3f605436c04a1b80d768adb90afb106bb0c"
+    },
+    {
+      "path": "Android/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "sha256": "42270c35879c950a04f33d267d0e64426b054a28c530d29573c8a8c8be8881f1"
+    },
+    {
+      "path": "docs/branding/preview.png",
+      "sha256": "87b4a53103693b54dcc69a4a58846a6a8ef3010cc0344cfef25659965bf7f0bf"
+    }
+  ]
+}

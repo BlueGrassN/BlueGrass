@@ -45,6 +45,7 @@ func (s *Store) Migrate(ctx context.Context) error {
           access_expires_at DATETIME(6) NOT NULL, idle_expires_at DATETIME(6) NOT NULL,
           generation BIGINT NOT NULL DEFAULT 0, revoked_at DATETIME(6) NULL,
           created_at DATETIME(6) NOT NULL, updated_at DATETIME(6) NOT NULL,
+          login_ip VARCHAR(45) CHARACTER SET ascii COLLATE ascii_bin NULL DEFAULT NULL,
           UNIQUE KEY(access_hash), KEY(customer_id,device_hash), KEY(idle_expires_at), KEY(revoked_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 		"CREATE TABLE IF NOT EXISTS " + s.table("refresh_tokens") + ` (
@@ -126,7 +127,8 @@ func (s *Store) Create(ctx context.Context, row model.Session, refresh []byte, n
 				return nil, err
 			}
 		}
-		_, err = tx.ExecContext(ctx, "INSERT INTO "+s.table("sessions")+" (id,customer_id,device_hash,device_name,credential_fingerprint,access_hash,access_expires_at,idle_expires_at,generation,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,0,?,?)", row.ID, row.CustomerID, row.DeviceHash, row.DeviceName, row.CredentialFingerprint, row.AccessHash, row.AccessExpiresAt, row.IdleExpiresAt, now, now)
+		loginIP := sql.NullString{String: row.LoginIP, Valid: row.LoginIP != ""}
+		_, err = tx.ExecContext(ctx, "INSERT INTO "+s.table("sessions")+" (id,customer_id,device_hash,device_name,credential_fingerprint,access_hash,access_expires_at,idle_expires_at,generation,created_at,updated_at,login_ip) VALUES (?,?,?,?,?,?,?,?,0,?,?,?)", row.ID, row.CustomerID, row.DeviceHash, row.DeviceName, row.CredentialFingerprint, row.AccessHash, row.AccessExpiresAt, row.IdleExpiresAt, now, now, loginIP)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +142,7 @@ func (s *Store) Create(ctx context.Context, row model.Session, refresh []byte, n
 }
 
 func columns(alias string) string {
-	items := []string{"id", "customer_id", "device_hash", "device_name", "credential_fingerprint", "access_hash", "access_expires_at", "idle_expires_at", "generation", "revoked_at"}
+	items := []string{"id", "customer_id", "device_hash", "device_name", "credential_fingerprint", "access_hash", "access_expires_at", "idle_expires_at", "generation", "revoked_at", "login_ip"}
 	for i := range items {
 		items[i] = alias + items[i]
 	}
@@ -152,7 +154,8 @@ type scanner interface{ Scan(...any) error }
 func scan(row scanner) (model.Session, error) {
 	var s model.Session
 	var revoked sql.NullTime
-	err := row.Scan(&s.ID, &s.CustomerID, &s.DeviceHash, &s.DeviceName, &s.CredentialFingerprint, &s.AccessHash, &s.AccessExpiresAt, &s.IdleExpiresAt, &s.Generation, &revoked)
+	var loginIP sql.NullString
+	err := row.Scan(&s.ID, &s.CustomerID, &s.DeviceHash, &s.DeviceName, &s.CredentialFingerprint, &s.AccessHash, &s.AccessExpiresAt, &s.IdleExpiresAt, &s.Generation, &revoked, &loginIP)
 	if errors.Is(err, sql.ErrNoRows) {
 		return s, model.ErrNotFound
 	}
@@ -161,6 +164,7 @@ func scan(row scanner) (model.Session, error) {
 	}
 	s.AccessExpiresAt = s.AccessExpiresAt.UTC()
 	s.IdleExpiresAt = s.IdleExpiresAt.UTC()
+	s.LoginIP = loginIP.String
 	if revoked.Valid {
 		v := revoked.Time.UTC()
 		s.RevokedAt = &v

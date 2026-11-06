@@ -1,11 +1,13 @@
-# ADR 0002：主力客户端首版仅集成 sing-box
+# ADR 0002：主力客户端首版仅集成 sing-box（已被替代）
 
-- 状态：已接受。
+- 状态：已被 [ADR 0049：四端仅使用 Xray-core](0049-xray-only-four-platforms.md) 于 2026-10-19 全文替代。
 - 决策日期：2026-10-10，Asia/Hong_Kong。
 - 对应事项：设计审阅报告 D-02。
 - 确认依据：用户选择 A，首版只集成 sing-box，保留通用内核适配接口。
 
-## 背景
+> 以下保留 2026-10-10 的历史决定及其理由，不再指导当前实现。Windows、Android、iOS、macOS 均仅使用 Xray-core；不保留旧核心回退或第二内核。当前执行入口为[四端开发手册](../development/four-platform-development.md)。
+
+## 历史背景
 
 主设计以 sing-box 为主内核，并预留 Xray 适配。需要明确首版是否实际交付第二内核，以及保留哪些扩展边界。
 

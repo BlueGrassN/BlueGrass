@@ -1,38 +1,29 @@
 # ADR 0011：Windows 后台服务采用 Go
 
-- 状态：已接受。
-- 决策日期：2026-10-10，Asia/Hong_Kong。
+- 状态：Go 服务和共享原生层决定继续有效；内核集成部分于 2026-10-19 由 [ADR 0049](0049-xray-only-four-platforms.md) 修订为 Xray-core。
+- 原决策日期：2026-10-10，Asia/Hong_Kong。
 - 对应事项：设计审阅报告 D-11。
-- 确认依据：用户选择 A，Windows 后台服务使用 Go，沿用内嵌 sing-box 与共享原生层方案。
 
-## 决定
+## 当前决定
 
-1. Windows 10/11 后台服务采用 Go，在受控服务进程中内嵌 sing-box；界面通过鉴权 IPC 提交结构化请求。
-2. `native/core` 保存可跨平台复用的请求校验、协议配置生成、内核适配、入口解析策略、出口检测和转发门槛。
-3. `native/windows-service` 负责 Windows 服务控制、命名管道、WFP、TUN 集成、网络变化和保护意图；Windows 网络修复工具由 `native/netrepair` 提供。
-4. Android 通过 Go/libbox 封装复用共享部分，Kotlin VpnService 负责授权、前台运行、底层网络绑定及系统生命周期。Windows 专用规则不进入 Android 共享实现。
-5. 账号登录、网页/V2 取数和业务资格判断继续通过 Dart 业务层执行。原生服务自行执行已下发的有效期、出口验证和保护约束，不持有业务登录令牌。
-6. 内核适配接口保持通用，首版仅实现 sing-box（D-02）。Flutter 到原生层的具体平台通道或 FFI 方案由 S6 验证，本项不预先决定桥接方式。
+1. Windows 10/11 后台服务采用 Go，在受控服务/原生宿主中嵌入 Xray-core；界面通过可信 IPC 提交结构化请求。固定版本与模块见[共享手册](../development/four-platform-development.md)。
+2. `Windows/native/core/` 保存可跨平台复用的配置校验、Xray 适配、入口解析策略、出口观测与暂停控制；Windows 服务、WFP、系统代理、修复及网络变化处理保持平台边界。
+3. 本地代理固定 `127.0.0.1:12808`，保留现有系统代理归属、暂停与恢复语义；TUN/WFP 保护不因更换内核降低要求。全局接管仍需要可信安装及服务权限。
+4. Android 通过 Go 原生库与 Kotlin VpnService 复用共享部分，负责系统授权、前台生命周期、protect、底层 Network 绑定和 fd 所有权；不再采用旧 libbox 方案。iOS/macOS 通过原生 Packet Tunnel 桥接，见各平台手册。
+5. 账号登录、API 会话与 token 留在业务层。原生层只执行结构化资源配置、有效期与保护约束；实际出口在连接后观测，失败不拆除可用连接，不恢复旧预期出口放行门槛。
+6. 配置、生命周期、能力和平台接口保持分层，但唯一代理内核为 Xray。保留接口不等于允许第二内核或 sing-box 回退。
 
 ## 权限与生命周期
 
-- Windows 服务按安装阶段取得的权限运行，界面在用户会话中操作系统代理；高权限服务只接受结构化参数，配置和内部路径由服务生成。
-- 运行中不因每次切换 TUN 再申请 UAC；服务不可用、版本不兼容或驱动失败时按对应错误处理，不显示虚假的已连接状态。
-- 内核与 Go 服务处于同一进程，内核异常可能影响整个服务。保护规则的生命周期、服务恢复和独立网络修复工具须按 D-06 验证，不能依赖界面或内核进程存活才能保持保护。
-- Win7 的路线和兼容性按 D-01 独立验证；本项不等于确认主力版 Go 服务可直接运行于 Win7。
+- 高权限服务只接受经过身份验证的结构化参数，不能接受任意命令或路径。服务不可用、版本不兼容或驱动失败应明确报错，不能报告虚假已连接。
+- 内核与宿主处于同一进程，其异常可能影响宿主；WFP 保护意图、服务恢复及独立网络修复必须按自身生命周期验证，不能依赖 GUI 或 Xray 存活维持全部保护。
+- Windows 的签名提权、崩溃、重启、恢复及多用户归属需要实机证据；跨平台 Go 单元测试不足以证明这些行为。
+- Win7 继续按 [D-01](0001-win7-delivery-scope.md)独立验证，本项不确认主力版 Go 服务或该 Xray 包直接兼容 Win7。
 
-## 上游依据与验证边界
+## 源码依据与历史
 
-2026-10-10 核对上游 `testing` 分支提交 `6afeff4c0f7123b5782f888812e96b8c82c7b699`：
+当前源码依据为固定提交的 [core/xray.go](https://github.com/XTLS/Xray-core/blob/92ccc939aaf4f8965f369cf0b142e005aeaa11d5/core/xray.go)，提供实例创建、启动与关闭。模块及平台兼容性仍须通过当前构建和运行验证。
 
-- [go.mod](https://github.com/SagerNet/sing-box/blob/6afeff4c0f7123b5782f888812e96b8c82c7b699/go.mod) 定义 Go 模块 `github.com/sagernet/sing-box`。
-- [box.go](https://github.com/SagerNet/sing-box/blob/6afeff4c0f7123b5782f888812e96b8c82c7b699/box.go) 提供 `Box`、`New`、`Start` 和 `Close`，作为 Go 内嵌方案的源码依据。
+2026-10-10 曾以 sing-box `testing` 提交 `6afeff4c0f7123b5782f888812e96b8c82c7b699` 的 `Box/New/Start/Close` 作为原 Go 内嵌选择依据。此项仅保留历史来源，已不作为当前依赖或接口要求；旧测试结果不迁移到 Xray。
 
-此提交仅用于记录当前源码证据，不作为已选发行版本。S4 仍须锁定稳定内核版本、Go 工具链和构建选项，验证启停、资源清理、暂停监听、检测门槛及两种 Windows 模式；S5 验证服务终止和内核异常时的保护，S7 验证 Android 集成。
-
-## 关联文档
-
-- [主设计](../superpowers/specs/2026-10-10-sunipip-client-design.md)
-- [设计审阅报告](../superpowers/reviews/2026-10-10-sunipip-client-design-review.md)
-- [补充设计](../superpowers/specs/2026-10-10-sunipip-client-design-addendum.md)
-- [实施计划](../superpowers/plans/2026-10-10-sunipip-client-implementation-plan.md)
+执行入口：[Windows 手册](../development/windows.md)、[Android 手册](../development/android.md)、[iOS 手册](../development/ios.md)、[macOS 手册](../development/macos.md)。

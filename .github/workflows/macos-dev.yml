@@ -1,0 +1,159 @@
+name: macOS development build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['main']
+    paths:
+      - 'Mac/**'
+      - 'Windows/app/**'
+      - 'Windows/packages/**'
+      - 'Windows/contracts/**'
+      - 'Windows/native/core/**'
+      - '.github/workflows/macos-dev.yml'
+  pull_request:
+    paths:
+      - 'Mac/**'
+      - 'Windows/app/**'
+      - 'Windows/packages/**'
+      - 'Windows/contracts/**'
+      - 'Windows/native/core/**'
+      - '.github/workflows/macos-dev.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-dev-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.47.9'
+  GO_VERSION: '1.27.2'
+
+jobs:
+  macos:
+    name: macOS ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x86_64
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1, node24
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0, node24
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: Windows/native/core/go.sum
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Prepare shared assets and dependencies
+        run: |
+          python3 Mac/tools/sync_assets.py
+          go run Windows/app/test/fixtures/control-tls/generate.go -out Windows/app/test/fixtures/control-tls
+          (cd Windows/app && flutter pub get)
+          (cd Mac/app && flutter pub get)
+      - name: Analyze shared and Mac applications
+        run: |
+          (cd Windows/app && flutter analyze)
+          (cd Mac/app && flutter analyze)
+      - name: Test shared business rules and Mac UI
+        run: |
+          (cd Windows/packages/domain && dart pub get && dart test)
+          (cd Windows/packages/data_source && dart pub get && dart test)
+          (cd Windows/app && flutter test test/macos_platform_test.dart test/macos_admin_tun_test.dart test/macos_control_http_transport_test.dart test/control_http_transport_test.dart test/control_http_build_origin_test.dart)
+          (cd Mac/app && flutter test)
+          python3 -m unittest discover -s Mac/tools/tests -v
+      - name: Test native core, TUN and proxy lifecycle
+        # Collect independent platform failures in the same run. Packaging
+        # still requires every preceding validation to succeed.
+        if: ${{ !cancelled() }}
+        working-directory: Windows/native/core
+        run: |
+          go test -count=1 ./nativehost ./macproxy ./localengine ./protocolconfig ./routingpolicy ./control ./entrydns ./diagnostics ./mactun ./mactunipc ./tunengine
+          go test -race -count=1 ./mactunipc
+      - name: Test private utun packet flow and isolated PF ownership
+        if: ${{ !cancelled() }}
+        working-directory: Windows/native/core
+        run: |
+          set -eu
+          kernel_dir="$(/usr/bin/mktemp -d "${RUNNER_TEMP:?}/bluegrass-kernel.XXXXXXXX")"
+          trap 'rm -rf "$kernel_dir"' EXIT
+          # Build as the ordinary user: root never needs a Go/toolchain cache.
+          go test -c -o "$kernel_dir/tunengine.test" ./tunengine
+          go test -c -o "$kernel_dir/mactun.test" ./mactun
+          sudo -n /usr/bin/env BLUEGRASS_DARWIN_KERNEL_TEST=1 \
+            "$kernel_dir/tunengine.test" -test.v -test.count=1 -test.timeout=3m \
+            -test.run '^TestDarwinKernel(UtunXrayTCPUDPDNSAndCleanup|ProtectedCache)$'
+          # Only an isolated test anchor, an owned loopback host route and
+          # reference reads. No PF enable/disable or default-route takeover.
+          sudo -n /usr/bin/env BLUEGRASS_MACTUN_KERNEL_TESTS=1 \
+            "$kernel_dir/mactun.test" -test.v -test.count=1 -test.timeout=2m \
+            -test.run '^TestDarwinKernel(IsolatedAnchor|OwnedTestHostRoute|ReferenceRead)$'
+      - name: Build and verify development package
+        env:
+          BLUEGRASS_BUILD_NUMBER: ${{ github.run_number }}
+        run: python3 Mac/tools/build.py --arch '${{ matrix.arch }}' --build-number "$BLUEGRASS_BUILD_NUMBER"
+      - name: Verify resolved dependency lockfiles
+        run: |
+          git diff --exit-code -- \
+            Windows/app/pubspec.lock Mac/app/pubspec.lock \
+            Windows/packages/domain/pubspec.lock Windows/packages/data_source/pubspec.lock
+      - name: Test final packaged root bootstrap without connecting
+        working-directory: Windows/native/core
+        env:
+          BLUEGRASS_PACKAGE_ARCH: ${{ matrix.arch }}
+        run: |
+          set -eu
+          smoke_dir="$(/usr/bin/mktemp -d "${RUNNER_TEMP:?}/bluegrass-bootstrap.XXXXXXXX")"
+          trap 'rm -rf "$smoke_dir"' EXIT
+          set -- "$GITHUB_WORKSPACE/Mac/dist/$BLUEGRASS_PACKAGE_ARCH"/BlueGrass-macOS-*.zip
+          test "$#" -eq 1
+          /usr/bin/ditto -x -k "$1" "$smoke_dir"
+          app="$smoke_dir/BlueGrass.app"
+          /usr/bin/codesign --verify --deep --strict --verbose=2 "$app"
+          python3 "$GITHUB_WORKSPACE/Mac/tools/verify_native.py" --app "$app"
+          # Never place a test binary inside the signed app. Copies preserve
+          # the final signed worker bytes and broker's embedded SHA-256.
+          fixture_dir="$smoke_dir/fixture"
+          /bin/mkdir "$fixture_dir"
+          /bin/cp "$app/Contents/MacOS/BlueGrass.Tunnel" "$fixture_dir/BlueGrass.Tunnel"
+          /bin/cp "$app/Contents/MacOS/BlueGrass.Native" "$fixture_dir/BlueGrass.Native"
+          worker_sha="$(/usr/bin/shasum -a 256 < "$fixture_dir/BlueGrass.Tunnel" | /usr/bin/cut -c 1-64)"
+          go test -c \
+            -ldflags "-X bluegrass/native/core/mactunipc.ExpectedWorkerSHA256=$worker_sha" \
+            -o "$fixture_dir/mactunipc.test" ./mactunipc
+          # Run as the ordinary UID. The test uses sudo -n only for the fixed
+          # real installer; its authenticated session sends Hello/Disconnect.
+          BLUEGRASS_TEST_DARWIN_ROOT_BOOTSTRAP=1 "$fixture_dir/mactunipc.test" \
+            -test.run '^TestDarwinRootBootstrapSmoke$' -test.v -test.count=1 -test.timeout=7m
+      - name: Test macOS platform contracts
+        working-directory: Mac/app
+        run: >-
+          xcodebuild test
+          -workspace macos/Runner.xcworkspace
+          -scheme Runner
+          -configuration Debug
+          -destination 'platform=macOS'
+          -derivedDataPath build/native-tests
+          CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual
+          DEVELOPMENT_TEAM= MACOSX_DEPLOYMENT_TARGET=13.0
+          -quiet
+      - name: Upload installable development package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2, node24
+        with:
+          name: BlueGrass-macOS-${{ matrix.arch }}-dev
+          path: Mac/dist/${{ matrix.arch }}/*
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

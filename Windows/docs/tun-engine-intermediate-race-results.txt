@@ -1,0 +1,26 @@
+ok  	bluegrass/native/core/clock	1.097s
+ok  	bluegrass/native/core/cmd/bluegrass-diagnostics	1.107s
+?   	bluegrass/native/core/cmd/bluegrass-native	[no test files]
+?   	bluegrass/native/core/cmd/bluegrass-repair	[no test files]
+?   	bluegrass/native/core/cmd/bluegrass-service	[no test files]
+?   	bluegrass/native/core/cmd/bluegrass-update	[no test files]
+ok  	bluegrass/native/core/cmdupdate	1.370s
+ok  	bluegrass/native/core/control	5.008s
+ok  	bluegrass/native/core/diagnostics	3.666s
+ok  	bluegrass/native/core/engine	1.086s
+ok  	bluegrass/native/core/entrydns	1.071s
+ok  	bluegrass/native/core/exitprobe	6.756s
+?   	bluegrass/native/core/gate	[no test files]
+ok  	bluegrass/native/core/localengine	1.153s
+ok  	bluegrass/native/core/nativehost	1.708s
+ok  	bluegrass/native/core/protocolconfig	1.136s
+ok  	bluegrass/native/core/serviceipc	1.088s
+ok  	bluegrass/native/core/tunengine	3.889s
+ok  	bluegrass/native/core/update	1.945s
+ok  	bluegrass/native/core/winprotect	1.154s
+ok  	bluegrass/native/core/winproxy	1.261s
+--- FAIL: TestServiceJournalIsDirtyBeforeFactoryAndCleanOnlyAfterClose (0.00s)
+    journal_windows_test.go:72: cleanup erased session or failed to confirm
+FAIL
+FAIL	bluegrass/native/core/winservice	0.115s
+FAIL

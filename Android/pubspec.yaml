@@ -1,0 +1,27 @@
+name: client
+description: BlueGrass Android client
+publish_to: none
+version: 0.5.0+9
+environment:
+  sdk: ^3.13.5
+dependencies:
+  flutter:
+    sdk: flutter
+  bluegrass_domain:
+    path: ../Windows/packages/domain
+  bluegrass_data_source:
+    path: ../Windows/packages/data_source
+dev_dependencies:
+  integration_test:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/branding/wordmark-light.png
+    - assets/branding/wordmark-dark.png
+    - native/LICENSE.Xray-core
+    - native/LICENSE.sing-tun
+    - native/LICENSE.sing

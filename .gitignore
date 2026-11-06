@@ -1,0 +1,17 @@
+.artifacts/
+.superpowers/
+.dart_tool/
+**/.dart_tool/
+**/build/
+**/bin/
+**/.packages
+**/coverage/
+**/flutter/ephemeral/
+**/.plugin_symlinks/
+**/*.log
+**/__pycache__/
+*.private.json
+.env
+.env.*
+!.env.example
+/testaccount.txt

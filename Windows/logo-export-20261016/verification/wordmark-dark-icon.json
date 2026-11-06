@@ -1,0 +1,74 @@
+{
+  "file": "ui/bluegrass-wordmark-dark-icon.svg",
+  "requested_variant": "dark grass icon with original dark text",
+  "icon_color": "#67D2E5",
+  "text_color": "#182B3A",
+  "background": "transparent",
+  "font_file_used_for_outlines": "C:/Windows/Fonts/msyhbd.ttc",
+  "font_file_included": false,
+  "raster_images_embedded": false,
+  "path_count": 10,
+  "font_size": 28,
+  "icon_size": 40,
+  "gap": 1.75,
+  "metrics": {
+    "width": 132.6746063232422,
+    "height": 37.0,
+    "baseline": 29.671875,
+    "ascent": 29.626953125,
+    "descent": 7.328125,
+    "fontSize": 28.0,
+    "lineHeight": null,
+    "boxes": [
+      {
+        "character": "B",
+        "left": -0.3499999940395355,
+        "right": 18.09062385559082
+      },
+      {
+        "character": "l",
+        "left": 18.09062385559082,
+        "right": 25.67578125
+      },
+      {
+        "character": "u",
+        "left": 25.67578125,
+        "right": 43.11836242675781
+      },
+      {
+        "character": "e",
+        "left": 43.11836242675781,
+        "right": 58.71523666381836
+      },
+      {
+        "character": "G",
+        "left": 58.71523666381836,
+        "right": 79.4390640258789
+      },
+      {
+        "character": "r",
+        "left": 79.4390640258789,
+        "right": 90.60625457763672
+      },
+      {
+        "character": "a",
+        "left": 90.60625457763672,
+        "right": 106.080078125
+      },
+      {
+        "character": "s",
+        "left": 106.080078125,
+        "right": 119.20234680175781
+      },
+      {
+        "character": "s",
+        "left": 119.20234680175781,
+        "right": 132.32460021972656
+      }
+    ]
+  },
+  "sha256": "8023fc56492df10efdcef680afec9cb6805d887ed4108b6ff7b477f178423cb4",
+  "wordmark_translation_x": -7.25,
+  "spacing_updated_on": "2026-10-19",
+  "scope": "This conversation export only; application sources are not changed."
+}

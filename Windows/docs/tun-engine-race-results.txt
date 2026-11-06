@@ -1,0 +1,22 @@
+ok  	bluegrass/native/core/clock	1.092s
+ok  	bluegrass/native/core/cmd/bluegrass-diagnostics	1.219s
+?   	bluegrass/native/core/cmd/bluegrass-native	[no test files]
+?   	bluegrass/native/core/cmd/bluegrass-repair	[no test files]
+?   	bluegrass/native/core/cmd/bluegrass-service	[no test files]
+?   	bluegrass/native/core/cmd/bluegrass-update	[no test files]
+ok  	bluegrass/native/core/cmdupdate	1.282s
+ok  	bluegrass/native/core/control	5.257s
+ok  	bluegrass/native/core/diagnostics	3.840s
+ok  	bluegrass/native/core/engine	1.130s
+ok  	bluegrass/native/core/entrydns	1.100s
+ok  	bluegrass/native/core/exitprobe	6.887s
+?   	bluegrass/native/core/gate	[no test files]
+ok  	bluegrass/native/core/localengine	1.192s
+ok  	bluegrass/native/core/nativehost	1.776s
+ok  	bluegrass/native/core/protocolconfig	1.145s
+ok  	bluegrass/native/core/serviceipc	1.112s
+ok  	bluegrass/native/core/tunengine	3.656s
+ok  	bluegrass/native/core/update	2.086s
+ok  	bluegrass/native/core/winprotect	1.181s
+ok  	bluegrass/native/core/winproxy	1.299s
+ok  	bluegrass/native/core/winservice	1.118s

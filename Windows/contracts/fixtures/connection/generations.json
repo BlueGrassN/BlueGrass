@@ -1,0 +1,16 @@
+{
+  "schemaVersion":1,
+  "nowUtc":"2026-10-11T00:00:00Z",
+  "contextA":{"schemaVersion":1,"clientEpoch":"client-1","runtimeEpoch":"runtime-1","logicalSessionId":"session-A","attemptId":"attempt-A","resourceKey":{"environment":"fixture","dataSource":"api-v1","accountKey":"fake-account","kind":"subscription","sourceId":"A"}},
+  "contextB":{"schemaVersion":1,"clientEpoch":"client-1","runtimeEpoch":"runtime-1","logicalSessionId":"session-B","attemptId":"attempt-B","resourceKey":{"environment":"fixture","dataSource":"api-v1","accountKey":"fake-account","kind":"subscription","sourceId":"B"}},
+  "expectedExitIpv4":"8.8.8.8",
+  "cases":[
+    {"caseId":"old_generation_result_is_ignored","adr":["D-07","D-12"],"events":[{"type":"connect","context":"A"},{"type":"disconnect"},{"type":"connect","context":"B"},{"type":"confirmed","context":"A","sequence":1,"phase":"connected"},{"type":"confirmed","context":"A","sequence":2,"phase":"failed"}],"expectedPhase":"connecting","expectedAttempt":"attempt-B"},
+    {"caseId":"native_confirmation_required","adr":["D-07"],"events":[{"type":"connect","context":"B"}],"expectedPhase":"connecting","expectedAttempt":"attempt-B"},
+    {"caseId":"current_observed_result_connects","adr":["D-07"],"events":[{"type":"connect","context":"B"},{"type":"confirmed","context":"B","sequence":1,"phase":"connected","verifiedExitIpv4":"8.8.8.8"}],"expectedPhase":"connected","expectedAttempt":"attempt-B","expectedObservedIpv4":"8.8.8.8"},
+    {"caseId":"cancelled_attempt_cannot_revive","adr":["D-07"],"events":[{"type":"connect","context":"A"},{"type":"disconnect"},{"type":"confirmed","context":"A","sequence":1,"phase":"connected"}],"expectedPhase":"stopping","expectedAttempt":"attempt-A"},
+    {"caseId":"different_actual_exit_connects","adr":["D-29"],"events":[{"type":"connect","context":"A"},{"type":"confirmed","context":"A","sequence":1,"phase":"connected","verifiedExitIpv4":"1.1.1.1"}],"expectedPhase":"connected","expectedAttempt":"attempt-A","expectedObservedIpv4":"1.1.1.1"},
+    {"caseId":"missing_observed_exit_connects","adr":["D-07"],"events":[{"type":"connect","context":"A"},{"type":"confirmed","context":"A","sequence":1,"phase":"connected"}],"expectedPhase":"connected","expectedAttempt":"attempt-A","expectedObservedIpv4":null},
+    {"caseId":"null_observed_exit_connects","adr":["D-07"],"events":[{"type":"connect","context":"A"},{"type":"confirmed","context":"A","sequence":1,"phase":"connected","verifiedExitIpv4":null}],"expectedPhase":"connected","expectedAttempt":"attempt-A","expectedObservedIpv4":null}
+  ]
+}

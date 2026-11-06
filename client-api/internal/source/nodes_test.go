@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"testing"
 	"time"
 
@@ -68,7 +69,7 @@ func TestNodesUsesOneCurrentCustomerJOINAndCorrectDTO(t *testing.T) {
 		t.Fatalf("want one node, got %+v", page)
 	}
 	n := page.Items[0]
-	if n.ID != "11" || n.Name != "Fixture Relay #11" || n.Protocol != "socks5" || n.Host != "custom.example" || n.Port != 10808 ||
+	if n.ID != "11" || n.Name != "Fixture Asset" || n.Protocol != "socks5" || n.Host != "custom.example" || n.Port != 10808 ||
 		n.Username != "fixture-user" || n.Password != "fixture-password" || n.CountryCode != "JP" || n.CountryName != "Japan" || n.City != "Tokyo" || !n.IsForwarded {
 		t.Fatalf("incorrect node mapping: %+v", n)
 	}
@@ -442,26 +443,66 @@ func TestNodeDetailUsesLatestMatchingActiveForward(t *testing.T) {
 	}
 }
 
-func TestNodeNameFallsBackToCountryBeforeNodeAndKeepsIDSuffix(t *testing.T) {
+func TestNodeNameUsesAssetNameAndNeutralFallback(t *testing.T) {
 	for _, tc := range []struct {
 		name                   string
 		remark, asset, country driver.Value
-		want                   string
+		want, wantRemark       string
 	}{
-		{"remark", "Customer label", "Asset label", "Japan", "Customer label #11"},
-		{"asset", nil, "Asset label", "Japan", "Asset label #11"},
-		{"country", " ", "", " Japan ", "Japan #11"},
-		{"default", nil, nil, nil, "Node #11"},
+		{"conflicting remark", "Customer label", "美国-198.87.96.137", "美国", "美国-198.87.96.137", "Customer label"},
+		{"null remark", nil, "Asset label", "Japan", "Asset label", ""},
+		{"trimmed asset and remark", " 我的备注 \t", " Asset label \t", "Japan", "Asset label", "我的备注"},
+		{"blank remark", " \t", "Asset label", "Japan", "Asset label", ""},
+		{"existing asset suffix", "Customer label", "Asset #88", "Japan", "Asset #88", "Customer label"},
+		{"null asset ignores remark", "Customer label", nil, " Japan ", "Japan #11", "Customer label"},
+		{"empty asset ignores remark", "Customer label", "", "Japan", "Japan #11", "Customer label"},
+		{"blank asset and country", "Customer label", " \t", " ", "Node #11", "Customer label"},
+		{"all null", nil, nil, nil, "Node #11", ""},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			repo, script := repositoryFixture(t, nil)
-			n := validNode(11)
-			n.remark, n.assetName, n.countryName = tc.remark, tc.asset, tc.country
-			script.expect(nodeStep("nodes", 7, 0, 1, nodeRows(n)))
-			page, err := repo.Nodes(context.Background(), 7, 0, 1)
-			if err != nil || len(page.Items) != 1 || page.Items[0].Name != tc.want {
-				t.Fatalf("node label precedence: %+v, %v; want %q", page, err, tc.want)
+			for _, mode := range []string{"list", "detail"} {
+				t.Run(mode, func(t *testing.T) {
+					repo, script := repositoryFixture(t, nil)
+					n := validNode(11)
+					n.remark, n.assetName, n.countryName = tc.remark, tc.asset, tc.country
+					// Neither the relay IP nor the legacy SOCKS endpoint is a name fallback.
+					n.customHost = "198.51.100.10"
+					var got model.Node
+					var err error
+					if mode == "list" {
+						script.expect(nodeStep("nodes", 7, 0, 1, nodeRows(n)))
+						var page model.NodePage
+						page, err = repo.Nodes(context.Background(), 7, 0, 1)
+						if err != nil || len(page.Items) != 1 {
+							t.Fatalf("node list: %+v, %v", page, err)
+						}
+						got = page.Items[0]
+					} else {
+						script.expect(
+							queryStep{kind: "owner", args: []driver.Value{int64(11)}, rows: &fixtureRows{columns: []string{"customer_id"}, values: [][]driver.Value{{int64(7)}}}},
+							nodeStep("detail", 7, 11, 0, nodeRows(n)),
+						)
+						got, err = repo.Node(context.Background(), 7, 11)
+					}
+					if err != nil || got.ID != "11" || got.Name != tc.want {
+						t.Fatalf("node name: %q, %v; want %q", got.Name, err, tc.want)
+					}
+					assertCustomerRemarkJSON(t, got, tc.wantRemark)
+				})
 			}
 		})
+	}
+}
+
+func TestNodeQuerySelectsCustomerRemarkSeparately(t *testing.T) {
+	repo, _ := repositoryFixture(t, nil)
+	for _, detail := range []bool{false, true} {
+		query := normalizeSQL(repo.nodeQuery(detail))
+		if !strings.HasPrefix(query, "select s.id, s.customer_remark, ip.asset_name,") {
+			t.Errorf("detail=%t: node query must select the customer's subscription remark separately from the asset name", detail)
+		}
+		if strings.Contains(query, "ip.remark") || strings.Contains(query, "s.remark") {
+			t.Errorf("detail=%t: internal remarks must not be selected", detail)
+		}
 	}
 }

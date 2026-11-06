@@ -1,0 +1,15 @@
+{
+  "schemaVersion":1,
+  "nowUtc":"2026-10-11T00:00:00Z",
+  "cases":[
+    {"caseId":"outside_window","adr":["D-46"],"expiry":"2026-10-18T00:00:00.000001Z","stage":null},
+    {"caseId":"seven_days","adr":["D-46"],"expiry":"2026-10-18T00:00:00Z","stage":"sevenDays"},
+    {"caseId":"three_days","adr":["D-46"],"expiry":"2026-10-14T00:00:00Z","stage":"threeDays"},
+    {"caseId":"one_day","adr":["D-46"],"expiry":"2026-10-12T00:00:00Z","stage":"oneDay"},
+    {"caseId":"reminder_catchup_uses_only_current_stage","adr":["D-46"],"expiry":"2026-10-11T03:00:00Z","stage":"oneDay"},
+    {"caseId":"expired","adr":["D-46"],"expiry":"2026-10-11T00:00:00Z","stage":"expired"},
+    {"caseId":"equivalent_offset","adr":["D-38","D-46"],"expiry":"2026-10-11T08:00:00+08:00","stage":"expired"},
+    {"caseId":"no_deadline","adr":["D-15","D-46"],"expiry":null,"stage":null}
+  ],
+  "grouped":{"caseId":"grouped_reminder_marks_only_included_items","adr":["D-48"],"sourceIds":["A","B","C","D","E"],"includedCount":3,"expiry":"2026-10-11T03:00:00Z"}
+}

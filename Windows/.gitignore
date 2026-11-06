@@ -1,0 +1,4 @@
+.artifacts/
+dist/
+backups/
+native/core/cmd/*/resource_windows_*.syso

@@ -1,0 +1,75 @@
+=== RUN   TestEmptyRequestDoesNotDialAndNeverPasses
+--- PASS: TestEmptyRequestDoesNotDialAndNeverPasses (0.00s)
+=== RUN   TestAPIHealthActualTLSAndEnvelope
+2026/10/12 13:49:10 http: TLS handshake error from 127.0.0.1:58228: remote error: tls: bad certificate
+--- PASS: TestAPIHealthActualTLSAndEnvelope (0.20s)
+=== RUN   TestAPIRejectsRedirectInvalidEnvelopeAndLargeBody
+=== RUN   TestAPIRejectsRedirectInvalidEnvelopeAndLargeBody/{"success":false,"data":{
+=== RUN   TestAPIRejectsRedirectInvalidEnvelopeAndLargeBody/{"success":true,"data":{"
+=== RUN   TestAPIRejectsRedirectInvalidEnvelopeAndLargeBody/xxxxxxxxxxxxxxxxxxxxxxxxx
+=== RUN   TestAPIRejectsRedirectInvalidEnvelopeAndLargeBody/{"success":true,"success"
+=== RUN   TestAPIRejectsRedirectInvalidEnvelopeAndLargeBody/{"success":true,"data":{"#01
+--- PASS: TestAPIRejectsRedirectInvalidEnvelopeAndLargeBody (0.09s)
+    --- PASS: TestAPIRejectsRedirectInvalidEnvelopeAndLargeBody/{"success":false,"data":{ (0.02s)
+    --- PASS: TestAPIRejectsRedirectInvalidEnvelopeAndLargeBody/{"success":true,"data":{" (0.01s)
+    --- PASS: TestAPIRejectsRedirectInvalidEnvelopeAndLargeBody/xxxxxxxxxxxxxxxxxxxxxxxxx (0.01s)
+    --- PASS: TestAPIRejectsRedirectInvalidEnvelopeAndLargeBody/{"success":true,"success" (0.01s)
+    --- PASS: TestAPIRejectsRedirectInvalidEnvelopeAndLargeBody/{"success":true,"data":{"#01 (0.02s)
+=== RUN   TestEntryLiteralRealTCPAndDNSIsSkipped
+--- PASS: TestEntryLiteralRealTCPAndDNSIsSkipped (0.00s)
+=== RUN   TestCustomDNSActualExchangeAndNoSystemFallback
+--- PASS: TestCustomDNSActualExchangeAndNoSystemFallback (0.31s)
+=== RUN   TestProxyExitActualTLSIPv4PinAndMismatchStopsFallback
+=== RUN   TestProxyExitActualTLSIPv4PinAndMismatchStopsFallback/8.8.8.8
+=== RUN   TestProxyExitActualTLSIPv4PinAndMismatchStopsFallback/1.1.1.1
+=== RUN   TestProxyExitActualTLSIPv4PinAndMismatchStopsFallback/2606:4700:4700::1111
+--- PASS: TestProxyExitActualTLSIPv4PinAndMismatchStopsFallback (0.04s)
+    --- PASS: TestProxyExitActualTLSIPv4PinAndMismatchStopsFallback/8.8.8.8 (0.01s)
+    --- PASS: TestProxyExitActualTLSIPv4PinAndMismatchStopsFallback/1.1.1.1 (0.01s)
+    --- PASS: TestProxyExitActualTLSIPv4PinAndMismatchStopsFallback/2606:4700:4700::1111 (0.01s)
+=== RUN   TestExitFallbackAfterTransportFailureAndInvalidResponse
+--- PASS: TestExitFallbackAfterTransportFailureAndInvalidResponse (0.02s)
+=== RUN   TestRealUDPSilenceTimesOutWithoutDirectFallback
+--- PASS: TestRealUDPSilenceTimesOutWithoutDirectFallback (0.10s)
+=== RUN   TestGenerationsRemainIndependentDuringCancellation
+--- PASS: TestGenerationsRemainIndependentDuringCancellation (0.01s)
+=== RUN   TestCustomDNSTCPFallbackAfterSilentPrimary
+--- PASS: TestCustomDNSTCPFallbackAfterSilentPrimary (0.20s)
+=== RUN   TestExpiredProbeCannotPassEvenIfDialIgnoresContext
+--- PASS: TestExpiredProbeCannotPassEvenIfDialIgnoresContext (0.10s)
+=== RUN   TestProxyMissingPrerequisitesNeverDials
+--- PASS: TestProxyMissingPrerequisitesNeverDials (0.00s)
+=== RUN   TestUDPActualNonceRoundTripAndWrongReply
+--- PASS: TestUDPActualNonceRoundTripAndWrongReply (0.00s)
+=== RUN   TestCancellationAndTimeoutAreBoundedAndRedacted
+--- PASS: TestCancellationAndTimeoutAreBoundedAndRedacted (0.10s)
+=== RUN   TestExitParserStrictness
+--- PASS: TestExitParserStrictness (0.00s)
+=== RUN   TestRejectUnsafeInputBeforeNetwork
+--- PASS: TestRejectUnsafeInputBeforeNetwork (0.00s)
+=== RUN   TestRequestDecodesDocumentedShape
+--- PASS: TestRequestDecodesDocumentedShape (0.00s)
+=== RUN   TestLoopbackHTTPConnectActualTunnel
+--- PASS: TestLoopbackHTTPConnectActualTunnel (0.01s)
+=== RUN   TestLoopbackHTTPRejectsAuthAndOversizedHeaders
+--- PASS: TestLoopbackHTTPRejectsAuthAndOversizedHeaders (0.00s)
+=== RUN   TestSOCKSUDPActualRelayAndInvalidFragment
+--- PASS: TestSOCKSUDPActualRelayAndInvalidFragment (0.01s)
+=== RUN   TestSOCKSAuthRequiredDoesNotSendCredentials
+--- PASS: TestSOCKSAuthRequiredDoesNotSendCredentials (0.00s)
+=== RUN   TestSOCKSTCPActualTunnel
+--- PASS: TestSOCKSTCPActualTunnel (0.01s)
+=== RUN   TestSOCKSRejectsRemoteUDPRelay
+--- PASS: TestSOCKSRejectsRemoteUDPRelay (0.00s)
+=== RUN   TestSOCKSUDPStopsWhenAssociationCloses
+--- PASS: TestSOCKSUDPStopsWhenAssociationCloses (0.00s)
+PASS
+ok  	bluegrass/native/core/diagnostics	2.322s
+=== RUN   TestEmptyInputReportExplicitlySkipsUnmeasuredProbes
+--- PASS: TestEmptyInputReportExplicitlySkipsUnmeasuredProbes (0.00s)
+=== RUN   TestInvalidInputDoesNotEchoSubmittedValues
+--- PASS: TestInvalidInputDoesNotEchoSubmittedValues (0.00s)
+=== RUN   TestCancelledInputReadIsBounded
+--- PASS: TestCancelledInputReadIsBounded (0.00s)
+PASS
+ok  	bluegrass/native/core/cmd/bluegrass-diagnostics	1.076s

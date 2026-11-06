@@ -1,0 +1,34 @@
+Command: go test -race -json -count=1 -timeout 5m ./...
+GO_API_TEST_CONFIG cleared; DB tests must skip.
+GOPROXY=https://goproxy.cn (process only); GCC from C:/msys64/ucrt64/bin.
+Exit: 0
+pass: bluegrass/client-api/internal/dbpool
+pass: bluegrass/client-api/internal/auth
+pass: bluegrass/client-api/internal/config
+pass: bluegrass/client-api/internal/secure
+pass: bluegrass/client-api/internal/session
+pass: bluegrass/client-api/internal/httpapi
+pass: bluegrass/client-api/internal/integration
+pass: bluegrass/client-api/internal/source
+SKIP: bluegrass/client-api/internal/auth/TestActiveSessionRefreshesBeyondOneYearAndLogoutRevokes
+SKIP: bluegrass/client-api/internal/auth/TestExpiredAccessCanRefreshButIdleSessionExpires
+SKIP: bluegrass/client-api/internal/auth/TestExternalPasswordOrStatusChangeInvalidatesExistingTokens
+SKIP: bluegrass/client-api/internal/auth/TestDatabaseOutageDoesNotConsumeRefreshToken
+SKIP: bluegrass/client-api/internal/session/TestConcurrentSameRefreshReturnsIdenticalResult
+SKIP: bluegrass/client-api/internal/session/TestRefreshReplayRevocationSurvivesTransactionCommit
+SKIP: bluegrass/client-api/internal/session/TestConcurrentSameDeviceLoginLeavesOneActiveSession
+SKIP: bluegrass/client-api/internal/session/TestUnrelatedSessionsDoNotShareARowLock
+SKIP: bluegrass/client-api/internal/session/TestStoreDeadlineBoundsBlockedRowLock
+SKIP: bluegrass/client-api/internal/integration/TestBurst100IndependentUsersNoPoolOverflowOrServerErrors
+SKIP: bluegrass/client-api/internal/integration/TestBusinessReadUsesMVCCWhileOtherProgramHoldsWriteLock
+SKIP: bluegrass/client-api/internal/integration/TestJoinNeverMixesCredentialVersionsDuringConcurrentUpdates
+SKIP: bluegrass/client-api/internal/integration/TestExternalDisableAndHistoricalReleaseAfterRenewal
+SKIP: bluegrass/client-api/internal/integration/TestPhoneDirectoryRevalidatesCurrentDatabaseRow
+SKIP: bluegrass/client-api/internal/integration/TestReadOnlyPoolEnforcedForEveryConnectionAndRecoversAfterQueueTimeout
+SKIP: bluegrass/client-api/internal/integration/TestParallelReadsStayWithinPoolBudget
+SKIP: bluegrass/client-api/internal/integration/TestOwnedResourcesMVCCExpiryReleaseAndTransfer
+SKIP: bluegrass/client-api/internal/integration/TestOwnedResourcesPendingUnlinkedAssetsAndSupersededSubscriptions
+SKIP: bluegrass/client-api/internal/integration/TestKeysetReadsWith20000Subscriptions
+Passed top-level tests: 84
+Skipped top-level tests: 19
+go vet ./... exit: 0

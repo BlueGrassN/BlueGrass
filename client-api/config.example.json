@@ -4,13 +4,13 @@
   "trusted_proxy_cidrs": ["127.0.0.1/32", "::1/128"],
   "token_key": "REPLACE_WITH_BASE64_OF_32_RANDOM_BYTES",
   "source": {
-    "host": "127.0.0.1", "port": 3306, "database": "suntest",
-    "user": "suntest", "password": "", "tls": "false",
+    "host": "127.0.0.1", "port": 3306, "database": "api_all_sunip_cc",
+    "user": "v2_test", "password": "REPLACE_DATABASE_PASSWORD", "tls": "false",
     "max_open": 16, "max_idle": 8
   },
   "sessions": {
-    "host": "127.0.0.1", "port": 3306, "database": "suntest",
-    "user": "suntest", "password": "", "tls": "false",
+    "host": "127.0.0.1", "port": 3306, "database": "api_all_sunip_cc",
+    "user": "v2_test", "password": "REPLACE_DATABASE_PASSWORD", "tls": "false",
     "max_open": 16, "max_idle": 8
   },
   "session_prefix": "bg_client_",

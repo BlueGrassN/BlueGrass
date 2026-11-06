@@ -1,0 +1,41 @@
+--- FAIL: TestEffectiveProtocolUsesExactlyOneCredentialSource (0.00s)
+    protocol_test.go:18: conflicting credential sources accepted
+--- FAIL: TestEffectiveProtocolRejectsAmbiguousLegacyCredentials (0.00s)
+    --- FAIL: TestEffectiveProtocolRejectsAmbiguousLegacyCredentials/socks-other-user (0.00s)
+        protocol_test.go:71: ambiguous credentials accepted or included in failed result
+    --- FAIL: TestEffectiveProtocolRejectsAmbiguousLegacyCredentials/socks-other-password (0.00s)
+        protocol_test.go:71: ambiguous credentials accepted or included in failed result
+    --- FAIL: TestEffectiveProtocolRejectsAmbiguousLegacyCredentials/socks-username-only (0.00s)
+        protocol_test.go:71: ambiguous credentials accepted or included in failed result
+    --- FAIL: TestEffectiveProtocolRejectsAmbiguousLegacyCredentials/socks-password-only (0.00s)
+        protocol_test.go:71: ambiguous credentials accepted or included in failed result
+    --- FAIL: TestEffectiveProtocolRejectsAmbiguousLegacyCredentials/socks-no-auth-with-legacy (0.00s)
+        protocol_test.go:71: ambiguous credentials accepted or included in failed result
+    --- FAIL: TestEffectiveProtocolRejectsAmbiguousLegacyCredentials/https-identical-still-ambiguous (0.00s)
+        protocol_test.go:71: ambiguous credentials accepted or included in failed result
+    --- FAIL: TestEffectiveProtocolRejectsAmbiguousLegacyCredentials/https-username-only (0.00s)
+        protocol_test.go:71: ambiguous credentials accepted or included in failed result
+    --- FAIL: TestEffectiveProtocolRejectsAmbiguousLegacyCredentials/https-password-only (0.00s)
+        protocol_test.go:71: ambiguous credentials accepted or included in failed result
+FAIL
+FAIL	bluegrass/native/core/engine	0.050s
+--- FAIL: TestControllerRejectsConflictingLegacyAuthBeforeEngine (0.00s)
+    --- FAIL: TestControllerRejectsConflictingLegacyAuthBeforeEngine/https-fixture-user (0.00s)
+        protocol_test.go:152: conflicting credentials validation = ""
+    --- FAIL: TestControllerRejectsConflictingLegacyAuthBeforeEngine/https- (0.00s)
+        protocol_test.go:152: conflicting credentials validation = ""
+    --- FAIL: TestControllerRejectsConflictingLegacyAuthBeforeEngine/socks5-fixture-user (0.00s)
+        protocol_test.go:152: conflicting credentials validation = ""
+    --- FAIL: TestControllerRejectsConflictingLegacyAuthBeforeEngine/socks5-legacy-user (0.00s)
+        protocol_test.go:152: conflicting credentials validation = ""
+FAIL
+FAIL	bluegrass/native/core/control	0.050s
+--- FAIL: TestLocalBothPreparePathsRejectConflictingAuthAndRetireProof (0.00s)
+    protocol_test.go:121: prepare admitted ambiguous credentials or retained old session
+FAIL
+FAIL	bluegrass/native/core/localengine	0.040s
+--- FAIL: TestTunBothPreparePathsRejectConflictingAuthAndRetireProof (0.00s)
+    protocol_test.go:131: prepare admitted ambiguous credentials or retained old session
+FAIL
+FAIL	bluegrass/native/core/tunengine	0.038s
+FAIL

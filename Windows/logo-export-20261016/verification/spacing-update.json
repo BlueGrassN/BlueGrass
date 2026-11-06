@@ -1,0 +1,25 @@
+{
+  "updated_on": "2026-10-19",
+  "scope": "Only the exported artwork in this conversation",
+  "reference": "ui/bluegrass-wordmark-dark-icon.svg",
+  "reference_sha256": "8023fc56492df10efdcef680afec9cb6805d887ed4108b6ff7b477f178423cb4",
+  "original_layout_gap": 9,
+  "updated_layout_gap": 1.75,
+  "text_translation_logical_pixels": -7.25,
+  "font_sizes": [
+    23,
+    25,
+    28
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "png_scales": [
+    1,
+    4
+  ],
+  "updated_wordmark_pngs": 13,
+  "transparent_background_verified": true,
+  "client_source_modified": false
+}

@@ -24,6 +24,7 @@ func (r *Repository) nodeQuery(detail bool) string {
 	if detail {
 		comparison, tail = "=", " LIMIT 1"
 	}
+	// Customer-authored remarks are returned separately from the asset name.
 	return `SELECT s.id, s.customer_remark, ip.asset_name,
 		ip.country_code, ip.country_name, ip.city, s.expires_at,
 		s.custom_host, fp.display_host, dg.custom_connect_host, dg.original_connect_host,
@@ -197,20 +198,19 @@ func (n *nodeRow) node() (model.Node, bool) {
 			password = parts[3]
 		}
 	}
-	label := strings.TrimSpace(n.remark.String)
-	if label == "" {
-		label = strings.TrimSpace(n.assetName.String)
-	}
+	id := strconv.FormatInt(n.id, 10)
+	label := strings.TrimSpace(n.assetName.String)
 	if label == "" {
 		label = strings.TrimSpace(n.countryName.String)
+		if label == "" {
+			label = "Node"
+		}
+		label += " #" + id
 	}
-	if label == "" {
-		label = "Node"
-	}
-	id := strconv.FormatInt(n.id, 10)
 	node := model.Node{
-		ID: id, Name: label + " #" + id, Protocol: "socks5",
-		Host: host, Port: int(n.port.Int64), Username: username, Password: password,
+		ID: id, Name: label, Protocol: "socks5",
+		CustomerRemark: strings.TrimSpace(n.remark.String),
+		Host:           host, Port: int(n.port.Int64), Username: username, Password: password,
 		CountryCode: n.countryCode.String, CountryName: n.countryName.String,
 		City: n.city.String, IsForwarded: true,
 	}

@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-16",
+  "original_copies": [
+    {
+      "file": "original/bluegrass-leaves.svg",
+      "source": "Windows/app/assets/brand.svg",
+      "sha256": "a297d25f56a1efec00075f38e6d95bd0c4e915e37802c17a9427773e41c6f597",
+      "byte_identical": true
+    },
+    {
+      "file": "original/bluegrass-windows.ico",
+      "source": "Windows/app/windows/runner/resources/app_icon.ico",
+      "sha256": "b9b59622d7976c0e096637fb0a06711459b7a42bf533b32bb8877c37cc92a13c",
+      "byte_identical": true
+    },
+    {
+      "file": "source/generate-icon.ps1",
+      "source": "Windows/scripts/generate-icon.ps1",
+      "sha256": "5cf2f113b73dc00bf85b7d4a00d8ffcf59ca5e5488deb19d1e76638a70b6ecdc",
+      "byte_identical": true
+    },
+    {
+      "file": "source/app_theme.dart",
+      "source": "Windows/app/lib/app_theme.dart",
+      "sha256": "a767024dd3903e80e24b320ee0d92a0f7a0e7c5f7275b24dfa4b0884d57ad914",
+      "byte_identical": true
+    }
+  ],
+  "exe_icon_resources": [
+    {
+      "source": "Windows/dist/BlueGrass-Windows-x64/BlueGrass.exe",
+      "groups": [
+        {
+          "id": 101,
+          "file": "original/bluegrass-windows-embedded.ico",
+          "sha256": "5c6b41ae03c40037ec3024527d3f48b36a736a792ac34a3d199c4d164cbeb260",
+          "matches_source_ico": false,
+          "pixels_match_source_ico": true
+        }
+      ]
+    },
+    {
+      "source": "Windows/dist/BlueGrass-Windows-x64/runtime/BlueGrass.Diagnostics.exe",
+      "groups": []
+    },
+    {
+      "source": "Windows/dist/BlueGrass-Windows-x64/runtime/BlueGrass.exe",
+      "groups": [
+        {
+          "id": 101,
+          "file": "original/bluegrass-windows-embedded.ico",
+          "sha256": "5c6b41ae03c40037ec3024527d3f48b36a736a792ac34a3d199c4d164cbeb260",
+          "matches_source_ico": false,
+          "pixels_match_source_ico": true
+        }
+      ]
+    },
+    {
+      "source": "Windows/dist/BlueGrass-Windows-x64/runtime/BlueGrass.Native.exe",
+      "groups": []
+    },
+    {
+      "source": "Windows/dist/BlueGrass-Windows-x64/runtime/BlueGrass.Repair.exe",
+      "groups": []
+    },
+    {
+      "source": "Windows/dist/BlueGrass-Windows-x64/runtime/BlueGrass.Service.exe",
+      "groups": []
+    },
+    {
+      "source": "Windows/dist/BlueGrass-Windows-x64/runtime/BlueGrass.Update.exe",
+      "groups": []
+    }
+  ],
+  "ui_icon": {
+    "source": "Windows/dist/BlueGrass-Windows-x64/runtime/data/flutter_assets/fonts/MaterialIcons-Regular.otf",
+    "font_sha256": "716dc53d0b7378d27a0fda7b2d86968e17106fd4e51718df7991bbbe3f5b2763",
+    "codepoint": "U+E2E4",
+    "glyph": "grass_baseline"
+  },
+  "brand_source": "Windows/app/lib/main.dart:1875",
+  "brand_source_sha256": "97d14b155a05ab436e3fa803720f47046430b7e55d28282408aa3e563ee7e294",
+  "note": "EXE reconstructed ICO differs in directory metadata; decoded RGBA pixels exactly match the source ICO. No application source was edited."
+}

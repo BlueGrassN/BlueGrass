@@ -1,0 +1,8 @@
+schemaVersion: 1
+scope: implemented profile rules only; not the complete error catalog
+codes:
+  SYNC-003: {message: Invalid resource identity, action: refresh_or_contact_support, retryable: true}
+  ELIG-001: {message: Forwarding is not available, action: inspect_resource, retryable: false}
+  ELIG-003: {message: Resource has expired, action: refresh_after_website_renewal, retryable: false}
+  ELIG-005: {message: Invalid entry endpoint, action: contact_support, retryable: false}
+  ELIG-007: {message: Protocol configuration is not supported, action: check_protocol_contract, retryable: false}

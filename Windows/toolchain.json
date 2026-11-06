@@ -1,0 +1,29 @@
+{
+  "verifiedOn": "2026-10-19",
+  "flutter": "3.47.7",
+  "flutterCommit": "abaf9c5237",
+  "dart": "3.13.5",
+  "go": "1.27.2",
+  "visualStudio": "2022 17.14.41",
+  "windowsSdk": "10.0.26100.0",
+  "architecture": "x64",
+  "embeddedNetworkCore": "Xray-core v26.10.17",
+  "embeddedCoreCommit": "92ccc939aaf4f8965f369cf0b142e005aeaa11d5",
+  "embeddedCoreModule": "v1.260327.1-0.20261017152356-92ccc939aaf4",
+  "embeddedCoreUpstreamPrerelease": true,
+  "wintun": {
+    "version": "0.14.1",
+    "architecture": "amd64",
+    "verifiedOn": "2026-10-20",
+    "sourceURL": "https://www.wintun.net/",
+    "downloadURL": "https://www.wintun.net/builds/wintun-0.14.1.zip",
+    "archiveSHA256": "07c256185d6ee3652e09fa55c0b673e2624b565e02c4b9091c79ca7d2f24ef51",
+    "archiveDllPath": "wintun/bin/amd64/wintun.dll",
+    "dllSourcePath": "scripts/assets/wintun/amd64/wintun.dll",
+    "dllSHA256": "e5da8447dc2c320edc0fc52fa01885c103de8c118481f683643cacc3220dafce",
+    "licenseSourcePath": "app/assets/LICENSE.wintun",
+    "licenseSHA256": "183adac21e7d96c508c8fd34d394b7b6708bc81564ad1bad61ab66143a008cd2",
+    "signerThumbprint": "DF98E075A012ED8C86FBCF14854B8F9555CB3D45",
+    "runtimeDllPath": "wintun.dll"
+  }
+}

@@ -18,6 +18,7 @@ func (h *apiHandler) login(r *http.Request) (any, error) {
 	if !validLogin(input) {
 		return nil, invalidInput()
 	}
+	input.ClientIP = h.clientIP(r)
 	return h.auth.Login(r.Context(), input)
 }
 

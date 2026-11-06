@@ -1,0 +1,196 @@
+{
+  "passed": true,
+  "sourceInputsUnchanged": 14,
+  "manifestHashesVerified": 28,
+  "decodedPngs": [
+    {
+      "path": "Windows/app/assets/branding/wordmark-light.png",
+      "width": 179,
+      "height": 44,
+      "alpha": true
+    },
+    {
+      "path": "Windows/app/assets/branding/4.0x/wordmark-light.png",
+      "width": 714,
+      "height": 176,
+      "alpha": true
+    },
+    {
+      "path": "Android/assets/branding/wordmark-light.png",
+      "width": 179,
+      "height": 44,
+      "alpha": true
+    },
+    {
+      "path": "Android/assets/branding/4.0x/wordmark-light.png",
+      "width": 714,
+      "height": 176,
+      "alpha": true
+    },
+    {
+      "path": "Windows/app/assets/branding/wordmark-dark.png",
+      "width": 179,
+      "height": 44,
+      "alpha": true
+    },
+    {
+      "path": "Windows/app/assets/branding/4.0x/wordmark-dark.png",
+      "width": 714,
+      "height": 176,
+      "alpha": true
+    },
+    {
+      "path": "Android/assets/branding/wordmark-dark.png",
+      "width": 179,
+      "height": 44,
+      "alpha": true
+    },
+    {
+      "path": "Android/assets/branding/4.0x/wordmark-dark.png",
+      "width": 714,
+      "height": 176,
+      "alpha": true
+    },
+    {
+      "path": "iOS/assets/branding/app-icon-1024.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true
+    },
+    {
+      "path": "Mac/assets/branding/app-icon-1024.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true
+    },
+    {
+      "path": "Android/android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "width": 48,
+      "height": 48,
+      "alpha": true
+    },
+    {
+      "path": "Android/android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "width": 72,
+      "height": 72,
+      "alpha": true
+    },
+    {
+      "path": "Android/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "width": 96,
+      "height": 96,
+      "alpha": true
+    },
+    {
+      "path": "Android/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "width": 144,
+      "height": 144,
+      "alpha": true
+    },
+    {
+      "path": "Android/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "width": 192,
+      "height": 192,
+      "alpha": true
+    },
+    {
+      "path": "docs/branding/preview.png",
+      "width": 840,
+      "height": 620,
+      "alpha": true
+    }
+  ],
+  "supplied4xPngsIdentical": true,
+  "svgPathsPreserved": true,
+  "icoSizes": [
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64,
+    128,
+    256
+  ],
+  "windowsMainChangeScope": "_Brand only; main() and LicenseRegistry untouched",
+  "installerBrandAssets": 4,
+  "licenseLinesUnchanged": true,
+  "checks": [
+    "PNG/ICO decode and dimensions",
+    "Root SHA256 preservation",
+    "Flutter asset declarations",
+    "Installer asset allowlist",
+    "Android adaptive path identity",
+    "SVG theme path identity"
+  ],
+  "changedPaths": [
+    "Android/android/app/src/main/res/drawable/ic_bluegrass_foreground.xml",
+    "Android/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+    "Android/android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+    "Android/android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+    "Android/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+    "Android/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+    "Android/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+    "Android/android/app/src/main/res/values/launcher_colors.xml",
+    "Android/assets/branding/4.0x/wordmark-dark.png",
+    "Android/assets/branding/4.0x/wordmark-light.png",
+    "Android/assets/branding/wordmark-dark.png",
+    "Android/assets/branding/wordmark-light.png",
+    "Android/lib/app.dart",
+    "Android/lib/brand.dart",
+    "Android/lib/screens/login_screen.dart",
+    "Android/lib/screens/settings_screen.dart",
+    "Android/pubspec.yaml",
+    "Mac/assets/branding/app-icon-1024.png",
+    "Mac/assets/branding/wordmark-dark.svg",
+    "Mac/assets/branding/wordmark-light.svg",
+    "Windows/app/assets/brand.svg",
+    "Windows/app/assets/branding/4.0x/wordmark-dark.png",
+    "Windows/app/assets/branding/4.0x/wordmark-light.png",
+    "Windows/app/assets/branding/wordmark-dark.png",
+    "Windows/app/assets/branding/wordmark-light.png",
+    "Windows/app/lib/main.dart",
+    "Windows/app/pubspec.yaml",
+    "Windows/app/windows/runner/resources/app_icon.ico",
+    "Windows/installer/payload.ps1",
+    "Windows/scripts/generate-brand-assets.cjs",
+    "Windows/scripts/generate-icon.ps1",
+    "docs/branding/app-icon.svg",
+    "docs/branding/manifest.json",
+    "docs/branding/preview.png",
+    "docs/branding/validation.json",
+    "docs/branding/wordmark-dark.svg",
+    "docs/branding/wordmark-light.svg",
+    "iOS/assets/branding/app-icon-1024.png",
+    "iOS/assets/branding/wordmark-dark.svg",
+    "iOS/assets/branding/wordmark-light.svg"
+  ],
+  "notRun": [
+    "Flutter builds/tests",
+    "On-device visual verification",
+    "Windows executable embedding/runtime tray verification",
+    "iOS/macOS app integration"
+  ],
+  "sourceChecks": {
+    "androidXml": "3 XML files parsed",
+    "dartAnalyze": {
+      "Android/lib/brand.dart": "No issues found",
+      "Android/lib/screens/login_screen.dart": "No issues found",
+      "Android/lib/app.dart": "No issues found",
+      "Android/lib/screens/settings_screen.dart": "No issues found",
+      "Windows/app/lib/main.dart": "No issues found"
+    },
+    "windowsLoadImageW": "All 9 sizes loaded at requested dimensions, including 256px",
+    "verificationNote": "System.Drawing.Icon selected 128px for a 256px request; native LoadImageW and direct PNG-frame decoding verified the 256px frame.",
+    "powershellParse": "generate-icon.ps1 and payload.ps1 passed",
+    "visualInspection": "docs/branding/preview.png checked: light/dark wordmarks, icons 16 through 256px",
+    "dartFormat": "5 files checked, 0 changed"
+  },
+  "parentIntegration": [
+    "Windows/app/test/widget_test.dart:110 expects find.text(\"BlueGrass\"); update this assertion for the branded Image (semanticLabel BlueGrass) after the Text-to-image change. Test file is outside this task write scope.",
+    "Run Flutter tests/builds and check actual UI/taskbar/tray/launcher after coordinating with the Xray migration.",
+    "Parent retains ownership of LicenseRegistry and LICENSE.sing-box migration; all such lines were preserved.",
+    "iOS/Mac have staged brand files only; wire these into real targets/asset catalogs when those applications exist."
+  ]
+}

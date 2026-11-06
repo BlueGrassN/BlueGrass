@@ -7,7 +7,7 @@
 
 ## 决定
 
-1. 入口解析优先使用 sing-box；App 管理解析策略，Go/Kotlin 原生层负责平台网络绑定，并补足经 S8 验证确认的容错或诊断缺口。
+1. 按 [ADR 0049](0049-xray-only-four-platforms.md)，入口解析采用固定 Xray 能力与受控原生解析器；App 管理策略，平台原生层负责物理网络绑定及经 S8 验证的容错与诊断。不得沿用旧内核字段或增加第二内核。
 2. 设置页提供“入口 DNS”的自动与自定义模式。自定义模式允许指定一个或多个 DNS 服务器，以列表顺序表达首选和备用；地址使用 IPv4/IPv6 字面量，端口默认 53，支持 UDP/TCP 配置。
 3. 自动模式使用产品默认候选，可包含物理网络 DNS 和不同提供商的公共 DNS；自定义模式只在用户配置的列表内查询和切换，不隐式加入系统 DNS 或产品默认 DNS。
 4. 自定义配置持久化，并优先于远程配置提供的默认值；用户主动恢复自动模式后再采用默认候选。
@@ -16,7 +16,7 @@
 ## 适用范围与网络路径
 
 - 本项指定的是中转入口域名的 DNS。解析请求由受控原生组件经当前物理网口、Wi-Fi 或移动数据发出，避免经过自己的 TUN/VPN。
-- 业务域名继续经所选代理线路处理，不使用入口 DNS 设置修改系统 DNS 或为普通应用增加直连 DNS 豁免。
+- 公网业务域名继续经所选代理线路处理，不使用入口 DNS 设置修改系统 DNS 或为普通应用增加直连 DNS 豁免。[D-32](0032-local-domain-dns.md) 的明确内网域名使用独立本地解析策略，不属于入口 DNS 自定义列表。
 - Windows 保护规则仅放行受控服务访问当前策略允许的 DNS 地址、端口和传输协议；Android 通过底层网络绑定和 `protect` 配合实现。
 - TLS 类协议保留入口原始域名，用于 SNI、Host 和证书验证；指定 DNS 不影响证书校验要求。
 - DoH 及其自举仍作为后续扩展，本项先明确普通 DNS 的服务器选择能力。
@@ -33,7 +33,7 @@ S8 验证指定单服务器、多服务器切换、全部失效、自定义模�
 
 ## 官方依据
 
-sing-box 的 [domain_resolver](https://sing-box.sagernet.org/configuration/shared/dial/#domain_resolver) 可以选择入口域名使用的解析器；[UDP DNS](https://sing-box.sagernet.org/configuration/dns/server/udp/)和 [TCP DNS](https://sing-box.sagernet.org/configuration/dns/server/tcp/)提供服务器配置。具体配置格式与故障切换行为在 S8 按锁定版本验证。
+固定 Xray 的 [DNS 配置源码](https://github.com/XTLS/Xray-core/blob/92ccc939aaf4f8965f369cf0b142e005aeaa11d5/infra/conf/dns.go)及平台 socket 控制作为当前接入依据。具体服务器选择、容错、物理绑定与业务 DNS 隔离仍由 S8 验证；旧 sing-box `domain_resolver` 不是 Xray 配置字段，不能直接搬用。四端边界见[共享开发手册](../development/four-platform-development.md)。
 
 ## 关联文档
 

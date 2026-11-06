@@ -1,0 +1,29 @@
+[Unit]
+Description=BlueGrass Client API
+After=network.target mysqld.service mysql.service
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=www
+Group=www
+WorkingDirectory=/www/wwwroot/client-api.sunip.cc
+ExecStart=/www/wwwroot/client-api.sunip.cc/client-api -config /www/wwwroot/client-api.sunip.cc/config.json
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=25
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+LimitNOFILE=16384
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

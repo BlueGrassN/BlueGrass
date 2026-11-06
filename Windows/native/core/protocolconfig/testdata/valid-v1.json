@@ -1,0 +1,12 @@
+[
+  {"version":1,"type":"socks5","socks5":{"username":"fixture-user","password":"fixture-password"}},
+  {"version":1,"type":"shadowsocks","shadowsocks":{"method":"aes-256-gcm","password":"fixture-password"}},
+  {"version":1,"type":"vmess","vmess":{"uuid":"7b7ea563-e7d4-4de9-a6d3-5e50b9d20f81","security":"aes-128-gcm","transport":"tcp"}},
+  {"version":1,"type":"vless","vless":{"uuid":"7b7ea563-e7d4-4de9-a6d3-5e50b9d20f81","transport":"tcp","flow":"xtls-rprx-vision"},"tls":{"serverName":"entry.example"}},
+  {"version":1,"type":"trojan","trojan":{"password":"fixture-password","transport":"tcp"},"tls":{"serverName":"entry.example"}},
+  {"version":1,"type":"http","http":{}},
+  {"version":1,"type":"https","http":{},"tls":{"serverName":"entry.example"}},
+  {"version":1,"type":"hysteria2","hysteria2":{"password":"fixture-password"},"tls":{"serverName":"entry.example"}},
+  {"version":1,"type":"tuic","tuic":{"uuid":"7b7ea563-e7d4-4de9-a6d3-5e50b9d20f81","password":"fixture-password","congestionControl":"bbr","udpRelayMode":"native"},"tls":{"serverName":"entry.example"}},
+  {"version":1,"type":"anytls","anytls":{"password":"fixture-password"},"tls":{"serverName":"entry.example"}}
+]

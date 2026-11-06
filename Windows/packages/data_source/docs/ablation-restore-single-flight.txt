@@ -1,0 +1,17 @@
+00:00 +0: loading test/session_coordinator_test.dart
+00:00 +0: restore callers await pending recovery instead of exposing a premature customer
+00:00 +0 -1: restore callers await pending recovery instead of exposing a premature customer [E]
+  Expected: false
+    Actual: <true>
+  
+  package:matcher                           expect
+  test\session_coordinator_test.dart 501:7  main.<fn>
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  test/session_coordinator_test.dart: restore callers await pending recovery instead of exposing a premature customer
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.
+

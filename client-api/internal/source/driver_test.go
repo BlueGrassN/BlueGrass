@@ -114,6 +114,8 @@ func checkQuery(kind, q string) error {
 		return fmt.Errorf("not a bounded ordinary source SELECT: %s", q)
 	}
 	switch kind {
+	case "resources", "resource_detail", "assets", "asset_detail":
+		return checkResourceQuery(kind, q)
 	case "username":
 		if strings.Contains(q, " or ") {
 			return errors.New("username lookup must not scan phone via OR")

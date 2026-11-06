@@ -97,6 +97,10 @@ func New(auth model.Authenticator, source model.Source, cfg Config) (http.Handle
 	h.route("POST", "/auth/logout", h.respond(h.protected(h.logout), nil))
 	h.route("GET", "/nodes", h.respond(h.protected(h.read(h.nodes)), nil))
 	h.route("GET", "/nodes/{id}", h.respond(h.protected(h.read(h.node)), nil))
+	h.route("GET", "/capabilities", h.respond(h.protected(h.read(h.capabilities)), nil))
+	h.route("GET", "/resources", h.respond(h.protected(h.read(h.resources)), nil))
+	h.route("GET", "/resources/expiry", h.respond(h.protected(h.read(h.resources)), nil))
+	h.route("GET", "/resources/{kind}/{id}", h.respond(h.protected(h.read(h.resource)), nil))
 	h.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		writeFailure(w, http.StatusNotFound, "not_found")
 	})
