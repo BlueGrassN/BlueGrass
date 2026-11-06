@@ -1,5 +1,7 @@
 # BlueGrass 四端共享开发手册
 
+2026-11-06 发布规则：所有可交付平台统一使用固定 [preview Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)，各端版本独立更新，不再自动创建平台 tag。构建/发布、来源核验和失败恢复见 [统一 GitHub 发布手册](github-releases.md)。
+
 更新日期：2026-10-20。本文是 Windows、Android、iOS、macOS 的共同开发约束，平台细节分别见 [Windows](windows.md)、[Android](android.md)、[iOS](ios.md)、[macOS](macos.md)。内核决策见 [ADR 0049](../adr/0049-xray-only-four-platforms.md)；本文与该 ADR 替代旧文档中的 sing-box 主内核和双内核扩展安排。
 
 ## 当前状态与交付范围

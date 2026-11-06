@@ -5,7 +5,7 @@
 ## 安装
 
 1. Apple Silicon（M 系列）下载 `arm64` 应用 ZIP；Intel 下载 `x86_64` 应用 ZIP。要求 macOS 13 或更高版本。Release 页面可直接下载应用 ZIP；若从 Actions 下载 artifact，先解压外层 artifact。
-2. 同时下载 `SHA256SUMS.txt`，运行 `shasum -a 256 BlueGrass-macOS-*.zip`，将结果与其中对应文件名的 SHA-256 核对。
+2. 从 [统一开发预览版](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview) 同时下载本版本前缀的 `*-SHA256SUMS.txt`，运行 `shasum -a 256 BlueGrass-macOS-*.zip`，将结果与其中对应文件名的 SHA-256 核对。
 3. 解压应用 ZIP，将 `BlueGrass.app` 放到“应用程序”。退出旧版并主动断开连接后再替换。
 4. 首次打开时，开发签名可能触发 Gatekeeper 拦截。仅在确认此包来自自己的本次 GitHub 构建后，按 macOS“系统设置 → 隐私与安全性”给该应用单独允许打开。无需关闭系统级安全功能。
 5. 若系统提示访问 BlueGrass 钥匙串记录或修改网络设置，请核对应用名称后授权。拒绝权限时应显示失败，不应报告已连接。
@@ -49,4 +49,4 @@ TUN 的受保护状态位于 `/Library/Application Support/BlueGrass/Tunnel`，�
 
 ## 构建方式
 
-工作流上传到 GitHub 后，向 `main` 推送 Mac 或其共享依赖源码会触发 `macOS development build`。工作流存在于默认分支时，也可在 Actions 页面使用 `Run workflow` 手动选择分支，或在已有运行页面重新运行。两个架构分别上传 artifact，保留 14 天；已发布的开发版本可从 Releases 页面下载。源码中的 `Mac/tools/build.py` 也可在配置好同版本 Flutter/Go/Xcode 的 Mac 上运行。
+工作流上传到 GitHub 后，向 `main` 推送 Mac 或其共享依赖源码会触发 `macOS development build`。工作流存在于默认分支时，也可在 Actions 页面使用 `Run workflow` 手动选择分支，或在已有运行页面重新运行。两个架构分别上传 artifact，保留 14 天；两架构同一次运行成功后，由 `publish-preview.yml` 自动更新到固定 [preview Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)，与 Windows/Android 集中展示。失败时保留前一次 macOS 下载，不再新增独立 macOS tag。附件带版本和 attempt 前缀，原始 BUILD.json 信息保留在同前缀元数据中。并发与重跑规则见 [统一发布手册](../../docs/development/github-releases.md)。源码中的 `Mac/tools/build.py` 也可在配置好同版本 Flutter/Go/Xcode 的 Mac 上运行。

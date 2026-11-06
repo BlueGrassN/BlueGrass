@@ -74,7 +74,7 @@ def verify(args):
         "abi": "arm64-v8a", "sourceCommit": args.source_commit,
         "sourceDirty": args.source_dirty,
         "signingMode": args.signing_mode, "certificateSha256": cert.group(1).lower(),
-        "tag": f"android-v{args.version}-build.{args.build_number}",
+        "releaseTag": "preview",
         "libraries": libraries,
         "validation": "Signature, ZIP integrity, non-debuggable manifest, ARM64 ABI, ZIP/ELF alignment; not device runtime acceptance",
     }

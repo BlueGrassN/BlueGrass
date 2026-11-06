@@ -1,5 +1,7 @@
 # BlueGrass Windows
 
+下载统一使用 [开发预览版 Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)，各端安装包集中展示并独立更新；规则见 [共享发布手册](../docs/development/github-releases.md)。
+
 2026-11-06：新增[本地构建与 GitHub Release 流程](docs/github-release.md)。本地运行 `./Windows/scripts/package.ps1` 生成并解压测试包；Windows 相关代码推送到 main 后，GitHub 自动检查、构建并发布预发布 Release。
 
 2026-11-05 交互更新：首页“选择资源”改为可搜索的就地弹出面板。新版入口与验证记录见 [首页资源选择](docs/home-resource-picker.md)。

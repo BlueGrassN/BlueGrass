@@ -1,5 +1,7 @@
 # BlueGrass Android
 
+下载统一使用 [开发预览版 Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)，各端安装包集中展示并独立更新；规则见 [共享发布手册](../docs/development/github-releases.md)。
+
 Android 8.0（API 26）及以上的 Flutter 客户端，应用标识 `com.bluegrass.client`，当前安装包仅支持 ARM64（arm64-v8a）设备。
 
 2026-11-05：**0.5.0+9** 增加真实上传/下载速度，以及总流量、总上传、总下载。按本次连接的代理业务统计，自动重连继续累计，后台停止界面轮询。统计口径与测试见[流量统计验收](docs/traffic-verification-20261105.md)。

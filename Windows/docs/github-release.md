@@ -45,15 +45,17 @@ $env:BLUEGRASS_PYTHON = '你的 CPython python.exe 完整路径'
 
 触发路径为 `Windows/**`、Windows 工作流本身、根 `.gitignore` 和 `.gitattributes`。其他平台或服务端的独立改动不重复生成 Windows Release。原有 macOS 工作流仍独立运行；共享 Windows 原生/Flutter 代码变化可能同时触发两端检查。
 
-云端构建号为 `buildBase + github.run_number`，例如 base=22、首次运行编号=1，客户端版本为 `0.1.0-beta.1+23`。标签为 `windows-v0.1.0-beta.1-build.23-r1`；同一运行重跑的 r2 使用新标签，不覆盖已发布版本。构建号必须小于等于 65535，超出则失败，不能循环归零。不要重置已有工作流的编号后复用既有标签。
+云端构建号为 `buildBase + github.run_number`，客户端版本和构建号保持独立；构建号不能超过 65535，也不能重置工作流编号后倒退。
 
-构建 job 只有仓库读取权限，发布 job 才拥有 `contents: write`，使用自动提供的 `GITHUB_TOKEN`，不需要个人访问令牌或测试账号。发布 job 仅取当前运行的确切 artifact，复核哈希与来源提交，先建立草稿并上传三项资产，再公开为预发布 Release。构建失败不会发布；上传或发布中断可能保留草稿，确认失败后可删除该草稿，重跑会生成新的 r 标签。
+成功构建由 `.github/workflows/publish-preview.yml` 汇总到固定 `preview` Pre-release，不再生成 `windows-v…` tag。Windows、Android 和 macOS 同页显示，各端分别更新。统一发布器复核来源运行、对应源码中的版本配置、元数据及包哈希；Windows 构建后的 `sourceDirty` 标记如实保留。先上传完整新附件，再更新下载表格，最后清理旧 Windows 附件，不影响其他端。
 
-下载入口：[GitHub Releases](https://github.com/BlueGrassN/BlueGrass/releases)。当前仓库私有，下载者需要仓库访问权限。本流程不修改仓库可见性。
+构建 job 保持 `contents: read`；统一发布 job 才拥有 `contents: write`，使用 Actions 自动提供的令牌，不需要个人令牌或测试账号。并发、重跑及中断恢复见 [统一发布手册](../../docs/development/github-releases.md)。
+
+下载入口：[统一开发预览版](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)。Windows ZIP、构建信息和 SHA256 校验文件都带平台、版本/构建号及 attempt 前缀；本地打包路径不变。历史 Windows Release 保留。当前仓库私有，下载者需要仓库访问权限。
 
 ## 下载和检查
 
-下载 Release 中的 ZIP 并完整解压，运行最外层 `BlueGrass.exe`，保留同级 `runtime/`。不要只复制 EXE。可用 `Get-FileHash -Algorithm SHA256` 与 `SHA256SUMS.txt` 比较。
+下载 Release 中的 ZIP 并完整解压，运行最外层 `BlueGrass.exe`，保留同级 `runtime/`。不要只复制 EXE。可用 `Get-FileHash -Algorithm SHA256` 与同版本前缀的 `*-SHA256SUMS.txt` 比较。
 
 当前交付仍是未签名便携测试包；预发布 Release 不代表已经取得应用签名，也不启用正式自动更新或绕过 TUN 服务信任校验。`testaccount.txt` 保持忽略，不能作为 Actions secret、artifact 或 Release 文件上传。
 

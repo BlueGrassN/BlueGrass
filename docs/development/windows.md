@@ -1,5 +1,7 @@
 # Windows 开发手册
 
+2026-11-06 发布规则：所有可交付平台统一使用固定 [preview Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)，各端版本独立更新，不再自动创建平台 tag。构建/发布、来源核验和失败恢复见 [统一 GitHub 发布手册](github-releases.md)。
+
 本手册与[四端共享手册](four-platform-development.md)、[ADR 0049](../adr/0049-xray-only-four-platforms.md)共同执行。Windows 10/11 x64 的唯一代理内核为 **Xray-core v26.10.17（上游预发布）**，模块/提交/校验值以共享手册为准。禁止 sing-box 回退或第二代理内核。
 
 ## 工程与迁移状态

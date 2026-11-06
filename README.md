@@ -1,12 +1,13 @@
 # BlueGrass
 
-- [Windows 自动构建与下载](Windows/docs/github-release.md)：本地测试打包、main 推送后 GitHub Actions 编译并发布到 [Releases](https://github.com/BlueGrassN/BlueGrass/releases)。
+- [统一开发预览版下载](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)：Windows、Android、macOS 双架构的最新成功安装包集中在同一页面，按平台独立更新。发布规则见 [共享发布手册](docs/development/github-releases.md)。
+- [Windows 自动构建与下载](Windows/docs/github-release.md)：本地测试打包与 GitHub Actions 构建。
 
 BlueGrass 客户端及独立 Go API 的开发资料。客户端通过专用 API 接入太阳IP账号与中转节点，官网登录与客户端会话分离：
 
-Android 构建入口：本地执行 `./Android/scripts/build-release.ps1`；推送 `main` 后，GitHub Actions 自动生成 ARM64 APK 并发布到 [Releases](https://github.com/BlueGrassN/BlueGrass/releases)。本仓库已配置固定 Alpha 签名，仓库结构与操作说明见 [Android 自动构建与发布](Android/docs/github-release.md)。
+Android 构建入口：本地执行 `./Android/scripts/build-release.ps1`；推送 `main` 后，GitHub Actions 自动生成 ARM64 APK 并更新到 [统一开发预览版](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)。本仓库已配置固定 Alpha 签名，仓库结构与操作说明见 [Android 自动构建与发布](Android/docs/github-release.md)。
 
-2026-10-19：Windows、Android、iOS、macOS **全部仅使用 Xray-core**，禁止旧核心回退或第二代理内核。当前固定官方 v26.10.17（上游预发布），实际 Go 伪版本及逐平台状态见共享手册。Windows/Android 正在迁移；iOS/macOS 尚无可运行客户端。旧内核测试不能作为本次验证。
+2026-10-19：Windows、Android、iOS、macOS **全部仅使用 Xray-core**，禁止旧核心回退或第二代理内核。当前固定官方 v26.10.17（上游预发布），实际 Go 伪版本及逐平台状态见共享手册。Windows、Android、macOS 已有开发构建；iOS 尚无可下载客户端。当前交付和验收以各端开发及发布记录为准。旧内核测试不能作为本次验证。
 
 - [四端共享开发手册](docs/development/four-platform-development.md)：统一内核、依赖锁、API/远程配置、连接保护和验证证据。
 - 平台手册：[Windows](docs/development/windows.md) · [Android](docs/development/android.md) · [iOS](docs/development/ios.md) · [macOS](docs/development/macos.md)。

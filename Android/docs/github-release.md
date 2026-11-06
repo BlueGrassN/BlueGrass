@@ -60,21 +60,23 @@ keytool -genkeypair -v -keystore 'E:/private/bluegrass-android.jks' -alias blueg
 
 父目录需要预先存在。密钥必须长期保留，不能在每次 CI 运行时随机生成。**覆盖安装要求签名一致**：现有本地包使用测试密钥；若 GitHub 改用新发行密钥，旧测试包需要卸载后首次安装。后续固定密钥的 GitHub 包可以正常升级。需要从 CI 包切回本地包时，使用同一发行密钥和不低于已安装版本的 `-BuildNumber`；默认本地构建号较低。
 
-未配置或少配任一 Secret，主分支工作流会在开头明确失败，不会把临时签名包发布到 Release。`GITHUB_TOKEN` 由 Actions 自动提供，无需配置个人令牌；发布 job 单独申请 `contents: write`。仓库/组织须允许 Actions 和该写权限。密钥仅写入 runner 临时目录并在任务结束时清理。
+未配置或少配任一 Secret，主分支工作流会在开头明确失败，不会把临时签名包发布到 Release。`GITHUB_TOKEN` 由 Actions 自动提供，无需配置个人令牌；统一发布 workflow 的 job 单独申请 `contents: write`。仓库/组织须允许 Actions 和该写权限。密钥仅写入 runner 临时目录并在任务结束时清理。
 
 ## 推送后的行为
 
 配置好 Secrets 并将流程文件随代码推送后：
 
-1. **每次 push 到 `main`**：测试 → 编译 → APK 校验 → 上传 Actions artifact → 创建 GitHub Release。
+1. **每次 push 到 `main`**：测试 → 编译 → APK 校验 → 上传 Actions artifact → 更新统一 `preview` Release 的 Android 附件。
 2. **Pull Request 到 `main`**：执行同样构建检查，上传测试签名的 APK artifact；不读取发行密钥、不创建 Release。
 3. **手动运行**：Actions → Android build and release → Run workflow。选择 `main` 会发布；其他分支只生成测试 artifact。
 
-客户端版本名读取 `Android/pubspec.yaml`；CI `versionCode = 100000 + github.run_number`，因此无需每次推送手改版本号。重跑同一次 run 保持 versionCode；Release tag 包含 attempt，例如 `android-v0.5.0-build.100001-r1`，不会覆盖以前的 Release。不要删除重建工作流导致 run_number 重置；如更换编号策略，应保持 versionCode 递增。
+客户端版本名读取 `Android/pubspec.yaml`；CI `versionCode = 100000 + github.run_number`。重跑保持 versionCode，发布附件名称包含 attempt，不能重置工作流编号或使 versionCode 回退。
 
-当前客户端仍是 Alpha，自动创建 **Pre-release**，不抢占其他平台的正式 Latest。先上传至 Draft，文件全部就绪后才公开。每次主分支运行独立排队，不会因后续推送主动取消；同一个 PR 的旧检查会被新检查替换。工作流失败时不会发布新的完整下载包，旧 Release 仍可下载。
+成功构建后由 `.github/workflows/publish-preview.yml` 统一汇总至固定 `preview` Pre-release；Android 工作流不再创建独立 tag/Release。与 Windows、macOS 共用下载页，平台版本独立。发布器只接受本仓库 main 的成功运行，复核固定签名、干净源码、提交、构建号和包哈希；失败时保留上一次 Android 下载，其余平台继续独立更新。
 
-下载入口：[GitHub Releases](https://github.com/BlueGrassN/BlueGrass/releases)。展开对应 Android 版本的 **Assets**，下载 `.apk`，不要下载自动生成的 Source code 压缩包。Actions artifact 仅保留 14 天；Release 附件不采用这个自动过期设置。
+下载入口：[统一开发预览版](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)。下载 Android ARM64 的 `.apk` 及同前缀 SHA256 文件；不要下载 Source code。元数据和校验文件采用带平台的独立名称，避免覆盖其他平台。Actions artifact 保留 14 天，Release 附件保留到本平台下次成功更新。原有平台 Release 仅作历史记录。
+
+并发、重跑、失败恢复及首次汇总规则见 [统一发布手册](../../docs/development/github-releases.md)。
 
 ## 校验与边界
 

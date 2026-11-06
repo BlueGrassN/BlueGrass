@@ -1,5 +1,7 @@
 # BlueGrass macOS
 
+下载统一使用 [开发预览版 Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)，各端安装包集中展示并独立更新；规则见 [共享发布手册](../docs/development/github-releases.md)。
+
 macOS 客户端的开发入口。当前开发方式为 Windows 编写与测试共享代码，GitHub Actions 在 macOS 上构建，由用户将产物拿到 Mac 验收。
 
 `app/` 是导入现有 Windows 桌面 UI 的薄 Flutter 应用：页面、导航、主题和组件共用同一份代码。Swift 宿主提供 Keychain、菜单栏、登录项和本地窗口能力；代理协议继续使用固定版本的 Go/Xray。

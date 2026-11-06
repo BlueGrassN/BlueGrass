@@ -1,0 +1,59 @@
+name: Publish unified preview
+
+on:
+  workflow_run:
+    workflows: ['Windows build and release', 'Android build and release', 'macOS development build']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/publish_preview.py'
+      - 'scripts/tests/**'
+      - '.github/workflows/publish-preview.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Test publication and recovery rules
+        run: python3 -m unittest discover -s scripts/tests -v
+
+  publish:
+    needs: test
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_repository.full_name == github.repository &&
+        (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch')))
+    # Only eligible publish jobs enter the lock. A failed/PR notification must
+    # never replace a pending successful publisher with a job that will skip.
+    # Every eligible writer reconciles all platforms, so coalescing pending
+    # publishers cannot lose updates. Never interrupt an active upload.
+    concurrency:
+      group: unified-preview-publish
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      # workflow_run uses the trusted default-branch SHA, never the triggering
+      # run's source. Downloaded artifacts are parsed as data, never executed.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Reconcile latest verified platform downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/publish_preview.py
