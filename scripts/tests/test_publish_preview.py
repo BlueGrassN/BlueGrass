@@ -142,7 +142,7 @@ class FakeGitHub:
 
 
 class PublicationTests(unittest.TestCase):
-    def test_draft_release_is_found_by_listing_when_tag_endpoint_returns_404(self):
+    def test_existing_draft_uses_cli_pending_tag_lookup_and_numeric_identity(self):
         draft = {'id': 42, 'tag_name': 'preview', 'draft': True, 'assets': [],
                  'body': p.render_notes({}, REPO)}
         def api(path, *args):
@@ -155,7 +155,25 @@ class PublicationTests(unittest.TestCase):
             raise AssertionError(path)
         with tempfile.TemporaryDirectory() as tmp:
             client = p.GitHub(REPO, Path(tmp))
-            with patch.object(client, 'api', side_effect=api):
+            lookup = json.dumps({'apiUrl': f'https://api.github.com/repos/{REPO}/releases/42'}).encode()
+            with patch.object(client, 'api', side_effect=api), patch.object(client, 'command', return_value=lookup):
+                self.assertEqual(client.release(), draft)
+
+    def test_created_release_id_is_used_without_waiting_for_tag_index(self):
+        draft = {'id': 42, 'tag_name': 'preview', 'draft': True, 'assets': [],
+                 'body': p.render_notes({}, REPO)}
+        def api(path, *args):
+            if path in ('releases', 'releases/42'):
+                return draft
+            if path == 'releases/tags/preview':
+                raise RuntimeError('HTTP 404: tag index not ready')
+            if path == 'releases?per_page=100':
+                return [[]]
+            raise AssertionError(path)
+        with tempfile.TemporaryDirectory() as tmp:
+            client = p.GitHub(REPO, Path(tmp))
+            with patch.object(client, 'api', side_effect=api), patch.object(client, 'command', return_value=b''):
+                client.create(SHA)
                 self.assertEqual(client.release(), draft)
 
     def test_uncommitted_empty_starter_upload_is_recovered(self):

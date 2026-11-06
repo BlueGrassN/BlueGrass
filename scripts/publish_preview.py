@@ -188,6 +188,7 @@ def render_notes(state, repo):
 class GitHub:
     def __init__(self, repo, directory):
         self.repo, self.directory = repo, directory
+        self.release_id = None
 
     def command(self, *args):
         try:
@@ -205,34 +206,42 @@ class GitHub:
         return [item for page in self.api(path, '--paginate', '--slurp') for item in page[key]]
 
     def release(self):
+        if self.release_id is not None:
+            return self.api(f'releases/{self.release_id}')
         try:
-            return self.api(f'releases/tags/{TAG}')
+            # gh uses GraphQL pendingTagName as well as REST tag lookup, which
+            # also resolves drafts whose tag is not published/indexed yet.
+            identity = json.loads(self.command('release', 'view', TAG, '--repo', self.repo, '--json', 'apiUrl'))
         except RuntimeError as exc:
-            if 'HTTP 404' in str(exc):
-                # A draft may have a pending tag that the tag endpoint cannot
-                # resolve yet. Authenticated release listings include drafts.
-                releases = [r for page in self.api('releases?per_page=100', '--paginate', '--slurp')
-                            for r in page if r['tag_name'] == TAG]
-                require(len(releases) <= 1, 'Multiple preview releases; refusing ambiguous draft')
-                if releases:
-                    return self.api(f"releases/{releases[0]['id']}")
+            if str(exc).strip() == 'release not found':
                 return None
             raise
+        match = re.fullmatch(re.escape(f'https://api.github.com/repos/{self.repo}/releases/') + r'(\d+)', identity['apiUrl'])
+        require(match is not None, 'Unexpected Release API identity')
+        self.release_id = int(match[1])
+        return self.api(f'releases/{self.release_id}')
 
     def create(self, target):
-        notes = self.directory / 'initial-notes.md'
-        notes.write_text(render_notes({}, self.repo), encoding='utf-8')
-        self.command('release', 'create', TAG, '--repo', self.repo, '--target', target,
-                     '--title', TITLE, '--notes-file', str(notes), '--draft', '--prerelease', '--latest=false')
+        payload = self.directory / 'create-release.json'
+        payload.write_text(json.dumps(dict(tag_name=TAG, target_commitish=target, name=TITLE,
+                                          body=render_notes({}, self.repo), draft=True,
+                                          prerelease=True, make_latest='false')), encoding='utf-8')
+        created = self.api('releases', '--method', 'POST', '--input', str(payload))
+        # Use the write response's stable ID immediately, without relying on
+        # eventual consistency of either the tag or release-list indexes.
+        self.release_id = created['id']
 
     def upload(self, path):
-        self.command('release', 'upload', TAG, str(path), '--repo', self.repo)
+        require(self.release_id is not None, 'Release identity is unknown')
+        url = f'https://uploads.github.com/repos/{self.repo}/releases/{self.release_id}/assets?name={quote(path.name)}'
+        self.command('api', url, '--method', 'POST', '--header', 'Content-Type: application/octet-stream', '--input', str(path))
 
     def edit(self, body):
-        notes = self.directory / 'release-notes.md'
-        notes.write_text(body, encoding='utf-8')
-        self.command('release', 'edit', TAG, '--repo', self.repo, '--title', TITLE,
-                     '--notes-file', str(notes), '--draft=false', '--prerelease', '--latest=false')
+        require(self.release_id is not None, 'Release identity is unknown')
+        payload = self.directory / 'edit-release.json'
+        payload.write_text(json.dumps(dict(name=TITLE, body=body, draft=False,
+                                          prerelease=True, make_latest='false')), encoding='utf-8')
+        self.api(f'releases/{self.release_id}', '--method', 'PATCH', '--input', str(payload))
 
     def delete_asset(self, asset):
         self.command('api', f"repos/{self.repo}/releases/assets/{asset['id']}", '--method', 'DELETE')
