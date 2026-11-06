@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tempfile
@@ -10,8 +11,46 @@ SCRIPTS = Path(__file__).resolve().parents[1]
 PWSH = shutil.which('pwsh')
 
 
+def compile_version_executable(root, version, number):
+    runner = SCRIPTS.parent / 'app/windows/runner'
+    gcc, windres = shutil.which('gcc'), shutil.which('windres')
+    if not gcc or not windres:
+        raise AssertionError('The Windows release toolchain requires gcc and windres')
+    major, minor, patch = version.split('.')
+    resource = root / 'version.rc'
+    resource.write_text(
+        f'#define FLUTTER_VERSION "{version}+{number}"\n'
+        f'#define FLUTTER_VERSION_MAJOR {major}\n#define FLUTTER_VERSION_MINOR {minor}\n'
+        f'#define FLUTTER_VERSION_PATCH {patch}\n#define FLUTTER_VERSION_BUILD {number}\n'
+        f'#include "{(runner / "Runner.rc").as_posix()}"\n', encoding='utf-8')
+    source, obj, exe = root / 'main.c', root / 'version.o', root / 'version.exe'
+    source.write_text('int main(void) { return 0; }\n', encoding='utf-8')
+    subprocess.run([windres, '-i', str(resource), '-o', str(obj), '-O', 'coff',
+                    '--target=pe-x86-64'], cwd=runner, check=True, capture_output=True)
+    subprocess.run([gcc, str(source), str(obj), '-o', str(exe)], check=True, capture_output=True)
+    return exe
+
+
 @unittest.skipUnless(PWSH, 'PowerShell is required')
 class ReleaseVersionTests(unittest.TestCase):
+    def test_compiled_pe_public_version_excludes_internal_build(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            exe = compile_version_executable(root, '2.3.4', 42)
+            reader = root / 'read-version.ps1'
+            reader.write_text(
+                'param([string]$Executable)\n'
+                '$v = [Diagnostics.FileVersionInfo]::GetVersionInfo($Executable)\n'
+                '@{ product=$v.ProductVersion; file=$v.FileVersion; '
+                'parts=@($v.FileMajorPart,$v.FileMinorPart,$v.FileBuildPart,$v.FilePrivatePart) } | ConvertTo-Json -Compress\n',
+                encoding='utf-8')
+            result = subprocess.check_output([PWSH, '-NoProfile', '-NonInteractive', '-File', str(reader), str(exe)],
+                                             text=True, encoding='utf-8')
+            actual = json.loads(result)
+            self.assertEqual(actual['product'], '2.3.4')
+            self.assertEqual(actual['file'], '2.3.4')
+            self.assertEqual(actual['parts'], [2, 3, 4, 42])
+
     def test_direct_build_injects_root_version_before_packaging(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -66,7 +105,7 @@ catch { if ($_.Exception.Message -ne 'STOP_AFTER_FLUTTER') { throw } }
             self.assertIn('Version must match root release.json', result.stderr)
             self.assertNotIn('SIGNING_TOUCHED', result.stderr)
 
-    def package(self, version='0.1.0', override=None, build=None):
+    def package(self, version='0.1.0', override=None, build=None, pe_version=None, pe_build=None):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             scripts = root / 'Windows/scripts'
@@ -78,6 +117,13 @@ catch { if ($_.Exception.Message -ne 'STOP_AFTER_FLUTTER') { throw } }
             (root / 'Windows/release.json').write_text('{"version":"9.8.7","buildBase":22}', encoding='utf-8')
             (root / 'Windows/dist').mkdir()
             (root / 'Windows/dist/BlueGrass-Windows-x64-dev.zip').write_bytes(b'archive fixture')
+            if (isinstance(version, str) and re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)', version)
+                    and all(int(part) <= 65535 for part in version.split('.'))
+                    and (override is None or override == version) and 22 <= (build or 22) <= 65535):
+                exe = compile_version_executable(root, pe_version or version, pe_build or build or 22)
+                gui = root / 'Windows/dist/BlueGrass-Windows-x64/runtime/BlueGrass.exe'
+                gui.parent.mkdir(parents=True)
+                shutil.copy2(exe, gui)
             (scripts / 'toolchain.ps1').write_text("function Get-BlueGrassPython { 'python' }", encoding='utf-8')
             (scripts / 'check.ps1').write_text('', encoding='utf-8')
             (scripts / 'build.ps1').write_text('param($Version, $Build)\n@{version=$Version;build=$Build} | ConvertTo-Json | Set-Content -Encoding utf8 "$PSScriptRoot/compiled.json"', encoding='utf-8')
@@ -128,6 +174,15 @@ function git { $global:LASTEXITCODE = 0; if ($args -contains 'rev-parse') { 'aaa
                 self.assertIn('version must be X.X.X', result.stderr)
                 self.assertIsNone(compiled)
                 self.assertIsNone(metadata)
+
+    def test_package_rejects_wrong_pe_version_before_emitting_metadata(self):
+        for version, number in [('0.2.0', 22), ('0.1.0', 23)]:
+            with self.subTest(pe_version=version, pe_build=number):
+                result, metadata, compiled = self.package(pe_version=version, pe_build=number)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('Packaged Windows PE version does not match', result.stderr)
+                self.assertIsNone(metadata)
+                self.assertEqual(compiled, {'version': '0.1.0', 'build': 22})
 
 
 if __name__ == '__main__':

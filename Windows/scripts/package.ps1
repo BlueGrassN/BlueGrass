@@ -18,6 +18,13 @@ foreach ($script in @('verify-release-bundles.py', 'verify-portable-runtime.py')
     if ($LASTEXITCODE -ne 0) { throw "$script failed." }
 }
 
+$guiPath = Join-Path $clientRoot 'dist/BlueGrass-Windows-x64/runtime/BlueGrass.exe'
+$embedded = [Diagnostics.FileVersionInfo]::GetVersionInfo($guiPath)
+$numericVersion = @($embedded.FileMajorPart, $embedded.FileMinorPart, $embedded.FileBuildPart, $embedded.FilePrivatePart) -join '.'
+if ($embedded.ProductVersion -cne $Version -or $embedded.FileVersion -cne $Version -or $numericVersion -cne "$Version.$Build") {
+    throw 'Packaged Windows PE version does not match the public version and internal build.'
+}
+
 # Publish only these explicit files, never the source tree or verification logs.
 $destination = Join-Path $clientRoot 'dist/release'
 if ((Test-Path -LiteralPath $destination) -and
