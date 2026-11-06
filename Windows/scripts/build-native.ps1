@@ -2,8 +2,7 @@ param([string]$ControlApiHost = 'client-api.sunip.vip')
 $ErrorActionPreference = 'Stop'
 if ($ControlApiHost -notmatch '^[a-zA-Z0-9.-]+$' -or $ControlApiHost.Length -gt 253) { throw 'ControlApiHost must be a numeric IPv4 or DNS host name.' }
 $ControlApiHost = $ControlApiHost.ToLowerInvariant()
-$env:Path = $env:Path + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' +
-    [Environment]::GetEnvironmentVariable('Path', 'User')
+. "$PSScriptRoot/environment.ps1"
 $Go = (Get-Command go -ErrorAction Stop).Source
 $clientRoot = Split-Path $PSScriptRoot -Parent
 $output = Join-Path $clientRoot 'native\bin'

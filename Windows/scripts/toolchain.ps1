@@ -1,5 +1,4 @@
-$env:Path = $env:Path + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' +
-    [Environment]::GetEnvironmentVariable('Path', 'User')
+. "$PSScriptRoot/environment.ps1"
 $Flutter = (Get-Command flutter -ErrorAction Stop).Source
 $Dart = (Get-Command dart -ErrorAction Stop).Source
 
