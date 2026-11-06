@@ -28,8 +28,8 @@
 - [x] Run pub outdated in all four roots. Every reported current version equals latest stable, including overrides.
 - [x] Run both app analyzers, full Windows shared Flutter tests, Mac launcher tests, domain/data_source Dart suites and package Python tests. Analysis clean; 437/3/164/179/11 tests passed, respectively.
 - [x] Review the dependency/configuration diff independently; no material findings. Added a CI check after packaging to prove all four resolved lockfiles match the reviewed commit.
-- [ ] Commit/push, follow both macOS CI jobs through package upload, verify logs have no available/newer dependency messages, download and verify both new archives.
-- [ ] Record exact versions, successful run, hashes, artifact links and remaining actual-device acceptance; commit/push documentation and report results.
+- [x] Commit/push, follow both macOS CI jobs through package upload, verify logs have no available/newer dependency messages, download and verify both new archives. Run `42148986910` succeeded for source `7e2221e02f5279724724719c1d03d2ed255dfbb9`; both `0.1.0-dev+10` archives verified.
+- [x] Record exact versions, successful run, hashes, artifact links and remaining actual-device acceptance in [the verification record](../../development/macos-dependency-refresh-20261106.md); deliver the final documentation commit and report results.
 
 ## Evidence and decisions
 
@@ -37,3 +37,4 @@
 - Flutter stable ref and tag 3.47.9 both resolve to `c197ca5199e9ee5661e865596c9c07294dfab51c`.
 - Ruling: two SDK-pinned dependencies need explicit root overrides to satisfy the user's all-latest request. Upstream changelogs show a hue calculation fix and additive test APIs; full tests and dual-architecture CI remain required before acceptance.
 - New implementation tests are unnecessary for a dependency-only refresh; use existing meaningful regression and packaging coverage.
+- Final verification: all local regressions and both CI architectures passed. Neither completed log contains dependency/SDK update notices or Node.js 20 warnings. CI confirmed committed lockfile equality; downloaded package metadata, hashes, architectures and shared assets match. Full user-device networking/interactive authorization acceptance remains separate.

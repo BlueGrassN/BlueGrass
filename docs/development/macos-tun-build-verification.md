@@ -1,5 +1,7 @@
 # macOS administrator TUN build verification — 2026-11-06
 
+The later [dependency refresh](macos-dependency-refresh-20261106.md) provides verified build **0.1.0-dev+10** with Flutter 3.47.9 and current packages. This entry retains the original build+9 implementation evidence.
+
 The user requests a development package with both system proxy and full administrator-authorized TUN before obtaining Apple certificates. UI shares the existing Windows Flutter package. This supersedes the system-proxy-only build recorded in `macos-build-verification.md`.
 
 ## Implementation and development checks

@@ -40,6 +40,17 @@ Upstream [material color changes](https://pub.dev/packages/material_color_utilit
 
 ## GitHub build and replacement artifacts
 
-Independent review found no material issues. CI now checks all four lockfiles after package compilation with `git diff --exit-code`, proving resolution/build did not silently change the committed dependency graph. Dual-architecture execution is pending; previous verified build+9 artifacts remain available until replacement archives are verified.
+Independent review found no material issues. CI checks all four lockfiles after package compilation with `git diff --exit-code`, proving resolution/build did not silently change the committed dependency graph.
+
+Source commit: `7e2221e02f5279724724719c1d03d2ed255dfbb9`. [Build 42148986910](https://github.com/BlueGrassN/BlueGrass/actions/runs/42148986910) successfully produced **0.1.0-dev+10**, requiring macOS 13+. ARM64 job `127667308143` and Intel job `127667307798` both succeeded. Both downloaded archives passed verification.
+
+Neither completed job log has newer/available dependency messages, Flutter SDK update notices or Node.js 20 warnings. On both architectures, all five real utun/PF kernel cases, all three packaged root bootstrap cases, the new lock comparison, Swift/Xcode tests, strict code signing and archive upload passed.
+
+| Architecture | Artifact | Application ZIP | Bytes | SHA-256 |
+| --- | --- | --- | ---: | --- |
+| Apple Silicon / arm64 | [13472135859](https://github.com/BlueGrassN/BlueGrass/actions/runs/42148986910/artifacts/13472135859) | `BlueGrass-macOS-arm64-0.1.0-dev+10.zip` | 36,171,160 | `98afd90554b690913983a87478c4c673eb27f8c957a933c0760b212aa5c13b3b` |
+| Intel / x86_64 | [13471997426](https://github.com/BlueGrassN/BlueGrass/actions/runs/42148986910/artifacts/13471997426) | `BlueGrass-macOS-x86_64-0.1.0-dev+10.zip` | 39,859,192 | `d59bc041d47c19e494b790171a20931884af0d44a41d53ba7c855e9d91086493` |
+
+Downloaded archives are stored under `Mac/dist/downloads-dependency-refresh/<architecture>/`, separately from the previous build+9 packages. Offline verification checks archive SHA-256/CRC, bundle metadata, executable modes, Mach-O architectures/minimum OS/signature load commands, signed worker hash and the hash embedded in the native broker, source revision and canonical shared assets. Build metadata confirms Flutter 3.47.9 and Dart 3.13.7. Actual cryptographic signature checks execute on macOS CI.
 
 The [Mac testing instructions](../../Mac/docs/TESTING.md) still apply: interactive administrator authorization, actual resource networking, global route/DNS takeover and recovery require the user's Mac. Hosted isolated kernel/bootstrap checks do not replace full-device acceptance.
