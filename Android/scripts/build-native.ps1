@@ -21,7 +21,9 @@ foreach ($name in @('Path','JAVA_HOME','ANDROID_HOME','ANDROID_SDK_ROOT','ANDROI
 $stagingDir = $null
 Push-Location $nativeRoot
 try {
-  $go = (Get-Command $GoExecutable -CommandType Application -ErrorAction Stop).Source
+  # Hosted Windows runners retain a preinstalled Go alongside setup-go's pin.
+  # Follow PATH precedence instead of combining every matching executable.
+  $go = (Get-Command $GoExecutable -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
   $env:JAVA_HOME = $JavaHome
   $env:ANDROID_HOME = $AndroidSdk
   $env:ANDROID_SDK_ROOT = $AndroidSdk
