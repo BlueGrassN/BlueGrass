@@ -39,6 +39,9 @@ $hash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvar
     bytes = (Get-Item -LiteralPath $archive).Length; signed = $false
 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $destination 'build-info.json') -Encoding utf8
 $manifestHash = (Get-FileHash -LiteralPath (Join-Path $destination 'build-info.json') -Algorithm SHA256).Hash.ToLowerInvariant()
-@("$hash  BlueGrass-Windows-x64.zip", "$manifestHash  build-info.json") |
-    Set-Content -LiteralPath (Join-Path $destination 'SHA256SUMS.txt') -Encoding ascii
+# The publisher runs GNU sha256sum on Linux: use LF without a BOM so CR is not
+# interpreted as part of each filename.
+[IO.File]::WriteAllText((Join-Path $destination 'SHA256SUMS.txt'),
+    "$hash  BlueGrass-Windows-x64.zip`n$manifestHash  build-info.json`n",
+    [Text.UTF8Encoding]::new($false))
 Write-Host "Verified Windows package: $destination"
