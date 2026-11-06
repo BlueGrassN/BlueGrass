@@ -28,7 +28,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FLUTTER_VERSION: '3.47.7'
+  FLUTTER_VERSION: '3.47.9'
   GO_VERSION: '1.27.2'
 
 jobs:
@@ -104,6 +104,11 @@ jobs:
         env:
           BLUEGRASS_BUILD_NUMBER: ${{ github.run_number }}
         run: python3 Mac/tools/build.py --arch '${{ matrix.arch }}' --build-number "$BLUEGRASS_BUILD_NUMBER"
+      - name: Verify resolved dependency lockfiles
+        run: |
+          git diff --exit-code -- \
+            Windows/app/pubspec.lock Mac/app/pubspec.lock \
+            Windows/packages/domain/pubspec.lock Windows/packages/data_source/pubspec.lock
       - name: Test final packaged root bootstrap without connecting
         working-directory: Windows/native/core
         env:
