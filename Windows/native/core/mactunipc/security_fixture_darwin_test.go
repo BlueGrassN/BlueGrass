@@ -9,7 +9,6 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 
 	"golang.org/x/sys/unix"
@@ -122,8 +121,10 @@ func smokeACLFixture(owner Identity) (retErr error) {
 	if checkRootDirectory(dir) != nil || validate("rootdir", dir) != nil || validate("rootfile", file) != nil {
 		return errors.New("clean root-owned fixture rejected")
 	}
-	uid := strconv.FormatUint(uint64(owner.UID), 10)
-	if _, err = smokeCommand("/bin/chmod", "+a", "user:"+uid+" allow add_file,delete_child,writeattr,writesecurity", dir); err != nil {
+	// chmod ACL principals are names/UUIDs, not numeric POSIX UIDs. The
+	// well-known everyone principal exercises an unsafe grant on either runner
+	// architecture without relying on directory-service name resolution.
+	if _, err = smokeCommand("/bin/chmod", "+a", "everyone allow write", dir); err != nil {
 		return err
 	}
 	var st unix.Stat_t
@@ -140,7 +141,7 @@ func smokeACLFixture(owner Identity) (retErr error) {
 	if _, err = smokeCommand("/bin/chmod", "-N", dir); err != nil {
 		return err
 	}
-	if _, err = smokeCommand("/bin/chmod", "+a", "user:"+uid+" allow write,append,writeattr,writesecurity,delete", file); err != nil {
+	if _, err = smokeCommand("/bin/chmod", "+a", "everyone allow write", file); err != nil {
 		return err
 	}
 	if unix.Lstat(file, &st) != nil || st.Uid != 0 || st.Mode&0777 != 0755 {
