@@ -8,6 +8,8 @@
 
 系统内部构建号独立递增：Windows 为 `Windows/release.json` 的 `buildBase + github.run_number`；Android 为 `100000 + github.run_number`；Mac 为 `github.run_number`。这些值用于系统升级、验证与追溯，不拼入公开版本。保留原有工作流名称、编号、签名和应用身份。
 
+Windows PE 文件属性的公开字符串同样只使用 X.X.X，系统数字型四段版本保留内部 build。本次实际包内版本与附件验证见 [统一版本验证记录](unified-version-verification-20261106.md)。
+
 公开附件示例为 `BlueGrass-Windows-0.1.0-x64.zip`、`BlueGrass-Android-0.1.0-arm64.apk`、`BlueGrass-macOS-0.1.0-arm64.zip`。不添加 beta、dev、+build 或 attempt。校验文件和元数据使用同一平台与版本前缀；真实构建号、commit、run、attempt 保留在元数据或来源链接中。
 
 一个已经完整发布的版本不可覆盖。相同版本的重跑保持现有安装包；需要发布修复或新代码时先递增公共版本，再推送 main，触发三端重建。发布器拒绝共同版本回退，且不会用更旧的工作流运行替换新产物。

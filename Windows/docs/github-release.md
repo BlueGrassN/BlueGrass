@@ -47,6 +47,8 @@ $env:BLUEGRASS_PYTHON = '你的 CPython python.exe 完整路径'
 
 云端构建号为 `buildBase + github.run_number`，客户端版本和构建号保持独立；构建号不能超过 65535，也不能重置工作流编号后倒退。
 
+启动器和客户端 PE 的 ProductVersion/FileVersion 字符串必须等于根配置的 X.X.X；数字型四段版本仍包含内部构建号。打包脚本在输出发行元数据前核对实际 EXE，避免 Flutter 将 `+build` 拼入公开文件属性。
+
 成功构建由 publish-preview.yml 汇总到固定 preview；三端公开版本统一读取根配置。全部平台（Mac 含双架构）成功并验证来源、内部构建号和哈希后，先上传完整新附件，再整体更新页面，最后清理上一版本附件。任一平台缺失或验证失败均保留上一整组下载。Windows sourceDirty 标记如实保留。
 
 构建 job 保持 `contents: read`；统一发布 job 才拥有 `contents: write`，使用 Actions 自动提供的令牌，不需要个人令牌或测试账号。并发、重跑及中断恢复见 [统一发布手册](../../docs/development/github-releases.md)。
