@@ -4,7 +4,15 @@ $RequiredPayload = @('BlueGrass.exe') + $NativePayload + @('flutter_windows.dll'
 $RoutingDataPayload = @(
     'geoip-cn-v4.dat', 'geosite-cn-foreign.dat', 'metadata.json', 'NOTICE.md',
     'licenses\LICENSE-DB-IP-CC-BY-4.0.txt', 'licenses\LICENSE-geoip-CC-BY-SA-4.0.txt',
-    'licenses\LICENSE-geosite-MIT.txt', 'licenses\LICENSE-Xray-MPL-2.0.txt'
+    'licenses\LICENSE-geosite-MIT.txt', 'licenses\LICENSE-Xray-MPL-2.0.txt',
+    'licenses\LICENSE-Loyalsoldier-v2ray-rules-dat-GPL-3.0.txt',
+    'licenses\LICENSE-Loyalsoldier-domain-list-custom-MIT.txt',
+    'licenses\LICENSE-dnsmasq-china-list-WTFPL-2.0.txt',
+    'licenses\LICENSE-GFWList-LGPL-2.1.txt',
+    'licenses\LICENSE-gfwlist2dnsmasq-GPL-3.0.txt',
+    'licenses\LICENSE-Loyalsoldier-geoip-CC-BY-SA-4.0.txt',
+    'licenses\LICENSE-Loyalsoldier-geoip-GPL-3.0.txt',
+    'licenses\LICENSE-china-operator-ip-MIT.txt'
 )
 $RequiredPayload += $RoutingDataPayload | ForEach-Object { 'data\routing-policy\' + $_ }
 $OptionalPayload = @(

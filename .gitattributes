@@ -1,2 +1,8 @@
 # Preserve SVG bytes so branding manifests stay valid on every platform.
 *.svg -text whitespace=trailing-space,space-before-tab,cr-at-eol
+
+# Routing metadata verifies these upstream files by SHA256. Preserve bytes on
+# Windows too, including fresh clones with core.autocrlf=true.
+Windows/native/core/routingpolicy/assets/licenses/*.txt -text
+# Wintun's signed-binary distribution license is also pinned to vendor bytes.
+Windows/app/assets/LICENSE.wintun -text whitespace=trailing-space,space-before-tab,cr-at-eol

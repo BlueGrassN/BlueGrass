@@ -6,6 +6,8 @@
 
 Windows 主入口是 `Windows/scripts/package.ps1`。本地与 GitHub 都运行这个脚本，依次执行业务包/Flutter 分析及测试、Go 竞态测试与 vet、契约检查、原生与 Flutter 构建、解压文件校验、便携助手测试。真实账号联网、TUN/WFP 接管及签名安装不属于 CI 检查。
 
+`.gitattributes` 对已锁定哈希的路由许可证和 Wintun 许可证禁用换行转换；不能用重新计算哈希的方式掩盖 checkout 改字节的问题。打包清单同时覆盖当前 Loyalsoldier 数据的上游许可证。
+
 ## 本地生成测试客户端
 
 安装 `Windows/toolchain.json` 指定的 Flutter、Go，以及 Visual Studio 2022 C++ 桌面开发工具和 Windows SDK。PATH 需能找到 `gcc`、`windres`；本机原有 MSYS2 UCRT64 路径可作为后备。CPython 不可使用 MSYS Python。
