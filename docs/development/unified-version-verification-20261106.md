@@ -4,7 +4,7 @@
 
 ## 清理与发布结果
 
-按用户要求删除了 4 个非 preview Release 及其 15 个附件。独立查询 GitHub Release API，确认仅剩 [preview](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)。Git 源码标签未纳入产物清理，README 仍不在 Git 跟踪范围内。
+按用户要求删除了 4 个非 preview Release 及其 15 个附件。独立查询 GitHub Release API，确认仅剩 [preview](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)。最初仅移除 Release 和附件，后续补充清理了 4 个对应的 Git 发布标签；再次查询远端与本地标签，均仅剩 preview，并核对 preview 标签指向、说明及 12 个附件未变。README 仍不在 Git 跟踪范围内。
 
 [统一发布运行 42202651000](https://github.com/BlueGrassN/BlueGrass/actions/runs/42202651000) 的测试与发布均成功。页面所有平台均显示 0.1.0，12 个附件的文件名不含 beta、dev、+build 或 attempt；没有未完成 pendingRelease、待清理附件或额外附件。逐个比对 GitHub 摘要、大小以及实际下载字节的 SHA256，全部一致。
 

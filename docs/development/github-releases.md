@@ -32,7 +32,7 @@ Windows PE 文件属性的公开字符串同样只使用 X.X.X，系统数字型
 
 版本统一不改变实际来源。各端页面仍分别提供 commit 和 run 链接；固定 preview tag 的 Source code 压缩包不代表所有安装包源码。Windows 构建后的 sourceDirty 标记如实保留。Windows 未签名、Android 既有 Alpha 签名、macOS ad hoc/未公证状态保持原事实，设备 VPN/TUN、真实账号联网和权限恢复仍按平台手册验收。
 
-2026-11-06 按用户要求删除了 4 个非 preview Release 及其 15 个附件。发行页面只保留 preview；不再生成平台 Release/tag。Git 源码标签未纳入此次产物清理。README 仅在本地维护，不上传到仓库或 Release。
+2026-11-06 按用户要求删除了 4 个非 preview Release 及其 15 个附件。相应的 4 个旧 Git 发布标签也已清理，远端 Release 和 Tags 均只保留 preview；不再生成或恢复平台 Release/tag。README 仅在本地维护，不上传到仓库或 Release。
 
 ## 维护与验证
 

@@ -21,7 +21,7 @@
 
 - 用户选择固定一个 Release 集中所有平台最新安装包。唯一自动发布入口是 `preview`，标题 `BlueGrass 开发预览版`。
 - 先读 [统一发布手册](docs/development/github-releases.md)。平台工作流只构建和上传 artifact，只有 `.github/workflows/publish-preview.yml` / `scripts/publish_preview.py` 更新 Release。
-- 不再为任何平台生成独立发布 tag。用户已要求仅保留 preview 的发行产物；非 preview Release/附件已清理，Git 源码标签不在本次清理范围。
+- 不再为任何平台生成独立发布 tag。Release 和 Git 发布标签均仅保留 preview；非 preview Release、附件及旧平台标签已清理，不得重新推送旧标签。
 - 发布器必须只接受本仓库 main 的成功 push/manual 运行，拒绝 PR/fork/非主分支产物；下载的 artifact 只能作为数据，不得执行。
 - 获取 main 运行列表后自行核验 completed/success，不能依赖 GitHub 的 status=success 筛选索引；该索引可能遗漏刚完成的成功运行。以 Release 逐端来源和附件哈希确认实际更新。
 - 每次串行汇总全部平台，目标版本须三端全部成功后整体发布；任何单端缺失或失败均保留上一整组下载。macOS 两架构必须同一成功运行，不能出现混合公开版本或旧运行回退。
