@@ -4,6 +4,7 @@
 
 - `Windows/`、`Android/`、`Mac/`、`iOS/`、`HarmonyOS/` 为平台宿主目录；公共实现位于根 `packages/domain`、`packages/data_source`、`packages/client`、`core` 与 `contracts`。
 - `client-api/` 是独立服务端，`client-config/` 是共享公开配置，`assets/branding/` 保存原始图片，`docs/development/` 保存开发手册。
+- 各级目录的 README 文件仅在本地维护，不纳入 Git，也不能用强制添加绕过忽略规则；已有跟踪文件只解除跟踪，保留本地内容。
 - 开始前检查 Git 状态和最新远端。保留已有未提交工作；跨任务共享目录时核对具体文件，必要时使用隔离工作区。
 - 原始品牌图片及锁定哈希的上游文件必须保持字节不变，遵守 `.gitattributes`；不要通过重算哈希掩盖换行转换或意外修改。
 
@@ -33,5 +34,5 @@
 
 - 修改统一发布代码后执行 `python -m unittest discover -s scripts/tests -v`；对工作流运行 actionlint。发布器变化应补充能验证合并、回退防护、来源/哈希拒绝或失败恢复的行为测试。
 - 推送前运行 `python scripts/publish_preview.py --repo BlueGrassN/BlueGrass --dry-run` 核对真实 artifact；网络/过期限制必须如实报告。
-- 发布行为变化须同步根 README、共享发布手册、相应平台 `docs/github-release.md` / `Mac/docs/TESTING.md`、`docs/development/` 平台入口及本文件。
+- 发布行为变化须同步根 README（仅本地维护）、共享发布手册、相应平台 `docs/github-release.md` / `Mac/docs/TESTING.md`、`docs/development/` 平台入口及本文件。
 - 构建入口和既有测试要求见各端开发手册。仅修改发布流程时执行相应发布测试和工作流检查，不以此声称已重新验证所有客户端运行时行为。

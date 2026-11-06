@@ -15,3 +15,6 @@
 .env.*
 !.env.example
 /testaccount.txt
+
+# README files are local documentation and must not be uploaded.
+[Rr][Ee][Aa][Dd][Mm][Ee]*
