@@ -46,3 +46,5 @@ Windows/macOS 工作流的路径过滤包含根 `packages/**`、`core/**`、`con
 产物目录、平台版本号、Android 签名及固定 [preview Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview) 维持原发布契约。详见[统一发布手册](github-releases.md)。仅移动目录不会重置构建号，也不会新增平台 tag。
 
 原始品牌、许可证和路由数据仍按哈希固定；目录迁移不能重算预期哈希来掩盖字节变化。旧日期的验证记录描述当时工程状态，不能替代迁移后的回归与构建记录。
+
+本次迁移的测试、构建与验收边界见 [2026-11-06 验证记录](shared-client-verification-20261106.md)。

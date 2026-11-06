@@ -505,9 +505,22 @@ func TestExpiryTimerRunsWithoutUI(t *testing.T) {
 	apply(t, c, r)
 	success(nextProbe(t, f))
 	waitState(t, c, "connected")
-	s := waitState(t, c, "paused")
-	if !s.Expired || s.BusinessGateOpen || !s.ProtectionIntent {
-		t.Fatal("timer did not enforce expiry")
+	// The timer publishes paused before acquiring engineMu to close the gate.
+	// Wait for the complete expiry result, not that intermediate snapshot.
+	deadline := time.Now().Add(2 * time.Second)
+	for {
+		s := c.Snapshot()
+		if s.Connection == "paused" && s.Expired && s.GateKnown && !s.BusinessGateOpen && s.ProtectionIntent {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("timer did not enforce expiry: connection=%s expired=%v gateKnown=%v gateOpen=%v intent=%v", s.Connection, s.Expired, s.GateKnown, s.BusinessGateOpen, s.ProtectionIntent)
+		}
+		time.Sleep(time.Millisecond)
+	}
+	history := f.history()
+	if len(history) < 2 || !reflect.DeepEqual(history[len(history)-2:], []string{"close", "stop"}) {
+		t.Fatalf("timer did not close and stop engine: %v", history)
 	}
 }
 func TestFailuresAreSanitizedAndDoNotClaimProtection(t *testing.T) {
