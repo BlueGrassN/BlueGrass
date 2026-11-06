@@ -13,7 +13,7 @@
 | `docs/` | 设计、开发和验收记录 |
 | `.github/workflows/` | Android 发布及原有 macOS 构建 |
 
-必须 checkout **完整仓库**。`Android/pubspec.yaml` 引用 `../Windows/packages/`，`Android/native/core/go.mod` 引用 `../../../Windows/native/core`。AAR、APK、local.properties、Gradle wrapper 和密钥不依赖提交：Flutter 会补齐 wrapper，脚本会从 Go 源码重建 AAR。
+必须 checkout **完整仓库**。`Android/pubspec.yaml` 引用根 `packages/client`、`packages/domain` 和 `packages/data_source`，`Android/native/core/go.mod` 引用 `../../../core`。AAR、APK、local.properties、Gradle wrapper 和密钥不依赖提交：Flutter 会补齐 wrapper，脚本会从 Go 源码重建 AAR。
 
 ## 本地一键生成测试客户端
 
@@ -23,7 +23,7 @@
 ./Android/scripts/build-release.ps1
 ```
 
-依赖：Flutter **3.47.7**、Go **1.27.2**、JDK **17**、Python 3；SDK platform/build-tools **36 / 36.0.0**、NDK **28.2.13676358**。Flutter、Go、Python 在 PATH 中，`JAVA_HOME` 与 `ANDROID_HOME` 指向工具目录；也可传 `-JavaHome`、`-AndroidSdk`、`-FlutterExecutable`、`-GoExecutable`、`-PythonExecutable`。
+依赖：Flutter **3.47.9**、Go **1.27.2**、JDK **17**、Python 3；SDK platform/build-tools **36 / 36.0.0**、NDK **28.2.13676358**。Flutter、Go、Python 在 PATH 中，`JAVA_HOME` 与 `ANDROID_HOME` 指向工具目录；也可传 `-JavaHome`、`-AndroidSdk`、`-FlutterExecutable`、`-GoExecutable`、`-PythonExecutable`。
 
 脚本先清理 Flutter 旧产物，按锁文件恢复依赖，执行 Flutter analyze/test、Go 测试/vet，再重建原生库和 ARM64 Release APK。Go 使用只读模块解析，下载依赖保留正常的 go.sum 校验；CI 另检查依赖锁未变化。不会打开 Android Studio 或模拟器。设备 VPN 转发验收仍使用原有单独的测试脚本。
 

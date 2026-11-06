@@ -3,6 +3,7 @@ $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $false
 . "$PSScriptRoot\toolchain.ps1"
 $clientRoot = Split-Path $PSScriptRoot -Parent
+$repoRoot = Split-Path $clientRoot -Parent
 $flutterBin = Split-Path $Flutter -Parent
 $dartExe = Join-Path $flutterBin 'cache\dart-sdk\bin\dart.exe'
 $flutterSnapshot = Join-Path $flutterBin 'cache\flutter_tools.snapshot'
@@ -14,7 +15,8 @@ $experiment = Join-Path $clientRoot ('.artifacts\ablation\production-api-' +
 New-Item -ItemType Directory -Path $experiment | Out-Null
 & git -C $clientRoot check-ignore --quiet -- $experiment
 if ($LASTEXITCODE -ne 0) { throw 'Experiment directory must be ignored by Git.' }
-$app = Join-Path $experiment 'app'
+$app = Join-Path $experiment 'Windows\app'
+$sharedClient = Join-Path $experiment 'packages\client'
 $dataSource = Join-Path $experiment 'packages\data_source'
 $utf8 = [Text.UTF8Encoding]::new($false)
 $manifest = [Collections.Generic.List[object]]::new()
@@ -29,7 +31,7 @@ function Write-JsonFile($Value, [string]$Path) {
 
 function Copy-Snapshot([string]$RelativeRoot, [string[]]$Names) {
     foreach ($name in $Names) {
-        $source = Join-Path $clientRoot "$RelativeRoot\$name"
+        $source = Join-Path $repoRoot "$RelativeRoot\$name"
         if (!(Test-Path -LiteralPath $source)) {
             if ($name -eq 'pubspec.lock') { continue }
             throw "Required snapshot input missing: $source"
@@ -38,7 +40,7 @@ function Copy-Snapshot([string]$RelativeRoot, [string[]]$Names) {
             @(Get-ChildItem -LiteralPath $source -File -Recurse)
         } else { @(Get-Item -LiteralPath $source) }
         foreach ($file in $files) {
-            $relative = [IO.Path]::GetRelativePath($clientRoot, $file.FullName)
+            $relative = [IO.Path]::GetRelativePath($repoRoot, $file.FullName)
             $destination = Join-Path $experiment $relative
             $before = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
             New-Item -ItemType Directory -Force -Path (Split-Path $destination -Parent) | Out-Null
@@ -116,10 +118,12 @@ function Invoke-Case($Variant, [string]$Phase) {
 }
 
 try {
-    Copy-Snapshot 'app' @('lib', 'test', 'assets', 'pubspec.yaml', 'pubspec.lock')
+    Copy-Snapshot 'contracts' @('fixtures')
+    Copy-Snapshot 'Windows\app' @('lib', 'test', 'assets', 'pubspec.yaml', 'pubspec.lock')
     foreach ($package in @('domain', 'data_source')) {
         Copy-Snapshot "packages\$package" @('lib', 'test', 'pubspec.yaml', 'pubspec.lock')
     }
+    Copy-Snapshot 'packages\client' @('lib', 'pubspec.yaml', 'pubspec.lock')
     Write-JsonFile $manifest (Join-Path $experiment 'shared-hashes.json')
     foreach ($setup in @(
         @{ root=$dataSource; args=@('--suppress-analytics', 'pub', 'get', '--offline'); name='data-source-dependencies' },
@@ -129,12 +133,12 @@ try {
         if ($run.exitCode -ne 0) { throw "Offline dependency setup failed: $($run.log)" }
     }
     $domain = Join-Path $experiment 'packages\domain'
-    Assert-IsolatedPackages $app @{bluegrass_client=$app; bluegrass_domain=$domain; bluegrass_data_source=$dataSource}
+    Assert-IsolatedPackages $app @{bluegrass_windows=$app; bluegrass_client=$sharedClient; bluegrass_domain=$domain; bluegrass_data_source=$dataSource}
     Assert-IsolatedPackages $dataSource @{bluegrass_domain=$domain; bluegrass_data_source=$dataSource}
     $variants = @(
         @{
             name='remove-control-uri-host-pin'; runner='flutter'; root=$app
-            target='app\lib\control_http_transport.dart'; testFile='test/control_http_transport_test.dart'
+            target='packages\client\lib\control_http_transport.dart'; testFile='test/control_http_transport_test.dart'
             testName='retired API origin is rejected in both network modes'; expectedError='insecure_endpoint'
             patterns=@("(?m)^        uri\.host != _baseUri\.host \|\|\r?\n")
         },
@@ -186,7 +190,7 @@ try {
 } finally {
     $changed = @()
     foreach ($entry in $manifest) {
-        $source = Join-Path $clientRoot $entry.path
+        $source = Join-Path $repoRoot $entry.path
         $entry.after = if (Test-Path -LiteralPath $source) {
             (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
         } else { 'MISSING' }
@@ -198,7 +202,7 @@ try {
     Write-JsonFile ([ordered]@{
         completed=($completed -and $changed.Count -eq 0); failure=$failure
         experiment=$experiment; sharedFilesChecked=$manifest.Count; changedSharedFiles=$changed
-        dependencyMode='offline'; packageResolution='isolated app/domain/data_source'
+        dependencyMode='offline'; packageResolution='isolated windows/client/domain/data_source'
         cases=$results
     }) (Join-Path $experiment 'results.json')
     if ($changed.Count -ne 0) { throw 'Shared snapshot inputs changed; evidence must be refreshed. See shared-hashes.json.' }

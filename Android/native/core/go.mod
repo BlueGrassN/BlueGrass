@@ -55,4 +55,4 @@ require (
 	lukechampine.com/blake3 v1.4.1 // indirect
 )
 
-replace bluegrass/native/core => ../../../Windows/native/core
+replace bluegrass/native/core => ../../../core

@@ -6,7 +6,7 @@
 
 **Goal:** 将现有 Android 模板变成可安装的账号与资源客户端，连接正式 API，交付登录、会话恢复、分页资源、选择、首页和主题设置。
 
-**Architecture:** Android Flutter UI 使用现有 `Windows/packages/domain` 与 `Windows/packages/data_source` 的纯 Dart 公共边界（暂不移动 Windows 文件）；Android Keystore/AES-GCM 持久化会话，平台通道保存设备 UUID 和主题。仅会话持久化，密码及节点凭据不落盘。当前批次不注册空 VPN 服务或模拟已连接。
+**Architecture:** Android Flutter UI 使用现有 `packages/domain` 与 `packages/data_source` 的纯 Dart 公共边界（暂不移动 Windows 文件）；Android Keystore/AES-GCM 持久化会话，平台通道保存设备 UUID 和主题。仅会话持久化，密码及节点凭据不落盘。当前批次不注册空 VPN 服务或模拟已连接。
 
 **Tech Stack:** Flutter 3.47.7 / Dart 3.13.5；Kotlin；Android API 26+。
 

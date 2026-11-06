@@ -168,7 +168,7 @@ forwarded. Existing host command errors retain their existing wire schema.
 
 ## Validation
 
-From `Windows/native/core`:
+From `core`:
 
 ```sh
 go test ./mactunipc
@@ -198,7 +198,7 @@ or accepts additional worker options.
 The lead must first build/sign the worker and build the broker with its hash.
 Place byte-for-byte copies in a separate temporary fixture directory, with the
 compiled test executable beside them. Do not add a test executable to an already
-signed application bundle. From `Windows/native/core`, use:
+signed application bundle. From `core`, use:
 
 ```sh
 fixture_dir="$(/usr/bin/mktemp -d "${RUNNER_TEMP:?}/bluegrass-bootstrap.XXXXXXXX")"

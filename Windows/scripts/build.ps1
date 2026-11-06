@@ -24,6 +24,7 @@ if ($WebsiteUrl) {
     }
 }
 $clientRoot = Split-Path $PSScriptRoot -Parent
+$repoRoot = Split-Path $clientRoot -Parent
 Push-Location (Join-Path $clientRoot 'app')
 try {
     & $Flutter pub get
@@ -57,7 +58,7 @@ try {
     foreach ($relative in $RoutingDataPayload) {
         $destination = Join-Path $bundle ('data\routing-policy\' + $relative)
         New-Item -ItemType Directory -Path (Split-Path $destination -Parent) -Force | Out-Null
-        Copy-Item -LiteralPath (Join-Path $clientRoot ('native\core\routingpolicy\assets\' + $relative)) -Destination $destination -Force
+        Copy-Item -LiteralPath (Join-Path $repoRoot ('core\routingpolicy\assets\' + $relative)) -Destination $destination -Force
     }
     $portable = & "$PSScriptRoot\stage-portable.ps1" -Bundle $bundle
     $dist = Join-Path $clientRoot 'dist'

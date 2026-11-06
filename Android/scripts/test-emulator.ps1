@@ -1,7 +1,7 @@
 param(
     [string]$Device = 'emulator-5554',
     [string]$AndroidSdk = 'E:\AndroidTools\sdk',
-    [string]$Flutter = 'E:\tools\flutter\bin\flutter.bat'
+    [string]$Flutter = 'E:\tools\flutter-3.47.9\bin\flutter.bat'
 )
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))

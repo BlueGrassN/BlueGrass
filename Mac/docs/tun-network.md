@@ -1,6 +1,6 @@
 # Privileged macOS TUN network ownership
 
-`Windows/native/core/mactun` composes the pinned Xray `tunengine` with the root-owned macOS PF, route and resolver transaction. This is the password-authorized development backend. It requires no Apple certificate and is not a Network Extension. Authorization, installed-worker verification, private IPC, nativehost dispatch, Dart HTTPS and packaging remain separate components.
+`core/mactun` composes the pinned Xray `tunengine` with the root-owned macOS PF, route and resolver transaction. This is the password-authorized development backend. It requires no Apple certificate and is not a Network Extension. Authorization, installed-worker verification, private IPC, nativehost dispatch, Dart HTTPS and packaging remain separate components.
 
 ## Composition contract
 
@@ -74,7 +74,7 @@ System commands use fixed absolute tools, argument arrays, fixed locale/PATH and
 
 ## Verification
 
-From `Windows/native/core`:
+From `core`:
 
 ```text
 go test ./mactun

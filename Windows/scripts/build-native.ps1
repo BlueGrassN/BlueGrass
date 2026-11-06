@@ -5,9 +5,10 @@ $ControlApiHost = $ControlApiHost.ToLowerInvariant()
 . "$PSScriptRoot/environment.ps1"
 $Go = (Get-Command go -ErrorAction Stop).Source
 $clientRoot = Split-Path $PSScriptRoot -Parent
+$repoRoot = Split-Path $clientRoot -Parent
 $output = Join-Path $clientRoot 'native\bin'
 New-Item -ItemType Directory -Force -Path $output | Out-Null
-Push-Location (Join-Path $clientRoot 'native\core')
+Push-Location (Join-Path $repoRoot 'core')
 $priorCgo = $env:CGO_ENABLED
 $priorGoos = $env:GOOS
 $priorGoarch = $env:GOARCH

@@ -9,7 +9,7 @@ function Get-BlueGrassPython {
         } | Select-Object -First 1).Source
     }
     if (!$executable -or !(Test-Path -LiteralPath $executable)) {
-        throw 'Set BLUEGRASS_PYTHON to a CPython executable with contracts/requirements-test.txt installed.'
+        throw 'Set BLUEGRASS_PYTHON to a CPython executable with repository-root contracts/requirements-test.txt installed.'
     }
     return $executable
 }

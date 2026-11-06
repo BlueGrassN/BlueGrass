@@ -7,17 +7,17 @@ on:
     paths:
       - 'Mac/**'
       - 'Windows/app/**'
-      - 'Windows/packages/**'
-      - 'Windows/contracts/**'
-      - 'Windows/native/core/**'
+      - 'packages/**'
+      - 'contracts/**'
+      - 'core/**'
       - '.github/workflows/macos-dev.yml'
   pull_request:
     paths:
       - 'Mac/**'
       - 'Windows/app/**'
-      - 'Windows/packages/**'
-      - 'Windows/contracts/**'
-      - 'Windows/native/core/**'
+      - 'packages/**'
+      - 'contracts/**'
+      - 'core/**'
       - '.github/workflows/macos-dev.yml'
 
 permissions:
@@ -51,7 +51,7 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0, node24
         with:
           go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: Windows/native/core/go.sum
+          cache-dependency-path: core/go.sum
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -61,16 +61,19 @@ jobs:
         run: |
           python3 Mac/tools/sync_assets.py
           go run Windows/app/test/fixtures/control-tls/generate.go -out Windows/app/test/fixtures/control-tls
+          (cd packages/client && flutter pub get)
           (cd Windows/app && flutter pub get)
           (cd Mac/app && flutter pub get)
       - name: Analyze shared and Mac applications
         run: |
+          (cd packages/client && flutter analyze)
           (cd Windows/app && flutter analyze)
           (cd Mac/app && flutter analyze)
       - name: Test shared business rules and Mac UI
         run: |
-          (cd Windows/packages/domain && dart pub get && dart test)
-          (cd Windows/packages/data_source && dart pub get && dart test)
+          (cd packages/client && flutter test)
+          (cd packages/domain && dart pub get && dart test)
+          (cd packages/data_source && dart pub get && dart test)
           (cd Windows/app && flutter test test/macos_platform_test.dart test/macos_admin_tun_test.dart test/macos_control_http_transport_test.dart test/control_http_transport_test.dart test/control_http_build_origin_test.dart test/protected_login_ui_test.dart)
           (cd Mac/app && flutter test)
           python3 -m unittest discover -s Mac/tools/tests -v
@@ -78,13 +81,13 @@ jobs:
         # Collect independent platform failures in the same run. Packaging
         # still requires every preceding validation to succeed.
         if: ${{ !cancelled() }}
-        working-directory: Windows/native/core
+        working-directory: core
         run: |
           go test -count=1 ./nativehost ./macproxy ./localengine ./protocolconfig ./routingpolicy ./control ./entrydns ./diagnostics ./mactun ./mactunipc ./tunengine
           go test -race -count=1 ./mactunipc
       - name: Test private utun packet flow and isolated PF ownership
         if: ${{ !cancelled() }}
-        working-directory: Windows/native/core
+        working-directory: core
         run: |
           set -eu
           kernel_dir="$(/usr/bin/mktemp -d "${RUNNER_TEMP:?}/bluegrass-kernel.XXXXXXXX")"
@@ -107,10 +110,10 @@ jobs:
       - name: Verify resolved dependency lockfiles
         run: |
           git diff --exit-code -- \
-            Windows/app/pubspec.lock Mac/app/pubspec.lock \
-            Windows/packages/domain/pubspec.lock Windows/packages/data_source/pubspec.lock
+            Windows/app/pubspec.lock Mac/app/pubspec.lock packages/client/pubspec.lock \
+            packages/domain/pubspec.lock packages/data_source/pubspec.lock
       - name: Test final packaged root bootstrap without connecting
-        working-directory: Windows/native/core
+        working-directory: core
         env:
           BLUEGRASS_PACKAGE_ARCH: ${{ matrix.arch }}
         run: |

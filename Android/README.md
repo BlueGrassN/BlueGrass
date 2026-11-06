@@ -1,5 +1,7 @@
 # BlueGrass Android
 
+2026-11-06 共享架构：平台工程使用根 `packages/client`，公共业务包、Go/Xray 与契约分别位于 `packages/`、`core/`、`contracts/`；新公共功能只维护一份实现。迁移后的开发和验证要求见 [共享客户端架构](../docs/development/shared-client-architecture.md)。
+
 下载统一使用 [开发预览版 Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)，各端安装包集中展示并独立更新；规则见 [共享发布手册](../docs/development/github-releases.md)。
 
 Android 8.0（API 26）及以上的 Flutter 客户端，应用标识 `com.bluegrass.client`，当前安装包仅支持 ARM64（arm64-v8a）设备。
@@ -60,7 +62,7 @@ $env:JAVA_HOME = 'D:\Android\Android Studio\jbr'
 & E:\tools\flutter\bin\flutter.bat build apk --release --target-platform android-arm64
 ```
 
-[原生构建说明](native/README.md)记录锁定版本、AAR 路径、Go 测试和模块依赖。Android 工程依赖仓库内 `Windows/packages/domain`、`Windows/packages/data_source` 和 `Windows/native/core` 的公共代码，不能只复制 Android 文件夹后直接构建。
+[原生构建说明](native/README.md)记录锁定版本、AAR 路径、Go 测试和模块依赖。Android 工程依赖仓库内 `packages/domain`、`packages/data_source` 和 `core` 的公共代码，不能只复制 Android 文件夹后直接构建。
 
 ## 迁移后必须保留并复验的行为
 

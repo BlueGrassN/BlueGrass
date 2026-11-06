@@ -12,21 +12,21 @@ packages:
   bluegrass_client:
     dependency: "direct main"
     description:
-      path: "../../Windows/app"
+      path: "../../packages/client"
       relative: true
     source: path
     version: "0.1.0+1"
   bluegrass_data_source:
     dependency: transitive
     description:
-      path: "../../Windows/packages/data_source"
+      path: "../../packages/data_source"
       relative: true
     source: path
     version: "0.1.0"
   bluegrass_domain:
     dependency: transitive
     description:
-      path: "../../Windows/packages/domain"
+      path: "../../packages/domain"
       relative: true
     source: path
     version: "0.1.0"

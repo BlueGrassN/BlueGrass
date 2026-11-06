@@ -18,7 +18,7 @@
 
 2026-10-15：界面重做为白色主色、青蓝强调、细线分区与 4px 小圆角。登录、首页、我的 IP、设置、诊断、关于和弹窗统一样式。旧版源码和可运行包已独立保存；备份位置、恢复办法与验证说明见 [白色界面更新](docs/white-ui-redesign.md)。
 
-Windows 10/11 x64 的 Flutter 客户端工程，目标为完整 Beta。界面、原生代码、领域包、契约、测试和脚本均在本目录内。当前实现和真实验收的差距集中记录在 [Beta 完成清单](docs/beta-completion.md)；尚未通过全部发行门槛，不能将未签名开发 ZIP 当作完整 Beta。
+Windows 10/11 x64 的 Flutter 客户端工程，目标为完整 Beta。本目录保留 Windows 宿主、测试与打包脚本；公共 UI、业务包、Go 核心和契约位于根 `packages/`、`core/`、`contracts/`。见 [跨端共享架构](../docs/development/shared-client-architecture.md)。当前实现和真实验收的差距集中记录在 [Beta 完成清单](docs/beta-completion.md)；尚未通过全部发行门槛，不能将未签名开发 ZIP 当作完整 Beta。
 
 2026-10-13 更新：“我的 IP”使用 API 的资产名称，客户备注单独显示在详情；到期超过 72 小时的资源不再显示，恰好 72 小时和未知期限仍保留。最新客户端、生产接口实测及验证结果见 [资源显示更新](docs/resource-display-verification.md)。
 

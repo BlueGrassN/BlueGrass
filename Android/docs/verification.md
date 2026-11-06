@@ -16,8 +16,8 @@
 | --- | --- | --- |
 | `flutter analyze` | No issues found | Dart 静态检查 |
 | `flutter test` | 23/23 通过 | 控制器、界面、平台通道边界及真实 API 适配器组合 |
-| `dart test`，Windows/packages/domain | 163/163 通过 | 当前复用的领域包 |
-| `dart test`，Windows/packages/data_source | 179/179 通过 | 当前复用的 API、资源、刷新与会话包 |
+| `dart test`，packages/domain | 163/163 通过 | 当前复用的领域包 |
+| `dart test`，packages/data_source | 179/179 通过 | 当前复用的 API、资源、刷新与会话包 |
 | `flutter test tool/render_previews.dart` | 1/1 通过，四张图片已人工检查 | 虚构资源下的实际 Flutter 渲染；不等于设备截图 |
 | `gradlew :app:assembleDebugAndroidTest -Ptarget-platform=android-arm64` | BUILD SUCCESSFUL | 16 项设备测试及原生实现编译、测试 APK 打包；没有执行测试 |
 | `flutter build apk --debug --target-platform android-arm64` | 最终构建通过；包信息见下方产物记录 | 可构建性，不证明生产登录和设备 VPN 能力 |

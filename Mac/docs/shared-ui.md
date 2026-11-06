@@ -1,13 +1,13 @@
 # Shared desktop UI
 
 `Mac/app` is a thin launcher. Its `bluegrass_client` path dependency is
-`../../Windows/app`; `lib/main.dart` invokes that package's production `main`.
+`../../packages/client`; `lib/main.dart` invokes that package's production `main`.
 Pages, navigation, components, controllers, resource/API code, theme colors and
 design sizes remain in the existing package. There are no copied Mac screens and
 no fixture imports in the launcher. Test fixtures are confined to tests and the
 existing explicit Windows fixture entry point.
 
-`Windows/app/lib/desktop_platform.dart` chooses macOS from Flutter's target
+`packages/client/lib/desktop_platform.dart` chooses macOS from Flutter's target
 platform; tests override the target explicitly. The remaining desktop behavior
 retains Windows defaults. macOS uses PingFang SC at the shared design sizes,
 Keychain labels, macOS login-item wording and menu-bar window instructions.
@@ -124,7 +124,7 @@ Verified on Windows on 2026-11-05 after the transport/export integration:
 
 ## Files changed by the shared-UI worker
 
-- `Windows/app/lib`: `desktop_platform.dart`, `app_controller.dart`,
+- `packages/client/lib`: `desktop_platform.dart`, `app_controller.dart`,
   `app_theme.dart`, `main.dart`, `native_client.dart`, `diagnostic_client.dart`,
   `platform_store.dart`, `user_lifecycle.dart`, `update_client.dart`,
   `crash_reports.dart`, `crash_report_settings.dart`,

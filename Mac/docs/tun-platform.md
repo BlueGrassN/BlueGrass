@@ -41,7 +41,7 @@ Darwin-only tests compile for arm64 and amd64. They cover route-RIB decoding, sc
 - `TestDarwinKernelUtunXrayTCPUDPDNSAndCleanup` opens a real `utun233`, checks its real index, refuses a second open, adds only private host route `10.253.233.9/32`, and sends ordinary kernel TCP/UDP through utun, the pinned Xray native stack/router and a real Xray freedom outbound redirected to local echo servers. It sends TCP and UDP DNS to the remote peer through production DNS handling. It checks counters, unchanged physical-network generation during activation, no default/split-default route on its adapter, route removal, interface disappearance and restored generation. The private prefix must be unoccupied. The adapter's /30 is selected from the existing private test pools. No default-route, system DNS or PF writes are performed by the test.
 - `TestDarwinKernelProtectedCache` creates a unique root-private directory beneath `/private/var/root`, proves persistence/exclusive access and rejects mode, ACL, hardlink and file/ancestor-symlink attacks. It removes only its own directory.
 
-Run on an ephemeral macOS runner, once per architecture. From `Windows/native/core`, the preferred invocation builds as the runner user and runs only the compiled tests as root; root needs no Go/module/build cache:
+Run on an ephemeral macOS runner, once per architecture. From `core`, the preferred invocation builds as the runner user and runs only the compiled tests as root; root needs no Go/module/build cache:
 
 ```sh
 set -eu

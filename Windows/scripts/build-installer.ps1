@@ -12,6 +12,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $clientRoot = Split-Path $PSScriptRoot -Parent
+$repoRoot = Split-Path $clientRoot -Parent
 . (Join-Path $clientRoot 'installer\signing.ps1')
 $hasSigning = Assert-SigningArguments -Candidate $UnsignedCandidate.IsPresent -Thumbprint $CertificateThumbprint -SignTool $SignTool -TimestampUrl $TimestampUrl
 if ($Version -notmatch '^(0|[1-9][0-9]{0,4})\.(0|[1-9][0-9]{0,4})\.(0|[1-9][0-9]{0,4})(-(beta|rc)\.(0|[1-9][0-9]{0,4}))?$') { throw 'Version must be numeric major.minor.patch with optional beta.N/rc.N.' }
@@ -81,7 +82,7 @@ foreach ($item in $files) {
 }
 if ($UnsignedCandidate) {
 $go = 'D:\Program Files\Go\bin\go.exe'
-Push-Location (Join-Path $clientRoot 'native\core')
+Push-Location (Join-Path $repoRoot 'core')
 try {
     & $go build -trimpath -ldflags '-s -w -H windowsgui' -o (Join-Path $stage 'BlueGrass.SetupTrust.exe') (Join-Path $clientRoot 'installer\trustcheck\main.go')
     if ($LASTEXITCODE -ne 0) { throw 'Installer trust helper build failed.' }

@@ -2,7 +2,7 @@
 
 Date: 2026-10-12 (Asia/Hong_Kong).
 
-Scope: `Windows/native/core/tunengine/`, the subsequently authorized
+Scope: `core/tunengine/`, the subsequently authorized
 `exitprobe/`, `localengine/`, `protocolconfig/`, shared `engine.Profile` and
 `control/` integration, and pinned module/sum consolidation, plus this report.
 Existing dirty work, localengine entrydns integration, service/WFP/bridge and GUI
@@ -552,7 +552,7 @@ SetupAPI removal path and reboot-required behavior remain untested.
 
 ## Latest verification and dependency consolidation
 
-Verified from `Windows/native/core` with Go `go1.27.2 windows/amd64`, tag
+Verified from `core` with Go `go1.27.2 windows/amd64`, tag
 `with_gvisor`, and MSYS2 UCRT64 GCC 16.2.0 for race. The official go.mod/go.sum
 are used directly with `-mod=readonly`; no temporary modfile is required.
 
@@ -674,7 +674,7 @@ the fix binds each attempt's adapter work to its own bounded context.
 Initial verification used a temporary module copy because the original module
 files were outside this task's edit scope. Main has since reconciled the shared
 module dependencies. Final shared-probe verification runs directly from
-`Windows/native/core` using the existing module in readonly mode:
+`core` using the existing module in readonly mode:
 
 ```powershell
 go test -mod=readonly -tags with_gvisor -count=1 ./exitprobe ./localengine ./tunengine

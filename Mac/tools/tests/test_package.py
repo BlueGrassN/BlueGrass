@@ -20,7 +20,7 @@ class PackageTests(unittest.TestCase):
     def exercise_build(self, directory, *, corrupt_worker=False):
         root = Path(directory)
         app_root = root / 'Mac/app'
-        core = root / 'Windows/native/core'
+        core = root / 'core'
         app = app_root / 'build/macos/Build/Products/Release/BlueGrass.app'
         for relative in build.REQUIRED_PAYLOAD:
             path = app / relative
@@ -30,10 +30,10 @@ class PackageTests(unittest.TestCase):
         swift_bin.mkdir()
         (swift_bin / 'BlueGrass.ProxySettings').write_bytes(b'swift helper')
         for relative in ('Mac/docs/TESTING.md', 'Windows/app/assets/LICENSE.Xray-core',
-                         'Windows/app/assets/LICENSE.sing', 'Windows/native/core/go.mod',
-                         'Windows/native/core/go.sum', 'Windows/native/core/routingpolicy/assets/NOTICE.md',
-                         'Windows/native/core/routingpolicy/assets/metadata.json',
-                         'Windows/native/core/routingpolicy/assets/licenses/LICENSE'):
+                         'Windows/app/assets/LICENSE.sing', 'core/go.mod',
+                         'core/go.sum', 'core/routingpolicy/assets/NOTICE.md',
+                         'core/routingpolicy/assets/metadata.json',
+                         'core/routingpolicy/assets/licenses/LICENSE'):
             path = root / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(b'fixture')
@@ -45,7 +45,10 @@ class PackageTests(unittest.TestCase):
             nonlocal embedded, outer_signed
             args = [str(arg) for arg in args]
             events.append(args)
+            if args[:2] in (['flutter', 'analyze'], ['flutter', 'test']):
+                self.assertEqual(kwargs['cwd'], root / 'packages/client')
             if args[:2] == ['go', 'build']:
+                self.assertEqual(kwargs['cwd'], core)
                 output = Path(args[args.index('-o') + 1])
                 output.write_bytes(b'go binary ' + args[-1].encode())
                 if output.name == 'BlueGrass.Native':
@@ -92,6 +95,8 @@ class PackageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             app, metadata, events = self.exercise_build(directory)
             worker = app / 'Contents/MacOS/BlueGrass.Tunnel'
+            self.assertIn(['flutter', 'analyze'], events)
+            self.assertIn(['flutter', 'test'], events)
             self.assertTrue(metadata['tun_available'])
             self.assertEqual(metadata['tun_authorization'], 'administrator-password development')
             self.assertEqual(metadata['tun_worker_sha256'], build.sha256(worker))

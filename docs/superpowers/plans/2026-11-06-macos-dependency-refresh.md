@@ -21,7 +21,7 @@
 
 ## Task 1: Resolve, validate and deliver dependency updates
 
-**Files:** `.github/workflows/macos-dev.yml`, `Windows/app/pubspec.yaml`, `Mac/app/pubspec.yaml`, and `pubspec.lock` in those roots plus `Windows/packages/domain` and `Windows/packages/data_source`. Record evidence in `docs/development/`.
+**Files:** `.github/workflows/macos-dev.yml`, `Windows/app/pubspec.yaml`, `Mac/app/pubspec.yaml`, and `pubspec.lock` in those roots plus `packages/domain` and `packages/data_source`. Record evidence in `docs/development/`.
 
 - [x] Extract 14 outdated names from the completed CI log; verify registry versions and Flutter stable tag.
 - [x] Prepare isolated Flutter 3.47.9; add exact overrides material_color_utilities 0.13.1 and test_api 0.7.15 to both applications; upgrade all four lockfiles.

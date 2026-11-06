@@ -4,7 +4,7 @@
 
 **Architecture:** Reuse the Windows PowerShell native builder on windows-2025, with a shared release script for local and hosted builds. The build job has read-only repository permissions; a separate publishing job creates an immutable per-run Android Alpha prerelease from verified artifacts. PR builds never receive signing secrets or publish releases.
 
-**Constraints:** Preserve ARM64-only compressed native libraries, Xray pins, application identity, routing and traffic behavior. Checkout the complete repository: Android depends on Windows/packages and Windows/native/core. No Studio/emulator launch, commit or push is needed to implement and validate this change.
+**Constraints:** Preserve ARM64-only compressed native libraries, Xray pins, application identity, routing and traffic behavior. Checkout the complete repository: Android depends on Windows/packages and core. No Studio/emulator launch, commit or push is needed to implement and validate this change.
 
 **Decisions:** Pushes to main and manual runs on main publish; PRs validate. Use Flutter 3.47.7, Go 1.27.2, JDK 17, SDK/build-tools 36 and NDK 28.2.13676358. Hosted release builds require a persistent keystore supplied using four Actions secrets; never silently use a fresh hosted debug key for a Release. Local builds without signing configuration continue to use the existing debug key. CI versionCode is 100000 + run_number; local builds default to pubspec's versionCode, with an override available. Every release contains APK, SHA256SUMS and metadata.
 

@@ -2,10 +2,19 @@
 
 ## 结构与改动范围
 
-- `Windows/`、`Android/`、`Mac/`、`iOS/`、`HarmonyOS/` 为平台目录；`Windows/packages/` 和 `Windows/native/core/` 有跨端依赖。
+- `Windows/`、`Android/`、`Mac/`、`iOS/`、`HarmonyOS/` 为平台宿主目录；公共实现位于根 `packages/domain`、`packages/data_source`、`packages/client`、`core` 与 `contracts`。
 - `client-api/` 是独立服务端，`client-config/` 是共享公开配置，`assets/branding/` 保存原始图片，`docs/development/` 保存开发手册。
 - 开始前检查 Git 状态和最新远端。保留已有未提交工作；跨任务共享目录时核对具体文件，必要时使用隔离工作区。
 - 原始品牌图片及锁定哈希的上游文件必须保持字节不变，遵守 `.gitattributes`；不要通过重算哈希掩盖换行转换或意外修改。
+
+## 跨端共享开发
+
+- 先读 [共享客户端架构](docs/development/shared-client-architecture.md)。所有新公共 UI、业务协调、主题/组件在 `packages/client` 实现；Windows/app/lib 和 Android/lib 只保留薄入口/兼容导出，不再维护独立实现副本。
+- 三端宿主共同依赖 `bluegrass_client`；Windows 宿主包名 `bluegrass_windows` 不改变 BlueGrass 可执行文件名，Android/Mac 应用身份保持原值。保留原有签名、版本编号和协议契约。
+- 根 `core/` 的 Go module 仍为 `bluegrass/native/core`；Android 桥接通过 replace 引用它，不能再创建平台私有的公共核心副本。
+- 保留各端原生网络事务、账号/请求世代隔离、暂停/恢复保护和权限边界。共同控制逻辑通过接口/组合调用平台适配器，不能以界面复用为由删掉桌面更新、提醒、崩溃记录或 Android VPN 生命周期。
+- Flutter 统一使用 3.47.9 / Dart 3.13.7；涉及公共包修改时运行其分析/测试及所有受影响宿主回归。packages、core、contracts 改动必须触发相应平台 CI。
+- 更新相对路径时同时检查测试 fixture、构建/消融脚本、许可证、CI 缓存和锁文件。搬移的品牌/许可证/规则字节必须一致。
 
 ## GitHub Release：统一入口
 

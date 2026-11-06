@@ -1,11 +1,15 @@
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\toolchain.ps1"
 $clientRoot = Split-Path $PSScriptRoot -Parent
-$source = Join-Path $clientRoot 'native\core'
+$repoRoot = Split-Path $clientRoot -Parent
+$source = Join-Path $repoRoot 'core'
 $experiment = Join-Path $clientRoot ('.artifacts\ablation\beta-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 New-Item -ItemType Directory -Force -Path $experiment | Out-Null
 $copy = Join-Path $experiment 'core'
 Copy-Item -LiteralPath $source -Destination $copy -Recurse
+$contracts = Join-Path $experiment 'contracts'
+New-Item -ItemType Directory -Force -Path $contracts | Out-Null
+Copy-Item -LiteralPath (Join-Path $repoRoot 'contracts\fixtures') -Destination $contracts -Recurse
 $variants = @(
   @{Name='remove-parent-publisher-check'; File='serviceipc\identity.go';
     Before=' || p.ParentSigner != trustedSigner'; After='';

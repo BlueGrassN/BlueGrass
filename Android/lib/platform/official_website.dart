@@ -1,6 +1,2 @@
-import 'package:flutter/services.dart';
-
-/// The native side opens only the fixed official HTTPS site.
-Future<void> openOfficialWebsite() =>
-    const MethodChannel('bluegrass/android')
-        .invokeMethod<void>('openOfficialWebsite');
+// Compatibility export; implementation lives in packages/client.
+export 'package:bluegrass_client/src/android/platform/official_website.dart';

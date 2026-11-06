@@ -1,5 +1,7 @@
 # BlueGrass
 
+公共代码已集中到根 `packages/`、`core/` 和 `contracts/`；Android、Windows、macOS 宿主共同消费 `packages/client`。功能归属和验证入口见 [跨端共享客户端架构](docs/development/shared-client-architecture.md)。
+
 - [统一开发预览版下载](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)：Windows、Android、macOS 双架构的最新成功安装包集中在同一页面，按平台独立更新。发布规则见 [共享发布手册](docs/development/github-releases.md)。
 - [Windows 自动构建与下载](Windows/docs/github-release.md)：本地测试打包与 GitHub Actions 构建。
 
@@ -28,7 +30,7 @@ Android 构建入口：本地执行 `./Android/scripts/build-release.ps1`；推�
 - [开发实施计划（2026-10-11 修订）](docs/superpowers/plans/2026-10-10-sunipip-client-implementation-plan.md)：冻结本轮决定，按契约、工作包、依赖和发布门禁安排开发；旧固定日期及工期不再作为执行承诺。
 - [开发启动任务清单](docs/superpowers/plans/2026-10-11-bluegrass-development-kickoff.md)：K-01～K-09 的目标文件、接口、行为测试、检查命令与完成条件，从开发环境和共享契约开始。
 
-全部 Windows 客户端代码和测试位于 [Windows/](Windows/README.md)，默认生产 API 已于 2026-10-15 切换为 `client-api.sunip.vip`，并接入四端共享远程配置；见 [API 迁移验证](Windows/docs/api-migration-20261015.md)。按用户 2026-10-12 的修正，有效节点直接连接，随后检测并显示实际出口 IP；检测失败保留连接，不再要求预期出口或测试绑定。连接行为与实测见 [连接与出口检测验证](Windows/docs/observed-exit-verification.md)，完整发行差距见 [Beta 清单](Windows/docs/beta-completion.md)。下列 ADR 中 D-07/D-29 的旧出口门槛已被本次修正替代：
+Windows 宿主与平台测试位于 [Windows/](Windows/README.md)，跨端 UI、业务与原生核心位于根 `packages/`、`core/`，默认生产 API 已于 2026-10-15 切换为 `client-api.sunip.vip`，并接入四端共享远程配置；见 [API 迁移验证](Windows/docs/api-migration-20261015.md)。按用户 2026-10-12 的修正，有效节点直接连接，随后检测并显示实际出口 IP；检测失败保留连接，不再要求预期出口或测试绑定。连接行为与实测见 [连接与出口检测验证](Windows/docs/observed-exit-verification.md)，完整发行差距见 [Beta 清单](Windows/docs/beta-completion.md)。下列 ADR 中 D-07/D-29 的旧出口门槛已被本次修正替代：
 
 - [D-01：交付顺序与 Win7 范围](docs/adr/0001-win7-delivery-scope.md)：主力版与安卓版先发布，Win7 后续独立交付，保留系统代理、TUN 和断线保护目标。
 - [D-02：主力客户端内核范围](docs/adr/0002-primary-client-core-scope.md)：历史决定，已由 D-49 全文替代；四端唯一代理内核为 Xray-core。

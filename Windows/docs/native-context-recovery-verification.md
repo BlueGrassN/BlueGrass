@@ -106,7 +106,7 @@ reports no issues; formatting reports zero changed files. Analysis evidence is
 `.artifacts/verification/native-context-recovery-analyze.log`.
 
 The actual nativehost marker implementation was read and its targeted regression
-suite was independently checked from `Windows/native/core`:
+suite was independently checked from `core`:
 
 ```powershell
 go test -mod=readonly -tags with_gvisor -count=1 -run 'Test.*ContextRecovery|TestSwitchResourceExpiryAfterJournalCommit' ./nativehost

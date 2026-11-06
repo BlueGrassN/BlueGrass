@@ -17,7 +17,7 @@ from verify_native import sha256, verify_native
 
 ROOT = Path(__file__).resolve().parents[2]
 APP_ROOT = ROOT / 'Mac/app'
-CORE = ROOT / 'Windows/native/core'
+CORE = ROOT / 'core'
 XRAY_VERSION = 'v1.260327.1-0.20261017152356-92ccc939aaf4'
 REQUIRED_PAYLOAD = (
     'Contents/Info.plist',
@@ -97,6 +97,10 @@ def build(args):
         raise ValueError('Run each build on a runner matching its target architecture')
 
     run([sys.executable, ROOT / 'Mac/tools/sync_assets.py'])
+    shared_client = ROOT / 'packages/client'
+    run(['flutter', 'pub', 'get'], cwd=shared_client)
+    run(['flutter', 'analyze'], cwd=shared_client)
+    run(['flutter', 'test'], cwd=shared_client)
     run(['flutter', 'pub', 'get'], cwd=APP_ROOT)
     run(['flutter', 'config', '--enable-macos-desktop', '--no-enable-macos-arm64-only'])
     environment = dict(os.environ)

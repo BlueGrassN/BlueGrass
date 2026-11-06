@@ -1,6 +1,6 @@
 # Windows WFP 保护实现与验收边界
 
-更新：2026-10-12。范围：`Windows/native/core/winprotect`、`winservice` 组合层及新增的 `serviceipc` 更新助手只读鉴权入口。
+更新：2026-10-12。范围：`core/winprotect`、`winservice` 组合层及新增的 `serviceipc` 更新助手只读鉴权入口。
 
 本包已实现真实 Windows WFP API 调用、事务替换、持久保护意图和独立 WFP 修复入口；本次只运行无防火墙写入的策略、生命周期、ABI 测试与编译。**没有安装规则、调用 `New`/`Repair`、修改本机防火墙/路由/DNS，尚未完成 Windows 提权运行、重启或抓包验收，不能据此通过对外 Beta1 的零泄漏门槛。** SMS 不属于本包范围。
 
@@ -212,7 +212,7 @@ v2记录保留原八个字段，并增加 `resourceKey`、`logicalSessionId`、`
 
 ## 已执行的无防火墙写入验证
 
-工作目录 `E:\workspace\APP\Windows\native\core`；Go 使用 `D:\Program Files\Go\bin\go.exe`。单元测试只执行纯策略/生命周期、注入的存储与防火墙替身、内存中 ABI/安全描述符检查；不执行真实 `New`、`Repair` 或 `diskStore`。替身用于隔离系统副作用，生产状态机和策略编译器仍是真实实现。
+工作目录 `E:\workspace\APP\core`；Go 使用 `D:\Program Files\Go\bin\go.exe`。单元测试只执行纯策略/生命周期、注入的存储与防火墙替身、内存中 ABI/安全描述符检查；不执行真实 `New`、`Repair` 或 `diskStore`。替身用于隔离系统副作用，生产状态机和策略编译器仍是真实实现。
 
 | 命令/检查 | 本次结果 |
 | --- | --- |

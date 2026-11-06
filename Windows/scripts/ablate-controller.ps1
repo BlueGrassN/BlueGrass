@@ -1,23 +1,28 @@
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\toolchain.ps1"
 $clientRoot = Split-Path $PSScriptRoot -Parent
+$repoRoot = Split-Path $clientRoot -Parent
 $experiment = Join-Path $clientRoot ('.artifacts\ablation\controller-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
-$app = Join-Path $experiment 'app'
+$contracts = Join-Path $experiment 'contracts'
+New-Item -ItemType Directory -Force -Path $contracts | Out-Null
+Copy-Item -LiteralPath (Join-Path $repoRoot 'contracts\fixtures') -Destination $contracts -Recurse
+$app = Join-Path $experiment 'Windows\app'
 New-Item -ItemType Directory -Force -Path $app | Out-Null
 foreach ($name in @('lib', 'test', 'assets', 'pubspec.yaml', 'pubspec.lock')) {
     Copy-Item -LiteralPath (Join-Path $clientRoot "app\$name") -Destination $app -Recurse
 }
-foreach ($package in @('domain', 'data_source')) {
+foreach ($package in @('domain', 'data_source', 'client')) {
     $target = Join-Path $experiment "packages\$package"
     New-Item -ItemType Directory -Force -Path $target | Out-Null
     foreach ($name in @('lib', 'pubspec.yaml', 'pubspec.lock')) {
-        $source = Join-Path $clientRoot "packages\$package\$name"
+        $source = Join-Path $repoRoot "packages\$package\$name"
         if (Test-Path -LiteralPath $source) { Copy-Item -LiteralPath $source -Destination $target -Recurse }
     }
 }
-$target = Join-Path $app 'lib\app_controller.dart'
+$target = Join-Path $experiment 'packages\client\lib\app_controller.dart'
 $bytes = [IO.File]::ReadAllBytes($target)
-$text = [Text.Encoding]::UTF8.GetString($bytes)
+# Normalize only the disposable mutation text; restore the exact saved bytes.
+$text = [Text.Encoding]::UTF8.GetString($bytes).Replace("`r`n", "`n")
 $variants = @(
     @{Name='remove-update-build-check'; Before="if ((marker['build'] as int) >= installedBuild) return true;"; After='';
       Test='test/update_resume_test.dart'; Pattern='changed build: false'; Expected='Actual: <true>'},
@@ -28,7 +33,7 @@ $variants = @(
     @{Name='remove-accepted-attempt-identity';
       Before="_nativeContext = context is Map<String, dynamic>`n          ? domain.ControlContext.fromJson(context)`n          : null;";
       After='// Experimental removal: retain the preceding resource identity.';
-      Test='test/protected_switch_test.dart'; Pattern='accepted failed attempt retains current resource identity: switch-proof-retry-tun'; Expected='Actual: <false>'}
+      Test='test/protected_switch_test.dart'; Pattern='accepted failed attempt retains current resource identity: switch-prepare-retry-tun'; Expected='Actual: <false>'}
 )
 function Invoke-Case($Variant, [string]$Phase) {
     $log = Join-Path $experiment "$($Variant.Name)-$Phase.log"
@@ -54,7 +59,7 @@ try {
         if ((Invoke-Case $variant 'restored') -ne 0) { throw 'Restored behavior failed.' }
         $results += @{ name=$variant.Name; baseline='pass'; ablated='behavioral failure'; restored='pass'; decision='retain' }
     }
-    if ((Get-FileHash -LiteralPath $target).Hash -ne (Get-FileHash -LiteralPath (Join-Path $clientRoot 'app\lib\app_controller.dart')).Hash) {
+    if ((Get-FileHash -LiteralPath $target).Hash -ne (Get-FileHash -LiteralPath (Join-Path $repoRoot 'packages\client\lib\app_controller.dart')).Hash) {
         throw 'Shared controller changed during isolated experiment; rebase evidence before claiming final coverage.'
     }
 } finally { Pop-Location }

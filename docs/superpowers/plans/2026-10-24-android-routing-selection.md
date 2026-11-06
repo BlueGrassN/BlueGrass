@@ -2,7 +2,7 @@
 
 **Goal:** 安卓提供与 Windows 相同的“国内外分流 / 全局代理”，设置持久化，实际 DNS/TCP/UDP 路由生效，并在 Android Studio 模拟器验收。
 
-**Architecture:** 复用 `Windows/native/core/routingpolicy` 的固定版本 GeoSite/GeoIP 数据与分类逻辑。Flutter 负责选择和状态，Kotlin 保存偏好并将模式纳入原生会话身份，Go 负责 DNS 和 TCP/UDP 去向。使用当前已授权工作区继续开发，保留已有未提交实现。
+**Architecture:** 复用 `core/routingpolicy` 的固定版本 GeoSite/GeoIP 数据与分类逻辑。Flutter 负责选择和状态，Kotlin 保存偏好并将模式纳入原生会话身份，Go 负责 DNS 和 TCP/UDP 去向。使用当前已授权工作区继续开发，保留已有未提交实现。
 
 **Tech Stack:** Flutter/Dart、Kotlin VpnService、Go/Xray、Android 11 模拟器。
 

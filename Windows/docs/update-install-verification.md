@@ -29,7 +29,7 @@ func TrustedHosts() []string
 accepts trust settings. `TrustedHosts` returns a defensive copy of the built-in
 allowlist; the current unconfigured build returns no hosts.
 
-`Windows/native/core/cmdupdate/release.json` is compiled into the executable.
+`core/cmdupdate/release.json` is compiled into the executable.
 All default release values are empty; check/download/launch return
 `UPDATE_UNCONFIGURED` before trust inspection, storage or networking. Release
 engineering must set the real version/build/channel, approved HTTPS manifest
@@ -207,7 +207,7 @@ D36/D37 verification on 2026-10-12:
   `tunengine/config.go`; packet-level interaction with the bound physical socket
   and installed WFP remains signed-runtime acceptance work.
 
-Repeat the optional, read-only local probes from `Windows/native/core`:
+Repeat the optional, read-only local probes from `core`:
 
 ```powershell
 $env:BLUEGRASS_NLM_SMOKE = '1'

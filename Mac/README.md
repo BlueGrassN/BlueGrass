@@ -4,7 +4,7 @@
 
 macOS 客户端的开发入口。当前开发方式为 Windows 编写与测试共享代码，GitHub Actions 在 macOS 上构建，由用户将产物拿到 Mac 验收。
 
-`app/` 是导入现有 Windows 桌面 UI 的薄 Flutter 应用：页面、导航、主题和组件共用同一份代码。Swift 宿主提供 Keychain、菜单栏、登录项和本地窗口能力；代理协议继续使用固定版本的 Go/Xray。
+`app/` 是导入根 `packages/client` 公共客户端库的薄 Flutter 应用：页面、导航、主题和组件共用同一份代码。Swift 宿主提供 Keychain、菜单栏、登录项和本地窗口能力；代理协议继续使用固定版本的 Go/Xray。
 
 开发包提供系统代理和管理员密码授权的 TUN。TUN 通过系统授权窗口按需启动受保护的原生 utun 组件，密码不会进入应用。产物使用 ad-hoc 开发签名，未公证；实际 Mac 联网验收由用户完成。此实现不依赖 Apple Developer 证书，也不使用 Network Extension。
 

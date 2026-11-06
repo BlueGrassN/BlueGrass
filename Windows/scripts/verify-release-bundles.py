@@ -13,6 +13,7 @@ import struct
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+ROUTING_ASSETS = ROOT.parent / 'core/routingpolicy/assets'
 TOOLCHAIN = json.loads((ROOT / 'toolchain.json').read_text(encoding='utf-8-sig'))
 DRIVER = TOOLCHAIN['wintun']
 RETIRED_MODULE = re.compile(r'^(github\.com/sagernet/(sing-box|sing-tun|gvisor)(/|$)|gvisor\.dev(/|$))')
@@ -107,9 +108,10 @@ def verify(name):
         names = {entry.replace("\\", "/") for entry in entries}
         assert len(entries) == len(names), "duplicate_archive_entry"
         assert REQUIRED <= names, "missing_runtime_payload"
-        for source in (ROOT / 'native/core/routingpolicy/assets').rglob('*'):
+        assert (ROUTING_ASSETS / 'metadata.json').is_file(), 'missing_routing_source_assets'
+        for source in ROUTING_ASSETS.rglob('*'):
             if source.is_file():
-                relative = source.relative_to(ROOT / 'native/core/routingpolicy/assets').as_posix()
+                relative = source.relative_to(ROUTING_ASSETS).as_posix()
                 assert archive.read('runtime/data/routing-policy/' + relative) == source.read_bytes(), 'stale_routing_data_or_notice'
         assert {name.split('/')[0] for name in names} == {"BlueGrass.exe", "runtime"}, "cluttered_bundle_root"
         assert not any(Path(name).suffix.lower() in ('.lib', '.pdb', '.obj', '.exp') for name in names), "build_only_payload"

@@ -1,3 +1,11 @@
+import 'package:bluegrass_client/src/presentation/login_content.dart';
+import 'package:bluegrass_client/src/presentation/connection_content.dart';
+import 'package:bluegrass_client/src/presentation/traffic_content.dart';
+import 'package:bluegrass_client/src/presentation/resource_content.dart';
+import 'package:bluegrass_client/src/presentation/settings_content.dart';
+import 'package:bluegrass_client/src/presentation/routing_content.dart';
+import 'package:bluegrass_client/ui/navigation.dart';
+import 'package:bluegrass_client/ui/start_button.dart';
 import 'package:client/app.dart';
 import 'package:bluegrass_data_source/bluegrass_data_source.dart';
 import 'package:client/app_controller.dart';
@@ -343,4 +351,72 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
+  for (final width in [390.0, 1280.0]) {
+    for (final mode in [ThemeMode.light, ThemeMode.dark]) {
+      testWidgets('production Android uses shared features at $width / $mode', (
+        tester,
+      ) async {
+        tester.view.physicalSize = Size(width, 900);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        store.theme = mode;
+        await launch(tester);
+        expect(find.byType(LoginContent), findsOneWidget);
+        await controller.login('demo', 'fixture-password');
+        await tester.pumpAndSettle();
+        expect(find.byType(ConnectionContent), findsOneWidget);
+        expect(find.byType(StartToggleButton), findsOneWidget);
+        expect(find.byType(TrafficMetricContent), findsWidgets);
+        expect(find.byType(RoutingModeControl), findsOneWidget);
+        expect(
+          find.byType(AppSidebar),
+          width >= 840 ? findsOneWidget : findsNothing,
+        );
+        expect(
+          find.byType(AppDock),
+          width < 840 ? findsOneWidget : findsNothing,
+        );
+        final selected = controller.selected?.key;
+        await tester.tap(find.byKey(const Key('nav-resources')));
+        await tester.pumpAndSettle();
+        expect(find.byType(ResourceContent), findsWidgets);
+        await tester.enterText(
+          find.byKey(const Key('resource-search')),
+          '香港线路 1',
+        );
+        await tester.pumpAndSettle();
+        tester.view.physicalSize = Size(width < 840 ? 1280 : 390, 900);
+        await tester.pumpAndSettle();
+        expect(find.text('香港线路 1'), findsWidgets);
+        expect(find.text('香港线路 2'), findsNothing);
+        expect(
+          tester
+                  .widget<TextField>(find.byKey(const Key('resource-search')))
+                  .controller
+                  ?.text ??
+              tester
+                  .widget<EditableText>(
+                    find.descendant(
+                      of: find.byKey(const Key('resource-search')),
+                      matching: find.byType(EditableText),
+                    ),
+                  )
+                  .controller
+                  .text,
+          '香港线路 1',
+        );
+        await tester.tap(find.byKey(const Key('nav-settings')));
+        await tester.pumpAndSettle();
+        expect(find.byType(ThemeModeControl), findsOneWidget);
+        await tester.tap(find.byKey(const Key('nav-diagnostics')));
+        await tester.pumpAndSettle();
+        expect(find.byType(DiagnosticsActions), findsOneWidget);
+        expect(controller.selected?.key, selected);
+        expect(controller.themeMode, mode);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      });
+    }
+  }
 }

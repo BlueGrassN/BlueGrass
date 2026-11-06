@@ -2,7 +2,7 @@
 
 This is the current implementation mapping. It supersedes the earlier list of
 unimplemented query predicates in
-`Windows/packages/data_source/docs/owned-resource-source-audit.md`; that audit's
+`packages/data_source/docs/owned-resource-source-audit.md`; that audit's
 Laravel evidence remains useful, but null assignment, max-ID suppression and
 bare-asset suppression are no longer left as implementation blockers.
 

@@ -1,16 +1,18 @@
-name: bluegrass_client
-description: BlueGrass Windows client
+name: bluegrass_windows
+description: Windows host for the shared BlueGrass client
 publish_to: none
 version: 0.1.0+1
 environment:
   sdk: ^3.13.5
 dependencies:
+  bluegrass_client:
+    path: ../../packages/client
   flutter:
     sdk: flutter
   bluegrass_domain:
-    path: ../packages/domain
+    path: ../../packages/domain
   bluegrass_data_source:
-    path: ../packages/data_source
+    path: ../../packages/data_source
 dev_dependencies:
   flutter_test:
     sdk: flutter

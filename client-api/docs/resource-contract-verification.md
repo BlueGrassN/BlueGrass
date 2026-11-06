@@ -5,7 +5,7 @@ fixes and their current verification boundary are recorded in
 [resource-ownership-verification.md](resource-ownership-verification.md) and
 [resource-ownership-mapping.md](resource-ownership-mapping.md).
 
-Scope: `client-api/` and `Windows/packages/data_source/`. Existing dirty work was
+Scope: `client-api/` and `packages/data_source/`. Existing dirty work was
 retained on `feature/windows-client`. No commits or deployment were performed.
 Laravel was read as source only. No database connections/writes, source
 configuration files, live credentials or account fixtures were used.
@@ -40,8 +40,8 @@ No global Go/network configuration was changed.
 
 Recorded Go results and the complete skip list:
 [resource-contract-tests.txt](resource-contract-tests.txt).
-Dart results: [tests](../../Windows/packages/data_source/docs/resource-contract-tests.txt)
-and [analysis](../../Windows/packages/data_source/docs/resource-contract-analyze.txt).
+Dart results: [tests](../../packages/data_source/docs/resource-contract-tests.txt)
+and [analysis](../../packages/data_source/docs/resource-contract-analyze.txt).
 
 ## What these tests prove
 

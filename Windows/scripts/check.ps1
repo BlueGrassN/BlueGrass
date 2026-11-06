@@ -9,6 +9,7 @@ if (!(Get-Command gcc -ErrorAction SilentlyContinue) -and (Test-Path -LiteralPat
 }
 $env:CGO_ENABLED = '1'
 $clientRoot = Split-Path $PSScriptRoot -Parent
+$repoRoot = Split-Path $clientRoot -Parent
 $logs = Join-Path $clientRoot '.artifacts\verification'
 New-Item -ItemType Directory -Force -Path $logs | Out-Null
 
@@ -21,16 +22,19 @@ function Invoke-Check([string]$Name, [string]$Directory, [string]$Command, [stri
 }
 
 foreach ($package in @('domain', 'data_source')) {
-    $directory = Join-Path $clientRoot "packages\$package"
+    $directory = Join-Path $repoRoot "packages\$package"
     Invoke-Check "$package-pub" $directory $Dart @('pub', 'get')
     Invoke-Check "$package-analyze" $directory $Dart @('analyze', '--fatal-infos')
     Invoke-Check "$package-test" $directory $Dart @('test', '--reporter', 'expanded')
 }
+Invoke-Check 'client-pub' (Join-Path $repoRoot 'packages/client') $Flutter @('pub', 'get')
+Invoke-Check 'client-analyze' (Join-Path $repoRoot 'packages/client') $Flutter @('analyze')
+Invoke-Check 'client-test' (Join-Path $repoRoot 'packages/client') $Flutter @('test', '--reporter', 'expanded')
 & "$PSScriptRoot\verify-native-dependencies.ps1" -Go $Go
 & "$PSScriptRoot\prepare-wintun.ps1" -VerifyOnly
-Invoke-Check 'native-test' (Join-Path $clientRoot 'native\core') $Go @('test', '-p', '1', '-race', '-count=1', './...')
-Invoke-Check 'native-vet' (Join-Path $clientRoot 'native\core') $Go @('vet', './...')
-Invoke-Check 'contracts' (Join-Path $clientRoot 'contracts') $Python @('test_contracts.py')
+Invoke-Check 'native-test' (Join-Path $repoRoot 'core') $Go @('test', '-p', '1', '-race', '-count=1', './...')
+Invoke-Check 'native-vet' (Join-Path $repoRoot 'core') $Go @('vet', './...')
+Invoke-Check 'contracts' (Join-Path $repoRoot 'contracts') $Python @('test_contracts.py')
 Invoke-Check 'live-api-redirects' (Join-Path $clientRoot 'scripts') $Python @('test_live_api_transport.py')
 Invoke-Check 'app-pub' (Join-Path $clientRoot 'app') $Flutter @('pub', 'get')
 Invoke-Check 'app-analyze' (Join-Path $clientRoot 'app') $Flutter @('analyze')

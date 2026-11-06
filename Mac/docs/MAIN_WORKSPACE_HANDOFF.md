@@ -5,7 +5,7 @@
 ## 移交内容
 
 - `Mac/`：共享 UI 启动器、Swift 宿主与系统代理组件、构建脚本、测试、品牌资源和使用说明。
-- `Windows/app/`、`Windows/native/core/` 中的 Mac 适配：Mac 与 Windows 共用页面、业务控制器和 Go/Xray 核心，因此这些改动也是 Mac 工程的组成部分。
+- `Windows/app/`、`core/` 中的 Mac 适配：Mac 与 Windows 共用页面、业务控制器和 Go/Xray 核心，因此这些改动也是 Mac 工程的组成部分。
 - 上一轮已验证的 Flutter 3.47.9、Dart 3.13.7 和依赖升级，包含四个锁文件与两个应用根目录的精确版本覆盖。
 - `.github/workflows/macos-dev.yml`：自动构建分支已改为 `main`，保留手动触发、Apple Silicon/Intel 双架构、Node.js 24 Actions 及依赖锁文件检查。
 - `docs/development/macos*.md` 与 Mac 专属方案/计划：保留构建证据和设计说明。

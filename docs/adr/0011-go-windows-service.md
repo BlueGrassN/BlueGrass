@@ -7,7 +7,7 @@
 ## 当前决定
 
 1. Windows 10/11 后台服务采用 Go，在受控服务/原生宿主中嵌入 Xray-core；界面通过可信 IPC 提交结构化请求。固定版本与模块见[共享手册](../development/four-platform-development.md)。
-2. `Windows/native/core/` 保存可跨平台复用的配置校验、Xray 适配、入口解析策略、出口观测与暂停控制；Windows 服务、WFP、系统代理、修复及网络变化处理保持平台边界。
+2. `core/` 保存可跨平台复用的配置校验、Xray 适配、入口解析策略、出口观测与暂停控制；Windows 服务、WFP、系统代理、修复及网络变化处理保持平台边界。
 3. 本地代理固定 `127.0.0.1:12808`，保留现有系统代理归属、暂停与恢复语义；TUN/WFP 保护不因更换内核降低要求。全局接管仍需要可信安装及服务权限。
 4. Android 通过 Go 原生库与 Kotlin VpnService 复用共享部分，负责系统授权、前台生命周期、protect、底层 Network 绑定和 fd 所有权；不再采用旧 libbox 方案。iOS/macOS 通过原生 Packet Tunnel 桥接，见各平台手册。
 5. 账号登录、API 会话与 token 留在业务层。原生层只执行结构化资源配置、有效期与保护约束；实际出口在连接后观测，失败不拆除可用连接，不恢复旧预期出口放行门槛。

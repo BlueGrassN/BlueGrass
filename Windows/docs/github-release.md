@@ -43,7 +43,7 @@ $env:BLUEGRASS_PYTHON = '你的 CPython python.exe 完整路径'
 | Actions 页面手动运行，选择 main | 同 main 推送 |
 | 手动选择其他分支 | 仅构建 artifact |
 
-触发路径为 `Windows/**`、Windows 工作流本身、根 `.gitignore` 和 `.gitattributes`。其他平台或服务端的独立改动不重复生成 Windows Release。原有 macOS 工作流仍独立运行；共享 Windows 原生/Flutter 代码变化可能同时触发两端检查。
+触发路径为 `Windows/**`、`packages/**`、`core/**`、`contracts/**`、Windows 工作流本身、根 `.gitignore` 和 `.gitattributes`。其他平台或服务端的独立改动不重复生成 Windows Release。原有 macOS 工作流仍独立运行；共享 Windows 原生/Flutter 代码变化可能同时触发两端检查。
 
 云端构建号为 `buildBase + github.run_number`，客户端版本和构建号保持独立；构建号不能超过 65535，也不能重置工作流编号后倒退。
 

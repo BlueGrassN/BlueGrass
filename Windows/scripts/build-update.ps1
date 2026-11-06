@@ -1,6 +1,7 @@
 param()
 $ErrorActionPreference = 'Stop'
 $clientRoot = Split-Path $PSScriptRoot -Parent
+$repoRoot = Split-Path $clientRoot -Parent
 $go = 'D:\Program Files\Go\bin\go.exe'
 $windres = 'C:\msys64\ucrt64\bin\windres.exe'
 if (!(Test-Path -LiteralPath $go) -or !(Test-Path -LiteralPath $windres)) { throw 'Go and windres are required to build the update helper.' }
@@ -8,7 +9,7 @@ $output = Join-Path $clientRoot ('.artifacts\update\' + [Guid]::NewGuid().ToStri
 New-Item -ItemType Directory -Path $output -Force | Out-Null
 $executable = Join-Path $output 'BlueGrass.Update.exe'
 $priorCgo = $env:CGO_ENABLED
-Push-Location (Join-Path $clientRoot 'native\core')
+Push-Location (Join-Path $repoRoot 'core')
 try {
     $env:CGO_ENABLED = '0'
     & "$PSScriptRoot\verify-native-dependencies.ps1" -Go $go

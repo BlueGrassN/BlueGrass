@@ -5,12 +5,18 @@ on:
     branches: [main]
     paths:
       - 'Windows/**'
+      - 'packages/**'
+      - 'core/**'
+      - 'contracts/**'
       - '.github/workflows/windows-release.yml'
       - '.gitattributes'
       - '.gitignore'
   pull_request:
     paths:
       - 'Windows/**'
+      - 'packages/**'
+      - 'core/**'
+      - 'contracts/**'
       - '.github/workflows/windows-release.yml'
       - '.gitattributes'
       - '.gitignore'
@@ -59,7 +65,7 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ steps.config.outputs.go }}
-          cache-dependency-path: Windows/native/core/go.sum
+          cache-dependency-path: core/go.sum
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           flutter-version: ${{ steps.config.outputs.flutter }}
@@ -69,13 +75,13 @@ jobs:
         with:
           python-version: '3.14'
           cache: pip
-          cache-dependency-path: Windows/contracts/requirements-test.txt
+          cache-dependency-path: contracts/requirements-test.txt
       - name: Prepare Windows build tools
         run: |
           $ErrorActionPreference = 'Stop'
           "BLUEGRASS_PYTHON=$((Get-Command python).Source)" >> $env:GITHUB_ENV
           Get-Command go, flutter, python, gcc, windres | Format-Table Name, Source
-          python -m pip install --requirement Windows/contracts/requirements-test.txt
+          python -m pip install --requirement contracts/requirements-test.txt
           if ($LASTEXITCODE -ne 0) { throw 'Python dependency installation failed.' }
       - name: Check, build, extract and verify Windows client
         env:
@@ -84,7 +90,7 @@ jobs:
         run: ./Windows/scripts/package.ps1 -Version $env:CLIENT_VERSION -Build ([int]$env:CLIENT_BUILD)
       - name: Check dependency lockfiles stayed unchanged
         run: |
-          git diff --exit-code -- Windows/app/pubspec.lock Windows/packages/domain/pubspec.lock Windows/packages/data_source/pubspec.lock Windows/native/core/go.mod Windows/native/core/go.sum
+          git diff --exit-code -- Windows/app/pubspec.lock packages/client/pubspec.lock packages/domain/pubspec.lock packages/data_source/pubspec.lock core/go.mod core/go.sum
           if ($LASTEXITCODE -ne 0) { throw 'Build changed dependency lockfiles.' }
       - name: Upload verified download files
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

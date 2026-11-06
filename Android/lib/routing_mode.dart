@@ -1,1 +1,2 @@
-const routingModes = {'global', 'bypass_cn'};
+// Compatibility export; implementation lives in packages/client.
+export 'package:bluegrass_client/src/android/routing_mode.dart';

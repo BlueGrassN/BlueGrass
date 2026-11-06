@@ -8,7 +8,7 @@ dependencies:
   flutter:
     sdk: flutter
   bluegrass_client:
-    path: ../../Windows/app
+    path: ../../packages/client
 dev_dependencies:
   flutter_test:
     sdk: flutter

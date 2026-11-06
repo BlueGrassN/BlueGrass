@@ -28,7 +28,7 @@ build natively; there are no third-party Swift dependencies. Apply the same ad h
 development signing policy to this executable as to the rest of the bundle. Keep
 the helper executable and not writable by other users (normal `0755` mode).
 
-From `Windows/native/core`, with Go 1.27.2 and the existing go.mod/go.sum pins:
+From `core`, with Go 1.27.2 and the existing go.mod/go.sum pins:
 
 ```sh
 CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o BlueGrass.Native ./cmd/bluegrass-native

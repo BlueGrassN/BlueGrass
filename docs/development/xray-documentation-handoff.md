@@ -56,11 +56,11 @@
 
 | 位置 | 观察与后续动作 |
 | --- | --- |
-| `Windows/native/core/protocolconfig/native.go:8` 起 | 仍导入 sing-box adapter/log 与各协议构造器，`Register` 包含 TUIC/AnyTLS；需要完成 Xray 实例/出站替换及不支持错误检查 |
-| `Windows/native/core/go.mod:8`、`Android/native/core/go.mod:61` | 扫描时仍分别保留 sing-box 直接/间接依赖；源码迁移结束后 tidy 并核对依赖可达图和最终二进制 |
+| `core/protocolconfig/native.go:8` 起 | 仍导入 sing-box adapter/log 与各协议构造器，`Register` 包含 TUIC/AnyTLS；需要完成 Xray 实例/出站替换及不支持错误检查 |
+| `core/go.mod:8`、`Android/native/core/go.mod:61` | 扫描时仍分别保留 sing-box 直接/间接依赖；源码迁移结束后 tidy 并核对依赖可达图和最终二进制 |
 | `Android/native/core/dependencies.txt:45` | 仍记录旧 AAR 的 sing-box 依赖；须由新 AAR 的真实模块信息重新生成，不能手工替换版本字符串冒充构建 |
 | `Android/native/build.ps1:27` | 旧入口仍使用旧 feature tags 且无新核心依赖检查；建议委托至新的 `Android/scripts/build-native.ps1`，或明确退休。文档已改用新的 build/check-native 入口 |
-| `Windows/native/core/README.md:3` | 活动说明仍宣称内嵌 sing-box 1.14.2；由原生实施方同步，本分工无写入权限 |
+| `core/README.md:3` | 活动说明仍宣称内嵌 sing-box 1.14.2；由原生实施方同步，本分工无写入权限 |
 
 `Windows/app/lib/crash_reports.dart:462` 兼容旧 `sing-box/版本` 报告格式属于数据解析，不能据此认定旧核心仍在运行；实现方应决定是否保留历史队列兼容。打包检查中明确拒绝 sing-box 的字符串是必要断言，不应删除。`sing-tun`、`sing`、构建工具以及依赖版本中包含 `sing-box-mod` 的名称也不能仅按文字命中判断为第二代理核心。
 

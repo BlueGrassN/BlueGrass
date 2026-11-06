@@ -1,17 +1,16 @@
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\toolchain.ps1"
 $clientRoot = Split-Path $PSScriptRoot -Parent
-$source = Join-Path $clientRoot 'native\core'
+$repoRoot = Split-Path $clientRoot -Parent
+$source = Join-Path $repoRoot 'core'
 $experiment = Join-Path $clientRoot '.artifacts\ablation\system-proxy'
 New-Item -ItemType Directory -Force -Path $experiment | Out-Null
-foreach ($name in @('go.mod', 'go.sum')) {
-    Copy-Item -LiteralPath (Join-Path $source $name) -Destination $experiment -Force
-}
-foreach ($name in @('clock', 'control', 'engine', 'gate', 'localengine', 'nativehost', 'winproxy')) {
-    $target = Join-Path $experiment $name
-    New-Item -ItemType Directory -Force -Path $target | Out-Null
-    Copy-Item -Path (Join-Path $source "$name\*.go") -Destination $target -Force
-}
+$native = Join-Path $experiment 'core'
+New-Item -ItemType Directory -Force -Path $native | Out-Null
+Get-ChildItem -LiteralPath $source -Force | Copy-Item -Destination $native -Recurse -Force
+$contracts = Join-Path $experiment 'contracts'
+New-Item -ItemType Directory -Force -Path $contracts | Out-Null
+Copy-Item -LiteralPath (Join-Path $repoRoot 'contracts\fixtures') -Destination $contracts -Recurse -Force
 $variants = @(
     @{ Name = 'no-apply-rollback'; File = 'nativehost\proxy.go';
        Before = 'return errors.Join(err, e.Engine.SetBusinessGate(false))'; After = 'return errors.Join(err)';
@@ -28,28 +27,28 @@ function Invoke-Suite([string]$Log, [string]$Pattern = '.') {
     # Keep executables outside Go's immediately deleted temp directory; compile
     # first, then execute. Windows file scanners can hold newly linked files.
     foreach ($package in @('nativehost', 'winproxy')) {
-        & go test -c -o "$package-check.exe" "./$package" 2>&1 | Out-File -FilePath $Log -Append
+        & go test -c -o (Join-Path $experiment "$package-check.exe") "./$package" 2>&1 | Out-File -FilePath (Join-Path $experiment $Log) -Append
         if ($LASTEXITCODE -ne 0) { throw 'Experiment compilation failed' }
     }
     $failed = $false
     foreach ($package in @('nativehost', 'winproxy')) {
-        & (Join-Path $experiment "$package-check.exe") '-test.count=1' "-test.run=$Pattern" 2>&1 | Out-File -FilePath $Log -Append
+        & (Join-Path $experiment "$package-check.exe") '-test.count=1' "-test.run=$Pattern" 2>&1 | Out-File -FilePath (Join-Path $experiment $Log) -Append
         if ($LASTEXITCODE -ne 0) { $failed = $true }
     }
     return !$failed
 }
-Push-Location $experiment
+Push-Location $native
 try {
     if (!(Invoke-Suite 'baseline.log')) { throw 'Baseline failed' }
     foreach ($variant in $variants) {
-        $path = Join-Path $experiment $variant.File
+        $path = Join-Path $native $variant.File
         $bytes = [IO.File]::ReadAllBytes($path)
         $text = [Text.Encoding]::UTF8.GetString($bytes)
         if (!$text.Contains($variant.Before)) { throw 'Mutation target changed' }
         try {
             [IO.File]::WriteAllText($path, $text.Replace($variant.Before, $variant.After), [Text.UTF8Encoding]::new($false))
             $passed = Invoke-Suite "$($variant.Name).log" $variant.Test
-            $output = Get-Content -Raw -LiteralPath "$($variant.Name).log"
+            $output = Get-Content -Raw -LiteralPath (Join-Path $experiment "$($variant.Name).log")
             if ($passed -or $output -notmatch $variant.Failure -or $output -match 'build failed') {
                 throw "Variant did not trigger the required behavioral failure: $($variant.Name)"
             }

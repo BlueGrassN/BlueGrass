@@ -1,13 +1,14 @@
 param([string]$BinaryDirectory = '', [string]$Go = '')
 $ErrorActionPreference = 'Stop'
 $clientRoot = Split-Path $PSScriptRoot -Parent
+$repoRoot = Split-Path $clientRoot -Parent
 if (!$Go) { $Go = (Get-Command go -ErrorAction Stop).Source }
 $corePin = (Get-Content -LiteralPath (Join-Path $clientRoot 'toolchain.json') -Raw | ConvertFrom-Json).embeddedCoreModule
 if (!$corePin) { throw 'The approved Xray-core pin is required.' }
 # Standalone sing utilities and bbolt are intentionally allowed.
 $retired = '^(github\.com/sagernet/(sing-box|sing-tun|gvisor)(/|$)|gvisor\.dev(/|$))'
 if (!$BinaryDirectory) {
-    Push-Location (Join-Path $clientRoot 'native/core')
+    Push-Location (Join-Path $repoRoot 'core')
     try {
         $actualCore = & $Go list -mod=readonly -m -f '{{.Version}}{{if .Replace}} replaced{{end}}' github.com/xtls/xray-core
         if ($LASTEXITCODE -ne 0 -or "$actualCore".Trim() -cne $corePin) { throw 'The approved Xray-core pin is required.' }

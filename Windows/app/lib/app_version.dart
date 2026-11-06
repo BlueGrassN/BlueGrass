@@ -1,6 +1,2 @@
-const clientVersion = String.fromEnvironment(
-  'BLUEGRASS_VERSION',
-  defaultValue: '0.1.0',
-);
-const clientBuild = int.fromEnvironment('BLUEGRASS_BUILD', defaultValue: 1);
-const clientVersionLabel = '$clientVersion+$clientBuild';
+// Compatibility export; implementation lives in packages/client.
+export 'package:bluegrass_client/app_version.dart';

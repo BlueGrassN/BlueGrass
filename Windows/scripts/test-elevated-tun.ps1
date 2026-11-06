@@ -24,6 +24,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 if (!$PrepareOnly -and !$Run) { throw 'Select -PrepareOnly or -Run.' }
 $clientRoot = [IO.Path]::GetFullPath((Split-Path $PSScriptRoot -Parent))
+$repoRoot = Split-Path $clientRoot -Parent
 $repositoryRoot = Split-Path $clientRoot -Parent
 $artifactRoot = Join-Path $clientRoot '.artifacts/verification/elevated-tun'
 $runsRoot = Join-Path $artifactRoot 'runs'
@@ -72,7 +73,7 @@ if ($PrepareOnly) {
         $oldGoos = $env:GOOS
         $oldGoarch = $env:GOARCH
         $oldGoCache = $env:GOCACHE
-        Push-Location (Join-Path $clientRoot 'native/core')
+        Push-Location (Join-Path $repoRoot 'core')
         try {
             $env:GOOS = 'windows'
             $env:GOARCH = 'amd64'

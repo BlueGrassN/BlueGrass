@@ -2,12 +2,13 @@ $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot/toolchain.ps1"
 $Go = (Get-Command go -ErrorAction Stop).Source
 $clientRoot = Split-Path $PSScriptRoot -Parent
+$repoRoot = Split-Path $clientRoot -Parent
 $evidence = Join-Path $clientRoot '.artifacts/verification/wintun-loader'
 $present = Join-Path $evidence 'present'
 $absent = Join-Path $evidence 'absent'
 New-Item -ItemType Directory -Force -Path $present, $absent | Out-Null
 if (Test-Path -LiteralPath (Join-Path $absent 'wintun.dll')) { throw 'The negative-test directory must not contain Wintun.' }
-Push-Location (Join-Path $clientRoot 'native/core')
+Push-Location (Join-Path $repoRoot 'core')
 try {
     & $Go test -c -o (Join-Path $present 'loader-test.exe') ./tunengine
     if ($LASTEXITCODE -ne 0) { throw 'Driver loader test build failed.' }

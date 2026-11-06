@@ -1,8 +1,8 @@
 {
   "verifiedOn": "2026-10-19",
-  "flutter": "3.47.7",
-  "flutterCommit": "abaf9c5237",
-  "dart": "3.13.5",
+  "flutter": "3.47.9",
+  "flutterCommit": "c197ca5199e9ee5661e865596c9c07294dfab51c",
+  "dart": "3.13.7",
   "go": "1.27.2",
   "visualStudio": "2022 17.14.41",
   "windowsSdk": "10.0.26100.0",
@@ -25,5 +25,6 @@
     "licenseSHA256": "183adac21e7d96c508c8fd34d394b7b6708bc81564ad1bad61ab66143a008cd2",
     "signerThumbprint": "DF98E075A012ED8C86FBCF14854B8F9555CB3D45",
     "runtimeDllPath": "wintun.dll"
-  }
+  },
+  "flutterVerifiedOn": "2026-11-06"
 }

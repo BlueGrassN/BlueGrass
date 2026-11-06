@@ -1,17 +1,19 @@
 # BlueGrass 四端共享开发手册
 
+2026-11-06 共享架构：平台工程使用根 `packages/client`，公共业务包、Go/Xray 与契约分别位于 `packages/`、`core/`、`contracts/`；新公共功能只维护一份实现。迁移后的开发和验证要求见 [共享客户端架构](shared-client-architecture.md)。
+
 2026-11-06 发布规则：所有可交付平台统一使用固定 [preview Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)，各端版本独立更新，不再自动创建平台 tag。构建/发布、来源核验和失败恢复见 [统一 GitHub 发布手册](github-releases.md)。
 
-更新日期：2026-10-20。本文是 Windows、Android、iOS、macOS 的共同开发约束，平台细节分别见 [Windows](windows.md)、[Android](android.md)、[iOS](ios.md)、[macOS](macos.md)。内核决策见 [ADR 0049](../adr/0049-xray-only-four-platforms.md)；本文与该 ADR 替代旧文档中的 sing-box 主内核和双内核扩展安排。
+更新日期：2026-11-06。本文是 Windows、Android、iOS、macOS 的共同开发约束，平台细节分别见 [Windows](windows.md)、[Android](android.md)、[iOS](ios.md)、[macOS](macos.md)。内核决策见 [ADR 0049](../adr/0049-xray-only-four-platforms.md)；本文与该 ADR 替代旧文档中的 sing-box 主内核和双内核扩展安排。
 
 ## 当前状态与交付范围
 
 | 平台 | 已有工程基础 | Xray 迁移状态 | 尚需证据 |
 | --- | --- | --- | --- |
 | Windows 10/11 x64 | Flutter、Go 原生宿主/服务、系统代理、WFP/TUN 基础 | 已完成 Windows +17 原生 TUN/协议栈迁移；Go race/vet、Flutter、驱动与便携包校验通过；4 条真实线路通过、1 条上游认证拒绝 | [原生 TUN 迁移证据](../../Windows/docs/xray-native-tun-verification.md)；签名安装与提权 TUN/WFP 实机验收仍未完成 |
-| Android 8.0+ / API 26、ARM64 | Flutter、Kotlin VpnService、Go AAR 桥接 | 实现方正在迁移；旧 Alpha 报告不能证明新内核可用 | 新 AAR/APK 构建、JNI/protect/绑定、真机 TCP/UDP/DNS 与生命周期 |
+| Android 8.0+ / API 26、ARM64 | Flutter 薄宿主、Kotlin VpnService、Go AAR 桥接 | 已有 Xray ARM64 Alpha 构建；本轮接入根共享客户端库 | 迁移后的 AAR/APK 构建与平台测试单独记录，设备 VPN/切网仍按平台验收 |
 | iOS | 此次盘点尚无客户端工程；目录仅建立文档入口 | 开发要求已记录，尚无可运行客户端 | Xcode 工程、Packet Tunnel、原生库、签名、设备与分发验证 |
-| macOS | 此次盘点尚无客户端工程；目录仅建立文档入口 | 开发要求已记录，尚无可运行客户端 | 应用及 Packet Tunnel 工程、原生库、签名、公证/分发和设备验证 |
+| macOS | Flutter 薄宿主、Swift 平台适配、共享 Go/Xray 与管理员 TUN | 已有双架构开发构建；本轮接入根共享客户端库 | 迁移后的 CI 证据见共享架构验证记录；真实联网、权限恢复、Developer ID/公证仍分别验收 |
 
 完整产品要求包括真实账号会话、当前归属资源、配置刷新、可靠连接/暂停/恢复、实际出口与统计、诊断、平台保护、安装及更新。短信登录可选，接口不可用时如实提示；不能以其尚未实现冒充其他平台已经完成，也不因此增加本轮迁移门槛。Win7 仍按 [D-01](../adr/0001-win7-delivery-scope.md) 独立兼容性计划处理，不从 Windows 10/11 构建推导可用性。
 
@@ -33,7 +35,7 @@
 
 Windows 已改用 `github.com/xtls/xray-core/proxy/tun`，不再编入 sing-tun/gVisor，也不需要 `with_gvisor` 标签。保留的 sing 通用地址/缓冲区和 bbolt 缓存工具不是代理或 TUN 内核。Android 的独立模块本轮未修改或验收，交给另一会话继续。依赖审计以各平台实际可达模块和二进制为准。
 
-共享配置编译、Xray 生命周期和协议能力集中维护；平台宿主负责 socket 物理网络绑定、权限、设备与保护。Windows 与 Android 目前复用 `Windows/native/core/` 中跨平台包，Android 还依赖 `Windows/packages/domain/` 和 `Windows/packages/data_source/`，开发时保持仓库布局。Apple 原生桥接需要隔离 Windows 系统包，不能仅复制 Windows 二进制。
+共享配置编译、Xray 生命周期和协议能力集中维护；平台宿主负责 socket 物理网络绑定、权限、设备与保护。Windows 与 Android 目前复用 `core/` 中跨平台包，Android 还依赖 `packages/domain/` 和 `packages/data_source/`，开发时保持仓库布局。Apple 原生桥接需要隔离 Windows 系统包，不能仅复制 Windows 二进制。
 
 本会话在 2026-10-19 按用户最新要求仅完成 Windows 迁移与交付。Android 已有的中间改动交由另一会话继续，不在本次构建或验收范围；iOS/macOS 仍按各自手册标注的工程状态推进。四端唯一 Xray 的长期要求不变。
 

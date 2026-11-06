@@ -1,7 +1,8 @@
 param()
 $ErrorActionPreference = 'Stop'
 $clientRoot = Split-Path $PSScriptRoot -Parent
-$source = Join-Path $clientRoot 'native\core\update'
+$repoRoot = Split-Path $clientRoot -Parent
+$source = Join-Path $repoRoot 'core\update'
 $temporary = Join-Path ([IO.Path]::GetTempPath()) ('BlueGrass-update-ablation-' + [Guid]::NewGuid().ToString('N'))
 $go = 'D:\Program Files\Go\bin\go.exe'
 $priorModule = $env:GO111MODULE

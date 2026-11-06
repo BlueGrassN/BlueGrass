@@ -1,16 +1,35 @@
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\toolchain.ps1"
 $clientRoot = Split-Path $PSScriptRoot -Parent
-$app = Join-Path $clientRoot 'app'
+$repoRoot = Split-Path $clientRoot -Parent
+$experiment = Join-Path $clientRoot ('.artifacts\ablation\ui-' + [Guid]::NewGuid().ToString('N'))
+$contracts = Join-Path $experiment 'contracts'
+New-Item -ItemType Directory -Force -Path $contracts | Out-Null
+Copy-Item -LiteralPath (Join-Path $repoRoot 'contracts\fixtures') -Destination $contracts -Recurse
+$app = Join-Path $experiment 'Windows\app'
+New-Item -ItemType Directory -Force -Path $app | Out-Null
+foreach ($name in @('lib', 'test', 'assets', 'pubspec.yaml', 'pubspec.lock')) {
+    Copy-Item -LiteralPath (Join-Path $clientRoot "app\$name") -Destination $app -Recurse
+}
+foreach ($package in @('domain', 'data_source', 'client')) {
+    $target = Join-Path $experiment "packages\$package"
+    New-Item -ItemType Directory -Force -Path $target | Out-Null
+    foreach ($name in @('lib', 'pubspec.yaml', 'pubspec.lock')) {
+        $source = Join-Path $repoRoot "packages\$package\$name"
+        if (Test-Path -LiteralPath $source) { Copy-Item -LiteralPath $source -Destination $target -Recurse }
+    }
+}
 $logs = Join-Path $clientRoot '.artifacts\verification'
 New-Item -ItemType Directory -Force -Path $logs | Out-Null
-$target = Join-Path $app 'lib\app_controller.dart'
+$target = Join-Path $experiment 'packages\client\lib\app_controller.dart'
 $originalBytes = [IO.File]::ReadAllBytes($target)
 $original = [Text.Encoding]::UTF8.GetString($originalBytes)
 $guard = 'if (_disposed || attempt != _attempt || generation != _generation) return;'
 if (!$original.Contains($guard)) { throw 'Attempt guard changed; review mutation before rerunning.' }
 Push-Location $app
 try {
+    & $Flutter pub get --offline *> (Join-Path $logs 'ui-ablation-dependencies.log')
+    if ($LASTEXITCODE -ne 0) { throw 'Isolated dependency setup failed.' }
     & $Flutter test --reporter expanded *> (Join-Path $logs 'ui-ablation-baseline.log')
     if ($LASTEXITCODE -ne 0) { throw 'Baseline must pass before ablation.' }
     [IO.File]::WriteAllText($target, $original.Replace($guard, ''), [Text.UTF8Encoding]::new($false))

@@ -48,6 +48,12 @@ try {
     if ($RequireReleaseSigning) { $env:BLUEGRASS_REQUIRE_RELEASE_SIGNING = 'true' }
     Invoke-Checked $FlutterExecutable @('clean')
     Invoke-Checked $FlutterExecutable @('pub', 'get', '--enforce-lockfile')
+    Push-Location (Join-Path (Split-Path $root -Parent) 'packages/client')
+    try {
+        Invoke-Checked $FlutterExecutable @('pub', 'get', '--enforce-lockfile')
+        Invoke-Checked $FlutterExecutable @('analyze')
+        Invoke-Checked $FlutterExecutable @('test')
+    } finally { Pop-Location }
     Invoke-Checked $FlutterExecutable @('analyze')
     Invoke-Checked $FlutterExecutable @('test')
     Push-Location (Join-Path $root 'native/core')

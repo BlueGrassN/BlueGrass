@@ -1,14 +1,15 @@
 [CmdletBinding()]
 param(
     [string]$Go = 'D:\Program Files\Go\bin\go.exe',
-    [string]$Dart = 'E:\tools\flutter\bin\cache\dart-sdk\bin\dart.exe',
-    [string]$FlutterTools = 'E:\tools\flutter\bin\cache\flutter_tools.snapshot',
+    [string]$Dart = 'E:\tools\flutter-3.47.9\bin\cache\dart-sdk\bin\dart.exe',
+    [string]$FlutterTools = 'E:\tools\flutter-3.47.9\bin\cache\flutter_tools.snapshot',
     [string]$Python = 'C:\msys64\ucrt64\bin\python.exe',
     [switch]$ScriptOnly
 )
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $false # Mutants must return failure without aborting restoration.
 $clientRoot = [IO.Path]::GetFullPath((Split-Path $PSScriptRoot -Parent))
+$repoRoot = Split-Path $clientRoot -Parent
 $experiment = Join-Path $clientRoot ('.artifacts\ablation\observed-exit-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $experiment | Out-Null
 $utf8 = [Text.UTF8Encoding]::new($false)
@@ -198,11 +199,11 @@ if ($LASTEXITCODE -ne 0) {
 if ($ScriptOnly) { Write-Output "Offline script contract passed: $experiment"; return }
 
 $copyRoot = Join-Path $experiment 'workspace'
-$native = Join-Path $copyRoot 'native\core'
-$app = Join-Path $copyRoot 'app'
+$native = Join-Path $copyRoot 'core'
+$app = Join-Path $copyRoot 'Windows\app'
 $inputs = [Collections.Generic.List[object]]::new()
 function Copy-Input([string]$Relative) {
-    $source = Join-Path $clientRoot $Relative
+    $source = Join-Path $repoRoot $Relative
     $dest = Join-Path $copyRoot $Relative
     $before = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
     New-Item -ItemType Directory -Force -Path (Split-Path $dest -Parent) | Out-Null
@@ -212,22 +213,22 @@ function Copy-Input([string]$Relative) {
     }
     $inputs.Add(@{path=$Relative; sha256=$before.ToLowerInvariant()})
 }
-foreach ($file in @('native\core\go.mod','native\core\go.sum')) { Copy-Input $file }
+foreach ($file in @('core\go.mod','core\go.sum')) { Copy-Input $file }
 foreach ($package in @('control','engine','gate','clock','protocolconfig')) {
-    foreach ($file in Get-ChildItem -LiteralPath (Join-Path $clientRoot "native\core\$package") -Filter '*.go' -File) {
-        Copy-Input "native\core\$package\$($file.Name)"
+    foreach ($file in Get-ChildItem -LiteralPath (Join-Path $repoRoot "core\$package") -Filter '*.go' -File) {
+        Copy-Input "core\$package\$($file.Name)"
     }
 }
-foreach ($folder in @('app\lib','app\assets','packages\domain\lib','packages\data_source\lib','contracts\fixtures')) {
-    foreach ($file in Get-ChildItem -LiteralPath (Join-Path $clientRoot $folder) -File -Recurse) {
-        Copy-Input ([IO.Path]::GetRelativePath($clientRoot, $file.FullName))
+foreach ($folder in @('Windows\app\lib','Windows\app\assets','packages\client\lib','packages\domain\lib','packages\data_source\lib','contracts\fixtures')) {
+    foreach ($file in Get-ChildItem -LiteralPath (Join-Path $repoRoot $folder) -File -Recurse) {
+        Copy-Input ([IO.Path]::GetRelativePath($repoRoot, $file.FullName))
     }
 }
-foreach ($file in @('app\test\observed_exit_test.dart','app\test\utils\native_process_fixture.dart')) { Copy-Input $file }
-foreach ($project in @('app','packages\domain','packages\data_source')) {
+foreach ($file in @('Windows\app\test\observed_exit_test.dart','Windows\app\test\utils\native_process_fixture.dart')) { Copy-Input $file }
+foreach ($project in @('Windows\app','packages\client','packages\domain','packages\data_source')) {
     foreach ($name in @('pubspec.yaml','pubspec.lock')) {
         $relative = "$project\$name"
-        if (Test-Path -LiteralPath (Join-Path $clientRoot $relative)) { Copy-Input $relative }
+        if (Test-Path -LiteralPath (Join-Path $repoRoot $relative)) { Copy-Input $relative }
     }
 }
 $inputs | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $experiment 'source-sha256.json') -Encoding utf8
@@ -276,7 +277,7 @@ try {
 if ((Native-Behavior 'restored' '^TestObservedExit') -ne 0) { throw "Native restoration failed: $experiment" }
 
 # Resolve dependencies offline inside the copy. Never reuse a package_config
-# that points the app/domain/data_source back into the shared workspace.
+# that points the windows/client/domain/data_source back into the shared workspace.
 Push-Location $app
 try {
     & $Dart $FlutterTools pub get --offline *> (Join-Path $experiment 'gui-dependencies.log')
@@ -285,7 +286,7 @@ try {
 $configPath = Join-Path $app '.dart_tool\package_config.json'
 $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
 $configURI = [Uri]::new($configPath)
-foreach ($name in @('bluegrass_client','bluegrass_domain','bluegrass_data_source')) {
+foreach ($name in @('bluegrass_windows','bluegrass_client','bluegrass_domain','bluegrass_data_source')) {
     $entry = @($config.packages | Where-Object name -eq $name)
     if ($entry.Count -ne 1) { throw "Missing isolated package: $name" }
     $resolved = [Uri]::new($configURI, [string]$entry[0].rootUri).LocalPath
@@ -293,7 +294,7 @@ foreach ($name in @('bluegrass_client','bluegrass_domain','bluegrass_data_source
         throw "Local package escaped the isolated snapshot: $name"
     }
 }
-$guiPath = Join-Path $app 'lib\app_controller.dart'
+$guiPath = Join-Path $copyRoot 'packages\client\lib\app_controller.dart'
 $guiOriginal = [IO.File]::ReadAllBytes($guiPath)
 $guiText = [Text.Encoding]::UTF8.GetString($guiOriginal)
 $guiMutation = Replace-ExactlyOnce $guiText 'actualExitIp = value is String && domain.isPublicIpv4(value) ? value : null;' '// Ablation: omit applying the current native observation to GUI state.'
@@ -310,7 +311,7 @@ try {
 if ((App-Behavior 'restored') -ne 0) { throw "GUI restoration failed: $experiment" }
 
 $changed = @($inputs | Where-Object {
-    (Get-FileHash -LiteralPath (Join-Path $clientRoot $_.path) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $_.sha256
+    (Get-FileHash -LiteralPath (Join-Path $repoRoot $_.path) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $_.sha256
 })
 $results = @{
     scriptContract='5 tests passed (subscription and asset lifecycle fixtures)'

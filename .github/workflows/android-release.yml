@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  FLUTTER_VERSION: '3.47.7'
+  FLUTTER_VERSION: '3.47.9'
   GO_VERSION: '1.27.2'
 
 jobs:
@@ -58,7 +58,7 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: |
             Android/native/core/go.sum
-            Windows/native/core/go.sum
+            core/go.sum
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -100,7 +100,7 @@ jobs:
           ./Android/scripts/build-release.ps1 -BuildNumber $env:BUILD_NUMBER -RequireReleaseSigning
       - name: Check dependency locks did not change
         run: |
-          git diff --exit-code -- Android/pubspec.lock Windows/packages/domain/pubspec.lock Windows/packages/data_source/pubspec.lock Android/native/core/go.mod Android/native/core/go.sum Windows/native/core/go.mod Windows/native/core/go.sum
+          git diff --exit-code -- Android/pubspec.lock packages/client/pubspec.lock packages/domain/pubspec.lock packages/data_source/pubspec.lock Android/native/core/go.mod Android/native/core/go.sum core/go.mod core/go.sum
           if ($LASTEXITCODE -ne 0) { throw 'Build changed a checked-in dependency lock.' }
       - name: Record artifact identity for publication retries
         id: artifact-name
