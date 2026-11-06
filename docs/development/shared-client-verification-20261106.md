@@ -6,7 +6,7 @@
 
 - domain 164、data_source 179、共享 client 34、Windows 440、Android 168、Mac 宿主 3 个测试通过；共享包和宿主静态分析通过。
 - 根 Go 核心完整测试、Windows 打包中的 race/vet、Android 桥接与实际 ARM64 Xray 原生库构建通过。
-- 契约 13、统一发布器 15、Mac 打包工具 11 个测试通过；Actionlint 通过（沿用 `macos-15-intel` runner 名称表例外）。54 个 PowerShell、13 个 Python 工具语法检查通过。
+- 契约 13、统一发布器 16、Mac 打包工具 11 个测试通过；Actionlint 通过（沿用 `macos-15-intel` runner 名称表例外）。54 个 PowerShell、13 个 Python 工具语法检查通过。
 - 原生、系统代理、生产 API、出口观测以及控制器 3 类消融均验证了正常基线、实际行为失败与精确恢复。
 - 窄屏 320dp / 1.8 倍字体的出口 IP 布局回归通过，覆盖亮暗主题、文本选择与桌面布局。
 - 16 个固定路由资源与迁移前 Git blob 字节一致；品牌资源与上游哈希未改写。
@@ -26,6 +26,10 @@
 共享源码已快进到 main：`1583186851dc327dc39e1842bb8eee459c2b05c2`。对应构建为 [Windows](https://github.com/BlueGrassN/BlueGrass/actions/runs/42186579789)、[Android](https://github.com/BlueGrassN/BlueGrass/actions/runs/42186579818)、[macOS 双架构](https://github.com/BlueGrassN/BlueGrass/actions/runs/42186579582)。后续发布器和文档修订不改变这些安装包的实际源码来源。
 
 三端主分支构建均成功。发布核验发现 GitHub 的 `status=success` 列表漏掉已成功的 Mac 运行，普通分支列表则已返回它；统一发布器改为读取分支列表后自行执行原有严格状态与来源筛选。新增回归先验证旧实现仍保留旧包的失败，再验证新实现更新合格包且拒绝更晚的 PR、fork、失败、运行中与非 main 记录；发布器共 16 项测试及 Actionlint 通过。
+
+修正发布器的提交为 `7c40d6520b43840ec404bfc4c8734eb07edbebd4`；[统一发布运行](https://github.com/BlueGrassN/BlueGrass/actions/runs/42189598643) 的测试和发布均成功。最终 preview 为 Windows `0.1.0-beta.1+30`、Android `0.5.0+100007`、macOS 双架构 `0.1.0-dev+18`，全部安装包的实际源码均为上述 `1583186`，Mac 两架构来自同一次运行。
+
+独立读取 Release 状态与 GitHub 附件记录，核对全部 12 个附件的 SHA256、字节数和已上传状态，并确认逐端 commit/run 正确、无待清理附件或额外附件。最终发布器 `--dry-run` 返回 `updated: []`、`errors: []`，再次执行无需修改已发布内容。
 
 ## 本地开发目录交接
 
