@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"math/rand/v2"
 	"net"
 	"net/netip"
+	"strconv"
 	"sync"
 	"testing"
 	"time"
@@ -18,16 +20,18 @@ import (
 // This keeps the redirect/echo fixture executable on Windows too.
 func darwinKernelOutboundFixture(t *testing.T, ctx context.Context, iface string) *xrayOutbound {
 	t.Helper()
-	// Windows can reserve different ephemeral ranges for TCP and UDP. Let UDP
-	// select a usable port first, then reserve the same port for TCP. A concurrent
-	// TCP listener may still win that port, so retry only this fixture allocation.
+	// TCP and UDP have different excluded ranges on Windows. Port-zero UDP
+	// allocations can repeatedly pick adjacent ports inside a TCP exclusion.
+	// Independently sample unprivileged loopback ports and reserve both sockets;
+	// do not modify exclusions or use the client's 10808/12808 ports.
 	var listener net.Listener
 	var udp net.PacketConn
 	var err error
 	for attempt := 0; attempt < 32; attempt++ {
-		udp, err = net.ListenPacket("udp4", "127.0.0.1:0")
+		address := net.JoinHostPort("127.0.0.1", strconv.Itoa(20000+rand.IntN(29000)))
+		udp, err = net.ListenPacket("udp4", address)
 		if err != nil {
-			t.Fatal(err)
+			continue
 		}
 		listener, err = net.Listen("tcp4", udp.LocalAddr().String())
 		if err == nil {

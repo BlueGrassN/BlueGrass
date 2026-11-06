@@ -1,5 +1,7 @@
 # BlueGrass Windows
 
+2026-11-06：新增[本地构建与 GitHub Release 流程](docs/github-release.md)。本地运行 `./Windows/scripts/package.ps1` 生成并解压测试包；Windows 相关代码推送到 main 后，GitHub 自动检查、构建并发布预发布 Release。
+
 2026-11-05 交互更新：首页“选择资源”改为可搜索的就地弹出面板。新版入口与验证记录见 [首页资源选择](docs/home-resource-picker.md)。
 
 2026-11-05：Windows 界面整体改为 FlClash v0.9.2 风格，保留 BlueGrass 功能与品牌。当前便携包为 **0.1.0-beta.1+21**；包含新仪表盘、可收起侧栏、窄窗口导航、资源卡片和统一的浅色/深色页面。运行入口、截图、备份与验收记录见 [FlClash 风格界面改版](docs/flclash-ui-redesign.md)。

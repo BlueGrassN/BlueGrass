@@ -1,5 +1,7 @@
 # BlueGrass
 
+- [Windows 自动构建与下载](Windows/docs/github-release.md)：本地测试打包、main 推送后 GitHub Actions 编译并发布到 [Releases](https://github.com/BlueGrassN/BlueGrass/releases)。
+
 BlueGrass 客户端及独立 Go API 的开发资料。客户端通过专用 API 接入太阳IP账号与中转节点，官网登录与客户端会话分离：
 
 2026-10-19：Windows、Android、iOS、macOS **全部仅使用 Xray-core**，禁止旧核心回退或第二代理内核。当前固定官方 v26.10.17（上游预发布），实际 Go 伪版本及逐平台状态见共享手册。Windows/Android 正在迁移；iOS/macOS 尚无可运行客户端。旧内核测试不能作为本次验证。

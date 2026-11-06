@@ -1,0 +1,170 @@
+name: Windows build and release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Windows/**'
+      - '.github/workflows/windows-release.yml'
+      - '.gitattributes'
+      - '.gitignore'
+  pull_request:
+    paths:
+      - 'Windows/**'
+      - '.github/workflows/windows-release.yml'
+      - '.gitattributes'
+      - '.gitignore'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never cancel a run while it is uploading/publishing a Release.
+concurrency:
+  group: windows-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+    outputs:
+      artifact: ${{ steps.config.outputs.artifact }}
+      version: ${{ steps.config.outputs.version }}
+      build: ${{ steps.config.outputs.build }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Read pinned toolchain and build version
+        id: config
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tools = Get-Content Windows/toolchain.json -Raw | ConvertFrom-Json
+          $release = Get-Content Windows/release.json -Raw | ConvertFrom-Json
+          $build = [int]$release.buildBase + [int]$env:RUN_NUMBER
+          if ($build -lt 1 -or $build -gt 65535) { throw 'Build number exceeds the Windows version range.' }
+          "flutter=$($tools.flutter)" >> $env:GITHUB_OUTPUT
+          "go=$($tools.go)" >> $env:GITHUB_OUTPUT
+          "version=$($release.version)" >> $env:GITHUB_OUTPUT
+          "build=$build" >> $env:GITHUB_OUTPUT
+          "artifact=windows-release-$env:RUN_ID-$env:RUN_ATTEMPT" >> $env:GITHUB_OUTPUT
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: ${{ steps.config.outputs.go }}
+          cache-dependency-path: Windows/native/core/go.sum
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ steps.config.outputs.flutter }}
+          channel: stable
+          cache: true
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: Windows/contracts/requirements-test.txt
+      - name: Prepare Windows build tools
+        run: |
+          $ErrorActionPreference = 'Stop'
+          "BLUEGRASS_PYTHON=$((Get-Command python).Source)" >> $env:GITHUB_ENV
+          Get-Command go, flutter, python, gcc, windres | Format-Table Name, Source
+          python -m pip install --requirement Windows/contracts/requirements-test.txt
+          if ($LASTEXITCODE -ne 0) { throw 'Python dependency installation failed.' }
+      - name: Check, build, extract and verify Windows client
+        env:
+          CLIENT_VERSION: ${{ steps.config.outputs.version }}
+          CLIENT_BUILD: ${{ steps.config.outputs.build }}
+        run: ./Windows/scripts/package.ps1 -Version $env:CLIENT_VERSION -Build ([int]$env:CLIENT_BUILD)
+      - name: Check dependency lockfiles stayed unchanged
+        run: |
+          git diff --exit-code -- Windows/app/pubspec.lock Windows/packages/domain/pubspec.lock Windows/packages/data_source/pubspec.lock Windows/native/core/go.mod Windows/native/core/go.sum
+          if ($LASTEXITCODE -ne 0) { throw 'Build changed dependency lockfiles.' }
+      - name: Upload verified download files
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ steps.config.outputs.artifact }}
+          path: |
+            Windows/dist/release/BlueGrass-Windows-x64.zip
+            Windows/dist/release/SHA256SUMS.txt
+            Windows/dist/release/build-info.json
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+      - name: Upload verification logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-checks-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            Windows/.artifacts/verification/*.log
+            Windows/.artifacts/verification/observed-exit-bundle.json
+            Windows/.artifacts/verification/portable-runtime.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  release:
+    needs: build
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: ${{ needs.build.outputs.artifact }}
+          path: release
+      - name: Verify artifact identity and checksums
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          CLIENT_VERSION: ${{ needs.build.outputs.version }}
+          CLIENT_BUILD: ${{ needs.build.outputs.build }}
+        run: |
+          cd release
+          sha256sum --check SHA256SUMS.txt
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          info = json.loads(Path('build-info.json').read_text(encoding='utf-8-sig'))
+          archive = Path('BlueGrass-Windows-x64.zip')
+          assert info['sourceCommit'] == os.environ['SOURCE_SHA']
+          assert info['version'] == os.environ['CLIENT_VERSION']
+          assert info['build'] == int(os.environ['CLIENT_BUILD'])
+          assert info['bytes'] == archive.stat().st_size
+          assert info['sha256'] == hashlib.sha256(archive.read_bytes()).hexdigest()
+          assert info['signed'] is False
+          PY
+      - name: Publish Windows prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          CLIENT_VERSION: ${{ needs.build.outputs.version }}
+          CLIENT_BUILD: ${{ needs.build.outputs.build }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          release_tag="windows-v${CLIENT_VERSION}-build.${CLIENT_BUILD}-r${RUN_ATTEMPT}"
+          cat > release-notes.md <<EOF
+          Windows x64 测试版。下载 BlueGrass-Windows-x64.zip，完整解压后运行 BlueGrass.exe，保留同级 runtime 文件夹。
+
+          版本：${CLIENT_VERSION}+${CLIENT_BUILD}
+          来源提交：${SOURCE_SHA}
+          构建记录：${RUN_URL}
+
+          附有 SHA256SUMS.txt 和 build-info.json。本包未做应用代码签名；CI 验证构建、回归和便携助手，不执行真实账号连接、管理员 TUN 接管或签名安装验收。
+          EOF
+          gh release create "$release_tag" \
+            release/BlueGrass-Windows-x64.zip release/SHA256SUMS.txt release/build-info.json \
+            --target "$SOURCE_SHA" --draft --prerelease --latest=false \
+            --title "Windows ${CLIENT_VERSION}+${CLIENT_BUILD}" --notes-file release-notes.md
+          gh release edit "$release_tag" --draft=false --prerelease --latest=false
+          gh release view "$release_tag" --json url --jq .url >> "$GITHUB_STEP_SUMMARY"

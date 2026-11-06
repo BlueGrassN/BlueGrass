@@ -3,13 +3,8 @@ $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\toolchain.ps1"
 $Go = (Get-Command go -ErrorAction Stop).Source
 # CPython wheels must not be loaded by the unrelated MSYS Python runtime.
-$Python = if ($env:BLUEGRASS_PYTHON) { $env:BLUEGRASS_PYTHON } else {
-    (Get-Command python -All -ErrorAction Stop | Where-Object {
-        $_.Source -notmatch '\\msys64\\|\\WindowsApps\\'
-    } | Select-Object -First 1).Source
-}
-if (!$Python -or !(Test-Path -LiteralPath $Python)) { throw 'Set BLUEGRASS_PYTHON to the CPython executable used to install contracts/requirements-test.txt.' }
-if (Test-Path -LiteralPath 'C:\msys64\ucrt64\bin\gcc.exe') {
+$Python = Get-BlueGrassPython
+if (!(Get-Command gcc -ErrorAction SilentlyContinue) -and (Test-Path -LiteralPath 'C:\msys64\ucrt64\bin\gcc.exe')) {
     $env:Path = 'C:\msys64\ucrt64\bin;' + $env:Path
 }
 $env:CGO_ENABLED = '1'

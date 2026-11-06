@@ -2,8 +2,8 @@ param([string]$ControlApiHost = 'client-api.sunip.vip')
 $ErrorActionPreference = 'Stop'
 if ($ControlApiHost -notmatch '^[a-zA-Z0-9.-]+$' -or $ControlApiHost.Length -gt 253) { throw 'ControlApiHost must be a numeric IPv4 or DNS host name.' }
 $ControlApiHost = $ControlApiHost.ToLowerInvariant()
-$env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' +
-    [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + $env:Path
+$env:Path = $env:Path + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' +
+    [Environment]::GetEnvironmentVariable('Path', 'User')
 $Go = (Get-Command go -ErrorAction Stop).Source
 $clientRoot = Split-Path $PSScriptRoot -Parent
 $output = Join-Path $clientRoot 'native\bin'
@@ -18,7 +18,10 @@ try {
     $env:GOARCH = 'amd64'
     & "$PSScriptRoot\verify-native-dependencies.ps1" -Go $Go
     & "$PSScriptRoot\prepare-wintun.ps1" -Destination $output
-    $windres = 'C:\msys64\ucrt64\bin\windres.exe'
+    $windres = if ($env:BLUEGRASS_WINDRES) { $env:BLUEGRASS_WINDRES } else {
+        $found = Get-Command windres -ErrorAction SilentlyContinue
+        if ($found) { $found.Source } else { 'C:\msys64\ucrt64\bin\windres.exe' }
+    }
     if (!(Test-Path -LiteralPath $windres)) { throw 'windres is required for native execution manifests.' }
     foreach ($command in @('bluegrass-repair', 'bluegrass-update', 'bluegrass-diagnostics')) {
         Push-Location (Join-Path 'cmd' $command)
