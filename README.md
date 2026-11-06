@@ -4,6 +4,8 @@
 
 BlueGrass 客户端及独立 Go API 的开发资料。客户端通过专用 API 接入太阳IP账号与中转节点，官网登录与客户端会话分离：
 
+Android 构建入口：本地执行 `./Android/scripts/build-release.ps1`；推送 `main` 后，GitHub Actions 自动生成 ARM64 APK 并发布到 [Releases](https://github.com/BlueGrassN/BlueGrass/releases)。本仓库已配置固定 Alpha 签名，仓库结构与操作说明见 [Android 自动构建与发布](Android/docs/github-release.md)。
+
 2026-10-19：Windows、Android、iOS、macOS **全部仅使用 Xray-core**，禁止旧核心回退或第二代理内核。当前固定官方 v26.10.17（上游预发布），实际 Go 伪版本及逐平台状态见共享手册。Windows/Android 正在迁移；iOS/macOS 尚无可运行客户端。旧内核测试不能作为本次验证。
 
 - [四端共享开发手册](docs/development/four-platform-development.md)：统一内核、依赖锁、API/远程配置、连接保护和验证证据。

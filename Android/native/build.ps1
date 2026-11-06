@@ -1,6 +1,6 @@
 param(
   [string]$AndroidSdk = $env:ANDROID_HOME,
-  [string]$JavaHome = 'D:\Android\Android Studio\jbr',
+  [string]$JavaHome = $env:JAVA_HOME,
   [ValidateSet('arm64')][string[]]$Architecture = @('arm64'),
   [string]$GoExecutable = 'go'
 )

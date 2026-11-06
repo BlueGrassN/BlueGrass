@@ -4,6 +4,21 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// CI injects a persistent keystore; local test builds retain their debug key.
+val releaseSigning = listOf(
+    "BLUEGRASS_ANDROID_KEYSTORE",
+    "BLUEGRASS_ANDROID_STORE_PASSWORD",
+    "BLUEGRASS_ANDROID_KEY_ALIAS",
+    "BLUEGRASS_ANDROID_KEY_PASSWORD",
+).associateWith { System.getenv(it)?.takeIf(String::isNotBlank) }
+val hasReleaseSigning = releaseSigning.values.all { it != null }
+require(releaseSigning.values.none { it != null } || hasReleaseSigning) {
+    "Android signing configuration is incomplete; provide all four BLUEGRASS_ANDROID_* signing variables."
+}
+require(System.getenv("BLUEGRASS_REQUIRE_RELEASE_SIGNING") != "true" || hasReleaseSigning) {
+    "Publishing requires a persistent Android signing key; debug signing is only for local/PR tests."
+}
+
 android {
     namespace = "com.bluegrass.client"
     compileSdk = flutter.compileSdkVersion
@@ -39,11 +54,20 @@ android {
         }
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("distribution") {
+                storeFile = file(releaseSigning.getValue("BLUEGRASS_ANDROID_KEYSTORE")!!)
+                storePassword = releaseSigning.getValue("BLUEGRASS_ANDROID_STORE_PASSWORD")
+                keyAlias = releaseSigning.getValue("BLUEGRASS_ANDROID_KEY_ALIAS")
+                keyPassword = releaseSigning.getValue("BLUEGRASS_ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName(if (hasReleaseSigning) "distribution" else "debug")
         }
     }
 

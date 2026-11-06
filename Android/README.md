@@ -24,6 +24,8 @@ Android 8.0（API 26）及以上的 Flutter 客户端，应用标识 `com.bluegr
 
 ## 构建与运行
 
+推荐在仓库根目录执行 `./Android/scripts/build-release.ps1`，自动完成检查、原生库和 ARM64 APK 构建，输出到 `Android/dist/<版本>+<构建号>/`。推送到 `main` 后，GitHub Actions 使用同一脚本构建并上传到 Release；本仓库已配置固定 Alpha 签名的四个 Actions Secrets。详见[本地与 GitHub 自动发布](docs/github-release.md)。下方保留逐步开发命令。
+
 在 Android Studio 打开本目录作为 Flutter 工程，入口 `lib/main.dart`。四端统一默认 API 为 `https://client-api.sunip.vip/api/client/v1`，官网为 `https://sunipip.com/`，远程 bootstrap 为 `https://client-api.sunip.vip/client-config/config.json`；域名变化重新登录，不转发旧环境 token。迁移后的实际接入须验证，规则见[共享配置](../client-config/README.md)。连接首次需用户接受系统 VPN 授权。
 
 首次构建或修改 Go 源码后先生成原生库；默认只构建 ARM64：

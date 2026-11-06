@@ -1,0 +1,176 @@
+name: Android build and release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.event.pull_request.number || github.run_id }}
+  # Every main run gets its own queue; only superseded PR checks are cancelled.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  FLUTTER_VERSION: '3.47.7'
+  GO_VERSION: '1.27.2'
+
+jobs:
+  build:
+    name: Build verified ARM64 APK
+    runs-on: windows-2025
+    timeout-minutes: 60
+    outputs:
+      artifact-name: ${{ steps.artifact-name.outputs.name }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check release signing secrets
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          foreach ($name in @('KEYSTORE_BASE64', 'STORE_PASSWORD', 'KEY_ALIAS', 'KEY_PASSWORD')) {
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) {
+              throw 'Configure ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD in repository Actions secrets. See Android/docs/github-release.md.'
+            }
+          }
+          $bytes = [Convert]::FromBase64String($env:KEYSTORE_BASE64)
+          if ($bytes.Length -eq 0) { throw 'The signing keystore is empty.' }
+          [IO.File]::WriteAllBytes((Join-Path $env:RUNNER_TEMP 'bluegrass-android.jks'), $bytes)
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            Android/native/core/go.sum
+            Windows/native/core/go.sum
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Install pinned Android SDK components
+        run: |
+          $manager = Join-Path $env:ANDROID_HOME 'cmdline-tools/latest/bin/sdkmanager.bat'
+          if (-not (Test-Path -LiteralPath $manager)) { throw 'Android command line tools are missing from the runner.' }
+          1..100 | ForEach-Object { 'y' } | & $manager --licenses
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to accept Android SDK licenses.' }
+          & $manager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358'
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to install pinned Android SDK packages.' }
+          flutter config --android-sdk $env:ANDROID_HOME --jdk-dir $env:JAVA_HOME
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to configure Flutter Android tools.' }
+      - name: Set build identity
+        id: identity
+        run: |
+          $match = [regex]::Match((Get-Content Android/pubspec.yaml -Raw), '(?m)^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$')
+          if (-not $match.Success) { throw 'Invalid Android version.' }
+          $number = 100000L + [long]$env:GITHUB_RUN_NUMBER
+          if ($number -lt [long]$match.Groups[2].Value -or $number -gt 2100000000) { throw 'CI build number is outside the valid increasing range.' }
+          "number=$number" >> $env:GITHUB_OUTPUT
+          "directory=$($match.Groups[1].Value)+$number" >> $env:GITHUB_OUTPUT
+      - name: Build local test APK (PR or non-main manual run)
+        if: github.event_name == 'pull_request' || github.ref != 'refs/heads/main'
+        env:
+          BUILD_NUMBER: ${{ steps.identity.outputs.number }}
+        run: ./Android/scripts/build-release.ps1 -BuildNumber $env:BUILD_NUMBER
+      - name: Build signed distribution APK
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          BUILD_NUMBER: ${{ steps.identity.outputs.number }}
+          BLUEGRASS_ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          BLUEGRASS_ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          BLUEGRASS_ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          $env:BLUEGRASS_ANDROID_KEYSTORE = Join-Path $env:RUNNER_TEMP 'bluegrass-android.jks'
+          ./Android/scripts/build-release.ps1 -BuildNumber $env:BUILD_NUMBER -RequireReleaseSigning
+      - name: Check dependency locks did not change
+        run: |
+          git diff --exit-code -- Android/pubspec.lock Windows/packages/domain/pubspec.lock Windows/packages/data_source/pubspec.lock Android/native/core/go.mod Android/native/core/go.sum Windows/native/core/go.mod Windows/native/core/go.sum
+          if ($LASTEXITCODE -ne 0) { throw 'Build changed a checked-in dependency lock.' }
+      - name: Record artifact identity for publication retries
+        id: artifact-name
+        run: '"name=Android-arm64-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT" >> $env:GITHUB_OUTPUT'
+      - name: Upload verified APK and checksums
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ steps.artifact-name.outputs.name }}
+          path: Android/dist/${{ steps.identity.outputs.directory }}/*
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+      - name: Remove temporary signing key
+        if: always()
+        run: |
+          $key = Join-Path $env:RUNNER_TEMP 'bluegrass-android.jks'
+          if (Test-Path -LiteralPath $key) { Remove-Item -LiteralPath $key -Force }
+
+  release:
+    name: Publish Android download
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      # This job never executes repository code with the publishing token.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: ${{ needs.build.outputs.artifact-name }}
+          path: dist
+      - name: Validate artifact and prepare release notes
+        id: metadata
+        shell: python
+        run: |
+          import hashlib, json, os, pathlib, re
+          root = pathlib.Path('dist')
+          info = json.loads((root / 'build-info.json').read_text())
+          assert info['sourceCommit'] == os.environ['GITHUB_SHA'], 'Wrong source commit'
+          assert info['sourceDirty'] is False, 'Refusing artifact from modified checkout'
+          assert info['signingMode'] == 'configured', 'Refusing test-signed artifact'
+          assert re.fullmatch(r'\d+\.\d+\.\d+', info['version']), 'Invalid version'
+          assert info['buildNumber'] == 100000 + int(os.environ['GITHUB_RUN_NUMBER']), 'Wrong build number'
+          expected = f"BlueGrass-Android-{info['version']}+{info['buildNumber']}-arm64.apk"
+          assert info['apk'] == expected, 'Unexpected APK name'
+          digest = hashlib.sha256((root / expected).read_bytes()).hexdigest()
+          assert digest == info['sha256'], 'APK checksum mismatch'
+          assert (root / 'SHA256SUMS').read_text() == f'{digest}  {expected}\n', 'Checksum file mismatch'
+          tag = f"android-v{info['version']}-build.{info['buildNumber']}-r{os.environ['GITHUB_RUN_ATTEMPT']}"
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f"tag={tag}\napk={expected}\n")
+          pathlib.Path('release-notes.md').write_text(
+              f"Android ARM64 自动构建 · {info['version']}+{info['buildNumber']}\n\n"
+              "下载 Assets 中的 `.apk` 文件安装，支持 Android 8.0 及以上 ARM64 设备。\n\n"
+              f"源码提交：{info['sourceCommit']}\n\n"
+              f"构建记录：{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}\n\n"
+              f"APK SHA256：`{digest}`\n\n"
+              "已通过自动化测试及安装包检查；该自动构建未执行设备 VPN 转发验收。\n",
+              encoding='utf-8')
+      - name: Publish complete prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.metadata.outputs.tag }}
+          APK_NAME: ${{ steps.metadata.outputs.apk }}
+        run: |
+          set -euo pipefail
+          gh release create "$RELEASE_TAG" \
+            "dist/$APK_NAME" dist/SHA256SUMS dist/build-info.json \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "BlueGrass Android $RELEASE_TAG" \
+            --notes-file release-notes.md --draft --prerelease
+          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest=false

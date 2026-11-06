@@ -1,12 +1,13 @@
 param(
   [string]$AndroidSdk = $env:ANDROID_HOME,
-  [string]$JavaHome = 'D:\Android\Android Studio\jbr',
+  [string]$JavaHome = $env:JAVA_HOME,
   # The distributed Android client targets ARM64 phones only.
   [ValidateSet('arm64')][string[]]$Architecture = @('arm64'),
   [string]$GoExecutable = 'go'
 )
 $ErrorActionPreference = 'Stop'
 if (-not $AndroidSdk) { $AndroidSdk = 'E:\AndroidTools\sdk' }
+if (-not $JavaHome) { $JavaHome = 'D:\Android\Android Studio\jbr' }
 $nativeRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\native\core'))
 $outputDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\android\app\libs'))
 $architectures = @($Architecture | ForEach-Object { $_.ToLowerInvariant() } | Select-Object -Unique)
