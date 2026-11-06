@@ -71,7 +71,7 @@ jobs:
         run: |
           (cd Windows/packages/domain && dart pub get && dart test)
           (cd Windows/packages/data_source && dart pub get && dart test)
-          (cd Windows/app && flutter test test/macos_platform_test.dart test/macos_admin_tun_test.dart test/macos_control_http_transport_test.dart test/control_http_transport_test.dart test/control_http_build_origin_test.dart)
+          (cd Windows/app && flutter test test/macos_platform_test.dart test/macos_admin_tun_test.dart test/macos_control_http_transport_test.dart test/control_http_transport_test.dart test/control_http_build_origin_test.dart test/protected_login_ui_test.dart)
           (cd Mac/app && flutter test)
           python3 -m unittest discover -s Mac/tools/tests -v
       - name: Test native core, TUN and proxy lifecycle

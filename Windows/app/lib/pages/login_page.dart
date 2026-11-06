@@ -27,9 +27,11 @@ extension _LoginPage on _ShellState {
             ),
           ),
           const SizedBox(height: 28),
+          // Local editing does not require a ready network/protection state.
+          // The login button, submit handler and controller enforce that gate.
           TextField(
             controller: username,
-            enabled: !c.busy && c.canLogin,
+            enabled: !c.busy,
             autofillHints: const [AutofillHints.username],
             textInputAction: TextInputAction.next,
             decoration: const InputDecoration(
@@ -40,7 +42,7 @@ extension _LoginPage on _ShellState {
           const SizedBox(height: 14),
           TextField(
             controller: password,
-            enabled: !c.busy && c.canLogin,
+            enabled: !c.busy,
             obscureText: obscure,
             autofillHints: const [AutofillHints.password],
             onSubmitted: (_) => _login(),

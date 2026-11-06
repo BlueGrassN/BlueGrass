@@ -4,9 +4,9 @@
 
 ## 安装
 
-1. Apple Silicon（M 系列）下载 `arm64` 产物；Intel 下载 `x86_64` 产物。要求 macOS 13 或更高版本。
-2. 解压 GitHub artifact 后，按 `SHA256SUMS.txt` 核对其中应用 ZIP：`shasum -a 256 BlueGrass-macOS-*.zip`。
-3. 再解压应用 ZIP，将 `BlueGrass.app` 放到“应用程序”。退出旧版并主动断开连接后再替换。
+1. Apple Silicon（M 系列）下载 `arm64` 应用 ZIP；Intel 下载 `x86_64` 应用 ZIP。要求 macOS 13 或更高版本。Release 页面可直接下载应用 ZIP；若从 Actions 下载 artifact，先解压外层 artifact。
+2. 同时下载 `SHA256SUMS.txt`，运行 `shasum -a 256 BlueGrass-macOS-*.zip`，将结果与其中对应文件名的 SHA-256 核对。
+3. 解压应用 ZIP，将 `BlueGrass.app` 放到“应用程序”。退出旧版并主动断开连接后再替换。
 4. 首次打开时，开发签名可能触发 Gatekeeper 拦截。仅在确认此包来自自己的本次 GitHub 构建后，按 macOS“系统设置 → 隐私与安全性”给该应用单独允许打开。无需关闭系统级安全功能。
 5. 若系统提示访问 BlueGrass 钥匙串记录或修改网络设置，请核对应用名称后授权。拒绝权限时应显示失败，不应报告已连接。
 
@@ -24,7 +24,7 @@ TUN 使用按需启动的管理员原生组件，无需 Apple Developer 证书�
 ## 建议的验收顺序
 
 1. 打开“系统设置 → 网络 → 当前网络 → 详细信息 → 代理”，记录测试前的代理/PAC/绕过设置。
-2. 登录、检查资源列表和平台文案，切换主题、调整窗口宽度，确认界面与 Windows 版一致。
+2. 首次启动时点击账号和密码框，确认出现光标且可输入；启动或网络恢复检查未完成时可以先填写，但登录按钮和回车不得提前提交。准备完成后登录、检查资源列表和平台文案，切换主题、调整窗口宽度，确认界面与 Windows 版一致。
 3. 连接一条有效线路；若需授权，允许 BlueGrass 修改系统代理。检查客户端实际出口并用遵循系统代理的浏览器联网。
 4. 主动断开，核对原有代理设置恢复，其他程序后来修改的设置不应被覆盖。
 5. 重新连接后关闭主窗口，从菜单栏恢复窗口；再从菜单栏退出，核对代理恢复。
@@ -49,4 +49,4 @@ TUN 的受保护状态位于 `/Library/Application Support/BlueGrass/Tunnel`，�
 
 ## 构建方式
 
-工作流上传到 GitHub 后，向 `main` 推送 Mac 或其共享依赖源码会触发 `macOS development build`。工作流存在于默认分支时，也可在 Actions 页面使用 `Run workflow` 手动选择分支，或在已有运行页面重新运行。两个架构分别上传 artifact，保留 14 天。源码中的 `Mac/tools/build.py` 也可在配置好同版本 Flutter/Go/Xcode 的 Mac 上运行。
+工作流上传到 GitHub 后，向 `main` 推送 Mac 或其共享依赖源码会触发 `macOS development build`。工作流存在于默认分支时，也可在 Actions 页面使用 `Run workflow` 手动选择分支，或在已有运行页面重新运行。两个架构分别上传 artifact，保留 14 天；已发布的开发版本可从 Releases 页面下载。源码中的 `Mac/tools/build.py` 也可在配置好同版本 Flutter/Go/Xcode 的 Mac 上运行。
