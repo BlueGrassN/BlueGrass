@@ -19,7 +19,19 @@
 
 该测试只等待 `paused`，但定时器在获取引擎锁、关闭业务通道前就会发布这个状态。本地锁住引擎锁可稳定复现 `expired=true, gateOpen=true, intent=true` 的中间快照。修正仅让测试在原有 2 秒上限内等待完整到期结果，并检查最后的引擎调用为 `close, stop`；保留 80ms 真实定时器，不修改生产代码或直接调用到期方法。
 
-修正后到期定时器测试连续 100 次通过，`go test -race ./control` 通过。Mac 双架构的最终结果须另看后续运行，不能把首次运行描述为全部成功。
+修正后到期定时器测试连续 100 次通过，`go test -race ./control` 通过。[补充 Mac 运行](https://github.com/BlueGrassN/BlueGrass/actions/runs/42185454795) 的 arm64 与 x86_64 均成功，覆盖共享/原生测试、隔离 utun/PF 检查、开发包构建、提权启动与平台契约。
+
+## 主分支来源
+
+共享源码已快进到 main：`1583186851dc327dc39e1842bb8eee459c2b05c2`。对应构建为 [Windows](https://github.com/BlueGrassN/BlueGrass/actions/runs/42186579789)、[Android](https://github.com/BlueGrassN/BlueGrass/actions/runs/42186579818)、[macOS 双架构](https://github.com/BlueGrassN/BlueGrass/actions/runs/42186579582)。后续发布器和文档修订不改变这些安装包的实际源码来源。
+
+三端主分支构建均成功。发布核验发现 GitHub 的 `status=success` 列表漏掉已成功的 Mac 运行，普通分支列表则已返回它；统一发布器改为读取分支列表后自行执行原有严格状态与来源筛选。新增回归先验证旧实现仍保留旧包的失败，再验证新实现更新合格包且拒绝更晚的 PR、fork、失败、运行中与非 main 记录；发布器共 16 项测试及 Actionlint 通过。
+
+## 本地开发目录交接
+
+原开发目录在同步前核对了 1,325 个基线文件哈希，无其他任务写入；通过 Git 快进迁移源码，保留原有 `.gitattributes` 注释修改。旧目录仅剩的生成文件与日志归档到本地忽略的 `.artifacts/shared-client-handoff-20261106/legacy-generated`，没有递归删除构建缓存或上传测试日志。
+
+三个共享包和 Windows、Android、Mac 宿主均重新解析依赖，Mac 资源同步完成。契约测试依赖随目录迁移，原目录运行 `contracts/test_contracts.py` 的 13 项检查通过。现有 Windows 原生输出目录 `Windows/native/bin` 保持可用。
 
 ## 验证边界
 

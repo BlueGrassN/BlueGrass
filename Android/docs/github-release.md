@@ -85,3 +85,5 @@ keytool -genkeypair -v -keystore 'E:/private/bluegrass-android.jks' -alias blueg
 实现参考：[GitHub workflow 语法](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)、[Flutter Android 签名与发布](https://docs.flutter.dev/deployment/android)、[GitHub CLI Release](https://cli.github.com/manual/gh_release_create)。
 
 本轮实际本地构建、全新源码副本及边界见[2026-11-06 验证记录](github-release-verification-20261106.md)。
+
+统一发布器读取 main 分支运行列表，再逐条核验成功状态与来源，避免 GitHub 状态筛选索引滞后漏掉新包。以 preview 页面逐端 commit/run 和附件摘要确认更新；补发使用共享发布手册中的统一工作流。

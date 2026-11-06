@@ -33,10 +33,11 @@ def archive(files):
     return stream.getvalue()
 
 
-def android(info_changes=None, payload=b'apk'):
-    name = 'BlueGrass-Android-0.5.0+100002-arm64.apk'
+def android(info_changes=None, payload=b'apk', number=2):
+    build = 100000 + number
+    name = f'BlueGrass-Android-0.5.0+{build}-arm64.apk'
     digest = hashlib.sha256(payload).hexdigest()
-    info = dict(version='0.5.0', buildNumber=100002, sourceCommit=SHA,
+    info = dict(version='0.5.0', buildNumber=build, sourceCommit=SHA,
                 sourceDirty=False, signingMode='configured', apk=name, sha256=digest)
     info.update(info_changes or {})
     return archive({name: payload, 'build-info.json': json.dumps(info),
@@ -142,6 +143,40 @@ class FakeGitHub:
 
 
 class PublicationTests(unittest.TestCase):
+    def test_completed_run_is_published_when_server_success_index_lags(self):
+        old_run, latest = run(2), run(3)
+        old, old_files = p.prepare('android', old_run, {'android': android()})
+        payload = {'android': android(number=3, payload=b'new apk')}
+
+        class LaggingIndexGitHub(FakeGitHub):
+            def pages(self, path, key):
+                if 'android-release.yml' not in path:
+                    return []
+                if 'status=success' in path:
+                    return [old_run]
+                return [run(9, status='in_progress'), run(8, conclusion='failure'),
+                        run(7, event='pull_request'), run(6, head_branch='feature'),
+                        run(5, head_repository={'full_name': 'elsewhere/fork'}),
+                        latest, old_run]
+
+            def api(self, path, *args):
+                if path == f'compare/{SHA}...main':
+                    return {'status': 'identical'}
+                raise AssertionError(path)
+
+            def archives(self, platform, selected):
+                if platform != 'android' or selected != latest:
+                    raise AssertionError('Downloaded an ineligible run')
+                return payload
+
+        api = LaggingIndexGitHub({'android': old}, old_files)
+        with tempfile.TemporaryDirectory() as tmp:
+            state = p.reconcile(api, REPO, Path(tmp), dry_run=False)
+        self.assertEqual(state['android']['runId'], latest['id'])
+        self.assertEqual(p.parse_state(api.body)['android']['version'], '0.5.0+100003')
+        expected, _ = p.prepare('android', latest, payload)
+        self.assertEqual(set(api.assets), set(expected['assets']))
+
     def test_existing_draft_uses_cli_pending_tag_lookup_and_numeric_identity(self):
         draft = {'id': 42, 'tag_name': 'preview', 'draft': True, 'assets': [],
                  'body': p.render_notes({}, REPO)}

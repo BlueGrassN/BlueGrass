@@ -60,3 +60,5 @@ $env:BLUEGRASS_PYTHON = '你的 CPython python.exe 完整路径'
 当前交付仍是未签名便携测试包；预发布 Release 不代表已经取得应用签名，也不启用正式自动更新或绕过 TUN 服务信任校验。`testaccount.txt` 保持忽略，不能作为 Actions secret、artifact 或 Release 文件上传。
 
 GitHub 权限与发布语义参照：[GITHUB_TOKEN](https://docs.github.com/en/actions/tutorials/authenticate-with-github_token)、[Release API](https://docs.github.com/en/rest/releases/releases)。
+
+统一发布器读取 main 分支运行列表，再逐条核验成功状态与来源，避免 GitHub 状态筛选索引滞后漏掉新包。以 preview 页面逐端 commit/run 和附件摘要确认更新；补发使用共享发布手册中的统一工作流。

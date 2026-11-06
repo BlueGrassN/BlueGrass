@@ -2,7 +2,7 @@
 
 公共代码已集中到根 `packages/`、`core/` 和 `contracts/`；Android、Windows、macOS 宿主共同消费 `packages/client`。功能归属和验证入口见 [跨端共享客户端架构](docs/development/shared-client-architecture.md)。
 
-- [统一开发预览版下载](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)：Windows、Android、macOS 双架构的最新成功安装包集中在同一页面，按平台独立更新。发布规则见 [共享发布手册](docs/development/github-releases.md)。
+- [统一开发预览版下载](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)：Windows、Android、macOS 双架构的最新成功安装包集中在同一页面，按平台独立更新。发布规则见 [共享发布手册](docs/development/github-releases.md)。 发布器自行核验 main 运行的成功状态，实际更新以页面逐端源码和附件记录为准。
 - [Windows 自动构建与下载](Windows/docs/github-release.md)：本地测试打包与 GitHub Actions 构建。
 
 BlueGrass 客户端及独立 Go API 的开发资料。客户端通过专用 API 接入太阳IP账号与中转节点，官网登录与客户端会话分离：

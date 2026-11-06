@@ -50,3 +50,5 @@ TUN 的受保护状态位于 `/Library/Application Support/BlueGrass/Tunnel`，�
 ## 构建方式
 
 工作流上传到 GitHub 后，向 `main` 推送 Mac 或其共享依赖源码会触发 `macOS development build`。工作流存在于默认分支时，也可在 Actions 页面使用 `Run workflow` 手动选择分支，或在已有运行页面重新运行。两个架构分别上传 artifact，保留 14 天；两架构同一次运行成功后，由 `publish-preview.yml` 自动更新到固定 [preview Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)，与 Windows/Android 集中展示。失败时保留前一次 macOS 下载，不再新增独立 macOS tag。附件带版本和 attempt 前缀，原始 BUILD.json 信息保留在同前缀元数据中。并发与重跑规则见 [统一发布手册](../../docs/development/github-releases.md)。源码中的 `Mac/tools/build.py` 也可在配置好同版本 Flutter/Go/Xcode 的 Mac 上运行。
+
+统一发布器读取 main 分支运行列表，再逐条核验成功状态与来源，避免 GitHub 状态筛选索引滞后漏掉新包。以 preview 页面逐端 commit/run 和附件摘要确认更新；补发使用共享发布手册中的统一工作流。

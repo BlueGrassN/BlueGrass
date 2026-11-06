@@ -316,7 +316,9 @@ def reconcile(api, repo, directory, dry_run):
     files, failures, changed = {}, [], []
     for platform, workflow in WORKFLOWS.items():
         try:
-            runs = api.pages(f'actions/workflows/{workflow}/runs?branch=main&status=success&per_page=100', 'workflow_runs')
+            # GitHub's success-filtered index can lag a completed workflow_run.
+            # Fetch the branch list; pick_run still checks every trust/status field.
+            runs = api.pages(f'actions/workflows/{workflow}/runs?branch=main&per_page=100', 'workflow_runs')
             run = pick_run(runs, repo)
             if not run or not newer(run, state.get(platform)):
                 continue

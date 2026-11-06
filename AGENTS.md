@@ -22,6 +22,7 @@
 - 先读 [统一发布手册](docs/development/github-releases.md)。平台工作流只构建和上传 artifact，只有 `.github/workflows/publish-preview.yml` / `scripts/publish_preview.py` 更新 Release。
 - 不再为 Windows、Android、macOS 或新增平台生成独立发布 tag。已有历史 Release/tag 保留，未经明确要求不删除。
 - 发布器必须只接受本仓库 main 的成功 push/manual 运行，拒绝 PR/fork/非主分支产物；下载的 artifact 只能作为数据，不得执行。
+- 获取 main 运行列表后自行核验 completed/success，不能依赖 GitHub 的 status=success 筛选索引；该索引可能遗漏刚完成的成功运行。以 Release 逐端来源和附件哈希确认实际更新。
 - 每次串行汇总全部平台，旧运行不得回退已发布新版本。单端失败保留该端原包，不能清空或覆盖其他端附件。macOS 两架构必须同一成功运行。
 - 先验证来源和哈希、上传完整新附件，再更新页面和状态，最后清理旧托管附件。附件命名包含平台，校验和与元数据不能重名；保留幂等重跑和失败恢复。
 - 各端版本/构建号独立；不要重置工作流编号或强行统一版本。`preview` tag 不是所有安装包的共同源码，页面必须逐端给出真实 commit/run 链接。
