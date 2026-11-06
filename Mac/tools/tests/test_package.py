@@ -17,8 +17,9 @@ spec.loader.exec_module(build)
 
 
 class PackageTests(unittest.TestCase):
-    def exercise_build(self, directory, *, corrupt_worker=False):
+    def exercise_build(self, directory, *, corrupt_worker=False, version=None, arch='arm64', root_version='0.1.0'):
         root = Path(directory)
+        (root / 'release.json').write_text(json.dumps({'version': root_version}), encoding='utf-8')
         app_root = root / 'Mac/app'
         core = root / 'core'
         app = app_root / 'build/macos/Build/Products/Release/BlueGrass.app'
@@ -79,17 +80,56 @@ class PackageTests(unittest.TestCase):
             events.append(['worker-info'])
             return subprocess.CompletedProcess(args, 0, json.dumps({'expectedWorkerSHA256': embedded, 'protocolVersion': 1}) + '\n', '')
 
-        args = argparse.Namespace(arch='arm64', version='0.1.0-dev', build_number=42)
+        args = argparse.Namespace(arch=arch, version=version, build_number=42)
         with ExitStack() as stack:
             for name, value in [('ROOT', root), ('APP_ROOT', app_root), ('CORE', core)]:
                 stack.enter_context(patch.object(build, name, value))
             stack.enter_context(patch.object(build.sys, 'platform', 'darwin'))
-            stack.enter_context(patch.object(build.platform, 'machine', return_value='arm64'))
+            stack.enter_context(patch.object(build.platform, 'machine', return_value=arch))
             stack.enter_context(patch.object(build, 'run', side_effect=run))
             stack.enter_context(patch.object(build.subprocess, 'run', side_effect=worker_info))
             build.build(args)
-        metadata = json.loads((root / 'Mac/dist/arm64/BUILD.json').read_text(encoding='utf-8'))
+        metadata = json.loads((root / f'Mac/dist/{arch}/BUILD.json').read_text(encoding='utf-8'))
         return app, metadata, events
+
+    def test_root_version_reaches_both_bundles_dart_and_public_names(self):
+        for arch in ('arm64', 'x86_64'):
+            for override in (None, '0.1.0'):
+                with self.subTest(arch=arch, override=override), tempfile.TemporaryDirectory() as directory:
+                    _, metadata, events = self.exercise_build(directory, arch=arch, version=override)
+                    flutter = next(args for args in events if args[:3] == ['flutter', 'build', 'macos'])
+                    self.assertIn('--build-name=0.1.0', flutter)
+                    self.assertIn('--dart-define=BLUEGRASS_VERSION=0.1.0', flutter)
+                    self.assertIn('--build-number=42', flutter)
+                    self.assertIn('--dart-define=BLUEGRASS_BUILD=42', flutter)
+                    self.assertEqual(metadata['version'], '0.1.0')
+                    self.assertEqual(metadata['build'], 42)
+                    self.assertEqual(metadata['archive'], f'BlueGrass-macOS-{arch}-0.1.0.zip')
+
+    def test_version_override_cannot_diverge_from_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(ValueError, 'release.json'):
+                self.exercise_build(directory, version='0.2.0')
+
+    def test_changing_only_root_updates_bundle_and_dart_version(self):
+        with tempfile.TemporaryDirectory() as directory:
+            _, metadata, events = self.exercise_build(directory, root_version='2.3.4')
+            flutter = next(args for args in events if args[:3] == ['flutter', 'build', 'macos'])
+            self.assertIn('--build-name=2.3.4', flutter)
+            self.assertIn('--dart-define=BLUEGRASS_VERSION=2.3.4', flutter)
+            self.assertEqual(metadata['archive'], 'BlueGrass-macOS-arm64-2.3.4.zip')
+
+    def test_invalid_root_is_rejected_even_with_a_valid_override(self):
+        for version in ('01.2.3', '0.1.0-dev', None, 123):
+            with self.subTest(version=version), tempfile.TemporaryDirectory() as directory:
+                with self.assertRaisesRegex(ValueError, 'release.json'):
+                    self.exercise_build(directory, root_version=version, version='0.1.0')
+
+    def test_unicode_root_is_rejected_even_when_override_matches(self):
+        for version in ('1\u0660.2.3', '1.2\uff10.3', '1.2.3\u0660'):
+            with self.subTest(version=version), tempfile.TemporaryDirectory() as directory:
+                with self.assertRaisesRegex(ValueError, 'version must be X.X.X'):
+                    self.exercise_build(directory, root_version=version, version=version)
 
     def test_full_build_seals_worker_and_advertises_development_authorization(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -154,8 +194,8 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(build.go_arch('x86_64'), 'amd64')
         with self.assertRaises(ValueError):
             build.go_arch('arm64; anything')
-        for value in ['../name', '0.1.0\n', '', 'foo']:
-            with self.assertRaises(ValueError):
+        for value in ['../name', '0.1.0\n', '', 'foo', '0.1.0-dev', '01.2.3', '1.02.3', '1.2.03', '1.2.3+4', None, 123]:
+            with self.subTest(value=value), self.assertRaises(ValueError):
                 build.validate_version(value)
 
     def test_payload_requires_real_helpers_assets_and_frameworks(self):

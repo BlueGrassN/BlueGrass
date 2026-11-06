@@ -1,6 +1,6 @@
 param(
     [string]$Bundle = '',
-    [Parameter(Mandatory)][string]$Version,
+    [string]$Version = '',
     [Parameter(Mandatory)][uint32]$Build,
     [string]$Compiler = '',
     [string]$CertificateThumbprint = '',
@@ -13,10 +13,12 @@ param(
 $ErrorActionPreference = 'Stop'
 $clientRoot = Split-Path $PSScriptRoot -Parent
 $repoRoot = Split-Path $clientRoot -Parent
+. "$PSScriptRoot/release-config.ps1"
+$release = Get-BlueGrassRelease -Version $Version -Build $Build
+$Version = $release.Version
 . (Join-Path $clientRoot 'installer\signing.ps1')
 $hasSigning = Assert-SigningArguments -Candidate $UnsignedCandidate.IsPresent -Thumbprint $CertificateThumbprint -SignTool $SignTool -TimestampUrl $TimestampUrl
-if ($Version -notmatch '^(0|[1-9][0-9]{0,4})\.(0|[1-9][0-9]{0,4})\.(0|[1-9][0-9]{0,4})(-(beta|rc)\.(0|[1-9][0-9]{0,4}))?$') { throw 'Version must be numeric major.minor.patch with optional beta.N/rc.N.' }
-$numericVersion = ($Version -split '-')[0]
+$numericVersion = $Version
 if (@($numericVersion.Split('.') | Where-Object { [int]$_ -gt 65535 }).Count -gt 0 -or $Build -eq 0 -or $Build -gt 65535) { throw 'Version must fit Windows version resources, with build 1..65535.' }
 if (!$UnsignedCandidate -and !$ValidateOnly -and !$hasSigning) { throw 'Production compilation requires CertificateThumbprint, SignTool and TimestampUrl with an existing release certificate.' }
 if (!$Bundle) { $Bundle = Join-Path $clientRoot 'app\build\windows\x64\runner\Release' }

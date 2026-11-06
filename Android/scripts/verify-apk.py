@@ -10,6 +10,8 @@ import struct
 import subprocess
 import zipfile
 
+ROOT = Path(__file__).resolve().parents[2]
+
 
 def run(*args):
     return subprocess.check_output([str(a) for a in args], text=True, encoding="utf-8", errors="replace", stderr=subprocess.STDOUT)
@@ -21,6 +23,11 @@ def check(condition, message):
 
 
 def verify(args):
+    release = json.loads((ROOT / 'release.json').read_text(encoding='utf-8'))
+    version = release.get('version') if isinstance(release, dict) else None
+    check(isinstance(version, str) and re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)', version) is not None,
+          'Root release.json version must be X.X.X without leading zeros or suffixes')
+    check(args.version == version, 'Version must match root release.json')
     apk = Path(args.apk).resolve(strict=True)
     tools = Path(args.sdk) / "build-tools" / "36.0.0"
     exe = ".exe" if os.name == "nt" else ""
@@ -64,7 +71,7 @@ def verify(args):
             libraries.append({"name": name, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()})
     output = Path(args.output_dir)
     output.mkdir(parents=True, exist_ok=True)
-    filename = f"BlueGrass-Android-{args.version}+{args.build_number}-arm64.apk"
+    filename = f"BlueGrass-Android-{args.version}-arm64.apk"
     destination = output / filename
     shutil.copyfile(apk, destination)
     sha256 = hashlib.sha256(destination.read_bytes()).hexdigest()

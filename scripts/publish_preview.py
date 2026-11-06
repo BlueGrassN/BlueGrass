@@ -25,6 +25,7 @@ WORKFLOWS = {'windows': 'windows-release.yml', 'android': 'android-release.yml',
              'macos': 'macos-dev.yml'}
 LABELS = {'windows': 'Windows x64', 'android': 'Android ARM64', 'macos': 'macOS'}
 MARKER = '<!-- bluegrass-preview-state\n'
+VERSION_PATTERN = r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'
 
 
 def require(condition, message):
@@ -34,6 +35,27 @@ def require(condition, message):
 
 def sha256(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def validate_version(value):
+    require(isinstance(value, str) and re.fullmatch(VERSION_PATTERN, value),
+            'Version must use X.X.X without suffixes or leading zeroes')
+    return value
+
+
+def configured_version():
+    config = Path(__file__).resolve().parents[1] / 'release.json'
+    return validate_version(json.loads(config.read_text(encoding='utf-8'))['version'])
+
+
+def source_version(api, commit):
+    try:
+        config = api.api(f'contents/release.json?ref={commit}')
+    except RuntimeError as exc:
+        if 'HTTP 404' in str(exc):
+            return None  # A successful build predating the shared version policy.
+        raise
+    return validate_version(json.loads(base64.b64decode(config['content']))['version'])
 
 
 def pick_run(runs, repo):
@@ -83,19 +105,18 @@ def prepare(platform, run, archives):
         files = read_artifact(archives[variant])
         metadata_name = 'BUILD.json' if platform == 'macos' else 'build-info.json'
         info = json.loads(files[metadata_name].decode('utf-8-sig'))
-        version = info['version']
-        require(re.fullmatch(r'\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?', version), 'Invalid version')
+        version = validate_version(info['version'])
         build = info['buildNumber'] if platform == 'android' else info['build']
         require(type(build) is int and build > 0, 'Invalid build number')
         source = info['commit'] if platform == 'macos' else info['sourceCommit']
         require(source == run['head_sha'], 'Wrong source commit')
-        prefix = f"BlueGrass-{label}-{version}+{build}-r{run['run_attempt']}"
+        prefix = f'BlueGrass-{label}-{version}'
         checks = verify_checksums(files, 'SHA256SUMS' if platform == 'android' else 'SHA256SUMS.txt')
         if platform == 'android':
             require(info['sourceDirty'] is False, 'Refusing modified Android source')
             require(info['signingMode'] == 'configured', 'Refusing test-signed Android artifact')
             require(build == 100000 + run['run_number'], 'Wrong Android build number')
-            original = f'BlueGrass-Android-{version}+{build}-arm64.apk'
+            original = f'BlueGrass-Android-{version}-arm64.apk'
             require(info['apk'] == original, 'Unexpected APK filename')
             name, architecture = f'{prefix}-arm64.apk', 'ARM64 APK'
         elif platform == 'windows':
@@ -113,7 +134,7 @@ def prepare(platform, run, archives):
             require(info['architecture'] == variant, 'Wrong macOS architecture')
             require(build == run['run_number'], 'Wrong macOS build number')
             require(info['signing'] == 'ad-hoc development; not notarized', 'macOS signing policy changed')
-            original = f'BlueGrass-macOS-{variant}-{version}+{build}.zip'
+            original = f'BlueGrass-macOS-{variant}-{version}.zip'
             require(info['archive'] == original, 'Unexpected macOS archive')
             name, architecture = f'{prefix}-{variant}.zip', f'{variant} ZIP'
         require(original in checks and info['sha256'] == sha256(files[original]), 'Package checksum mismatch')
@@ -126,24 +147,28 @@ def prepare(platform, run, archives):
                     'macOS architectures have different instructions')
             output[testing_name] = files['TESTING.md']
         downloads[architecture] = name
-        versions.add(f'{version}+{build}')
+        versions.add(version)
     require(len(versions) == 1, 'Platform architectures have different versions')
     checksum_name = f'{prefix}-SHA256SUMS.txt'
     output[checksum_name] = ''.join(f'{sha256(data)}  {name}\n' for name, data in sorted(output.items())).encode()
-    entry = dict(version=versions.pop(), sourceCommit=run['head_sha'], runId=run['id'],
+    entry = dict(version=versions.pop(), buildNumber=build, sourceCommit=run['head_sha'], runId=run['id'],
                  runNumber=run['run_number'], runAttempt=run['run_attempt'],
                  downloads=downloads, checksums=checksum_name,
                  assets={name: {'sha256': sha256(data), 'bytes': len(data)} for name, data in output.items()})
     return entry, output
 
 
-def parse_state(body):
+def state_document(body):
     require(body.count(MARKER) == 1, 'Release is missing managed state; refusing to replace it')
     raw = body.split(MARKER, 1)[1].split('\n-->', 1)[0]
     state = json.loads(raw)
     require(state.get('schema') == 1 and isinstance(state.get('platforms'), dict), 'Invalid release state')
-    require(set(state['platforms']) <= set(WORKFLOWS), 'Unknown platform in release state')
-    for entry in state['platforms'].values():
+    return state
+
+
+def validate_platforms(platforms):
+    require(isinstance(platforms, dict) and set(platforms) <= set(WORKFLOWS), 'Unknown platform in release state')
+    for entry in platforms.values():
         require(isinstance(entry.get('assets'), dict), 'Invalid platform assets')
         require(type(entry.get('runNumber')) is int and type(entry.get('runAttempt')) is int,
                 'Invalid published run identity')
@@ -153,15 +178,32 @@ def parse_state(body):
                     'Invalid managed asset digest')
         require(all(re.fullmatch(r'BlueGrass-[A-Za-z0-9_.+\-]+', name)
                     for name in entry.get('retiredAssets', [])), 'Invalid retired asset name')
-    active = {name for entry in state['platforms'].values() for name in entry['assets']}
-    retired = {name for entry in state['platforms'].values() for name in entry.get('retiredAssets', [])}
+    active = {name for entry in platforms.values() for name in entry['assets']}
+    retired = {name for entry in platforms.values() for name in entry.get('retiredAssets', [])}
     require(not active.intersection(retired), 'Release state marks active downloads for deletion')
-    return state['platforms']
+    return platforms
 
 
-def render_notes(state, repo):
+def parse_pending(body):
+    pending = state_document(body).get('pendingRelease')
+    if pending is not None:
+        validate_platforms(pending)
+        for entry in pending.values():
+            validate_version(entry['version'])
+    return pending
+
+
+def parse_state(body):
+    parse_pending(body)
+    return validate_platforms(state_document(body)['platforms'])
+
+
+def render_notes(state, repo, pending_release=None):
+    document = {'schema': 1, 'platforms': state}
+    if pending_release is not None:
+        document['pendingRelease'] = pending_release
     base = f'https://github.com/{repo}'
-    lines = ['各平台最新成功构建集中在本页；版本独立更新。下载对应安装包，不要下载 Source code。', '',
+    lines = ['各平台统一使用 X.X.X 版本；全部平台验证通过后整体更新。下载对应安装包，不要下载 Source code。', '',
              '| 平台 | 版本 | 安装包 | SHA256 | 源码 / 构建 |',
              '| --- | --- | --- | --- | --- |']
     for platform, label in LABELS.items():
@@ -179,9 +221,9 @@ def render_notes(state, repo):
               'macOS：macOS 13 及以上，按芯片选择 arm64 或 x86_64；临时开发签名，未公证。',
               '', '各端自动化构建通过不代表真实账号联网、VPN/TUN 或系统权限恢复已经通过设备验收。',
               '构建信息保留原始 artifact 文件名和 sourceDirty 等事实；下载文件名以本页链接和校验文件为准。',
-              'iOS / HarmonyOS 暂无可下载安装包。历史平台 Release 保留供追溯。',
+              'iOS / HarmonyOS 暂无可下载安装包。发行产物仅保留在 preview。',
               'preview 为固定下载入口，tag 的 Source code 不代表全部平台的源码，请使用表格中的逐端源码链接。', '',
-              MARKER + json.dumps({'schema': 1, 'platforms': state}, ensure_ascii=False, sort_keys=True) + '\n-->']
+              MARKER + json.dumps(document, ensure_ascii=False, sort_keys=True) + '\n-->']
     return '\n'.join(lines) + '\n'
 
 
@@ -243,6 +285,13 @@ class GitHub:
                                           prerelease=True, make_latest='false')), encoding='utf-8')
         self.api(f'releases/{self.release_id}', '--method', 'PATCH', '--input', str(payload))
 
+    def edit_pending(self, body):
+        require(self.release_id is not None, 'Release identity is unknown')
+        payload = self.directory / 'pending-release.json'
+        # A journal update must not publish a draft or change its visible status.
+        payload.write_text(json.dumps({'body': body}), encoding='utf-8')
+        self.api(f'releases/{self.release_id}', '--method', 'PATCH', '--input', str(payload))
+
     def delete_asset(self, asset):
         self.command('api', f"repos/{self.repo}/releases/assets/{asset['id']}", '--method', 'DELETE')
 
@@ -266,13 +315,53 @@ class GitHub:
                 for key, a in selected.items()}
 
 
+def recover_pending(api, release, repo, dry_run):
+    pending = parse_pending(release['body'])
+    if pending is None:
+        return []
+    committed = parse_state(release['body'])
+    active = {name for entry in committed.values() for name in entry['assets']}
+    expected = {name: info for entry in pending.values() for name, info in entry['assets'].items()}
+    existing = {asset['name']: asset for asset in release['assets']}
+    removable = []
+    for name, info in expected.items():
+        if name in active or name not in existing:
+            continue
+        asset = existing[name]
+        empty_starter = asset.get('state') == 'starter' and asset['size'] == 0
+        require(empty_starter or (asset.get('state') == 'uploaded' and
+                asset.get('digest') == 'sha256:' + info['sha256'] and asset['size'] == info['bytes']),
+                f'Pending asset differs; refusing cleanup: {name}')
+        removable.append(asset)
+    if not dry_run:
+        for asset in removable:
+            api.delete_asset(asset)
+        api.edit_pending(render_notes(committed, repo))
+    return [asset['name'] for asset in removable]
+
+
 def publish(api, state, files, repo, directory):
     previous = api.release()
     require(previous is not None, 'Release must exist before upload')
+    if parse_pending(previous['body']) is not None:
+        recover_pending(api, previous, repo, dry_run=False)
+        previous = api.release()
     old = parse_state(previous['body'])
     existing = {a['name']: a for a in previous['assets']}
     expected = {name: info for entry in state.values() for name, info in entry['assets'].items()}
     committed = {name for entry in old.values() for name in entry['assets']}
+    # Reject all pre-existing conflicts before claiming journal ownership or
+    # deleting starters. Unrelated content must not poison future recovery.
+    for name, data in files.items():
+        asset = existing.get(name)
+        empty_starter = asset and asset.get('state') == 'starter' and asset['size'] == 0 and name not in committed
+        if asset and not empty_starter:
+            require(asset.get('digest') == 'sha256:' + sha256(data) and asset['size'] == len(data),
+                    f'Existing asset differs; refusing overwrite: {name}')
+    if files:
+        # Persist ownership before the first upload. A later run can then remove
+        # only these uncommitted bytes before retrying a newer candidate safely.
+        api.edit_pending(render_notes(old, repo, pending_release=state))
     for name, data in files.items():
         asset = existing.get(name)
         if asset and asset.get('state') == 'starter' and asset['size'] == 0 and name not in committed:
@@ -310,45 +399,74 @@ def publish(api, state, files, repo, directory):
         api.edit(render_notes(pending, repo))
 
 
-def reconcile(api, repo, directory, dry_run):
+def reconcile(api, repo, directory, dry_run, version=None):
+    target = validate_version(version if version is not None else configured_version())
     release = api.release()
     state = parse_state(release['body']) if release else {}
-    files, failures, changed = {}, [], []
-    for platform, workflow in WORKFLOWS.items():
-        try:
-            # GitHub's success-filtered index can lag a completed workflow_run.
-            # Fetch the branch list; pick_run still checks every trust/status field.
-            runs = api.pages(f'actions/workflows/{workflow}/runs?branch=main&per_page=100', 'workflow_runs')
-            run = pick_run(runs, repo)
-            if not run or not newer(run, state.get(platform)):
-                continue
-            relation = api.api(f"compare/{run['head_sha']}...main")
-            require(relation['status'] in ('ahead', 'identical'), 'Build commit is not on current main history')
-            print(f"Verifying {platform}: run {run['id']}, attempt {run['run_attempt']}", flush=True)
-            entry, payload = prepare(platform, run, api.archives(platform, run))
-            if platform == 'windows':
-                config = api.api(f"contents/Windows/release.json?ref={run['head_sha']}")
-                identity = json.loads(base64.b64decode(config['content']))
-                require(entry['version'] == f"{identity['version']}+{identity['buildBase'] + run['run_number']}",
-                        'Windows artifact does not match source release configuration')
-            state[platform] = entry
-            files.update(payload)
-            changed.append(platform)
-        except (ValueError, KeyError, RuntimeError, zipfile.BadZipFile) as exc:
-            failures.append(f'{platform}: {exc}')
+    for entry in state.values():
+        published = entry['version']
+        # Legacy entries include +build/prerelease suffixes and migrate once.
+        # Every entry written by this policy is a plain monotonic version.
+        if re.fullmatch(VERSION_PATTERN, published):
+            require(tuple(map(int, target.split('.'))) >= tuple(map(int, published.split('.'))),
+                    'Refusing shared version rollback')
+    recovered = recover_pending(api, release, repo, dry_run) if release else []
+    already_published = set(state) == set(WORKFLOWS) and all(
+        entry['version'] == target for entry in state.values())
+    selected, waiting, failures = {}, [], []
+    files, candidates, changed = {}, {}, []
+    if not already_published:
+        for platform, workflow in WORKFLOWS.items():
+            try:
+                # Server-side success indexes can lag workflow_run events.
+                runs = api.pages(f'actions/workflows/{workflow}/runs?branch=main&per_page=100', 'workflow_runs')
+                run = pick_run(runs, repo)
+                if not run or not newer(run, state.get(platform)):
+                    waiting.append(platform)
+                    continue
+                if source_version(api, run['head_sha']) != target:
+                    waiting.append(platform)
+                    continue
+                relation = api.api(f"compare/{run['head_sha']}...main")
+                require(relation['status'] in ('ahead', 'identical'), 'Build commit is not on current main history')
+                selected[platform] = run
+            except (ValueError, KeyError, RuntimeError) as exc:
+                failures.append(f'{platform}: {exc}')
+        # Download only once the entire version is ready. Never expose a mixed
+        # table or replace one platform while another is missing/invalid.
+        if not failures and len(selected) == len(WORKFLOWS):
+            for platform, run in selected.items():
+                try:
+                    print(f"Verifying {platform}: run {run['id']}, attempt {run['run_attempt']}", flush=True)
+                    entry, payload = prepare(platform, run, api.archives(platform, run))
+                    require(entry['version'] == target, 'Package version does not match shared source configuration')
+                    if platform == 'windows':
+                        config = api.api(f"contents/Windows/release.json?ref={run['head_sha']}")
+                        identity = json.loads(base64.b64decode(config['content']))
+                        require(type(identity['buildBase']) is int and
+                                entry['buildNumber'] == identity['buildBase'] + run['run_number'],
+                                'Windows artifact does not match source build configuration')
+                    candidates[platform] = entry
+                    files.update(payload)
+                except (ValueError, KeyError, RuntimeError, zipfile.BadZipFile) as exc:
+                    failures.append(f'{platform}: {exc}')
+            if not failures and len(candidates) == len(WORKFLOWS):
+                state = candidates
+                changed = list(WORKFLOWS)
     notes = render_notes(state, repo)
     (directory / 'preview-notes.md').write_text(notes, encoding='utf-8')
-    print(json.dumps({'updated': changed, 'platforms': {k: v['version'] for k, v in state.items()},
+    print(json.dumps({'targetVersion': target, 'updated': changed,
+                      'platforms': {k: v['version'] for k, v in state.items()},
+                      'waiting': waiting, 'recoveredPending': recovered,
                       'dryRun': dry_run, 'errors': failures}, ensure_ascii=False), flush=True)
+    require(not failures, '\n'.join(failures))
     if changed and not dry_run:
         if release is None:
             api.create(api.api('commits/main')['sha'])
         publish(api, state, files, repo, directory)
-    elif release and (release['draft'] or any(e.get('retiredAssets') for e in state.values())) and not dry_run:
-        publish(api, state, files, repo, directory)
-    if not state:
-        failures.append('No verified platform packages are available')
-    require(not failures, '\n'.join(failures))
+    elif release and ((release['draft'] and already_published) or
+                      any(e.get('retiredAssets') for e in state.values())) and not dry_run:
+        publish(api, state, {}, repo, directory)
     return state
 
 

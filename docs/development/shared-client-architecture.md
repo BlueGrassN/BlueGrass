@@ -43,7 +43,7 @@ Go 通用模块测试从 `core/` 执行 `go test ./...`；Android 原生桥接�
 
 Windows/macOS 工作流的路径过滤包含根 `packages/**`、`core/**`、`contracts/**`，Android 仍按既有规则在 main 推送时构建。三端都验证公共包，依赖缓存和锁文件检查使用新路径。
 
-产物目录、平台版本号、Android 签名及固定 [preview Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview) 维持原发布契约。详见[统一发布手册](github-releases.md)。仅移动目录不会重置构建号，也不会新增平台 tag。
+平台内部构建号、Android 签名及固定 [preview Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview) 继续保留；公开版本改由根 release.json 统一为 X.X.X，三端成功后整体发布，同版本文件不可覆盖。详见[统一发布手册](github-releases.md)。迁移不会重置构建号，也不会新增平台 tag。
 
 原始品牌、许可证和路由数据仍按哈希固定；目录迁移不能重算预期哈希来掩盖字节变化。旧日期的验证记录描述当时工程状态，不能替代迁移后的回归与构建记录。
 

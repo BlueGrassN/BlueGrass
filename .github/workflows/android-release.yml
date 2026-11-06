@@ -3,6 +3,7 @@ name: Android build and release
 on:
   push:
     branches: [main]
+    # All main changes, including root release.json, rebuild Android.
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -77,12 +78,16 @@ jobs:
       - name: Set build identity
         id: identity
         run: |
-          $match = [regex]::Match((Get-Content Android/pubspec.yaml -Raw), '(?m)^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$')
-          if (-not $match.Success) { throw 'Invalid Android version.' }
+          . ./Android/scripts/release-config.ps1
           $number = 100000L + [long]$env:GITHUB_RUN_NUMBER
-          if ($number -lt [long]$match.Groups[2].Value -or $number -gt 2100000000) { throw 'CI build number is outside the valid increasing range.' }
-          "number=$number" >> $env:GITHUB_OUTPUT
-          "directory=$($match.Groups[1].Value)+$number" >> $env:GITHUB_OUTPUT
+          if ($number -le 100000 -or $number -gt 2100000000) { throw 'CI build number is outside the valid increasing range.' }
+          $release = Get-BlueGrassAndroidRelease -BuildNumber $number
+          "number=$($release.BuildNumber)" >> $env:GITHUB_OUTPUT
+          "directory=$($release.Version)+$($release.BuildNumber)" >> $env:GITHUB_OUTPUT
+      - name: Test release version wiring and APK verification
+        run: |
+          python -m unittest discover -s Android/scripts/tests -v
+          if ($LASTEXITCODE -ne 0) { throw 'Android release version tests failed.' }
       - name: Build local test APK (PR or non-main manual run)
         if: github.event_name == 'pull_request' || github.ref != 'refs/heads/main'
         env:

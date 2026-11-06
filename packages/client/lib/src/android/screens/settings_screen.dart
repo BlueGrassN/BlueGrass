@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app_version.dart';
 import '../../presentation/settings_content.dart';
 import '../app_controller.dart';
 import '../brand.dart';
@@ -133,7 +134,7 @@ class SettingsScreen extends StatelessWidget {
               const BlueGrassBrand(size: 25),
               const SizedBox(height: 8),
               Text(
-                'Android 客户端 · 0.5.0 Alpha',
+                'Android 客户端 · $clientVersion',
                 key: const Key('app-version'),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -148,7 +149,7 @@ class SettingsScreen extends StatelessWidget {
                 onTap: () => showLicensePage(
                   context: context,
                   applicationName: 'BlueGrass',
-                  applicationVersion: '0.5.0 Alpha',
+                  applicationVersion: clientVersion,
                 ),
               ),
               const SizedBox(height: 8),

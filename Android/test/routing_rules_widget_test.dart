@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:bluegrass_client/app_version.dart';
 import 'package:client/app.dart';
 import 'package:client/app_controller.dart';
 import 'package:client/platform/routing_rules_client.dart';
@@ -87,6 +88,24 @@ void main() {
     expect(find.text('202610232206'), findsOneWidget);
     expect(find.text('内置规则'), findsOneWidget);
     expect(calls, ['status']);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('settings and licenses display the injected public version', (
+    tester,
+  ) async {
+    await launch(tester);
+    await settings(tester);
+    await reveal(tester, find.byKey(const Key('app-version')));
+    expect(find.text('Android 客户端 · $clientVersion'), findsOneWidget);
+    expect(find.textContaining('$clientVersion+$clientBuild'), findsNothing);
+    await reveal(tester, find.text('开源许可'));
+    await tester.tap(find.text('开源许可'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<LicensePage>(find.byType(LicensePage)).applicationVersion,
+      clientVersion,
+    );
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
@@ -313,7 +332,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       await reveal(tester, find.byKey(const Key('app-version')));
-      expect(find.byKey(const Key('app-version')).hitTestable(), findsOneWidget);
+      expect(
+        find.byKey(const Key('app-version')).hitTestable(),
+        findsOneWidget,
+      );
       await tester.tap(find.byKey(const Key('nav-home')));
       await tester.pumpAndSettle();
       await tester.pumpWidget(const SizedBox.shrink());

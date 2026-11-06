@@ -4,9 +4,10 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $clientRoot = [IO.Path]::GetFullPath((Split-Path $PSScriptRoot -Parent))
-$release = Get-Content -LiteralPath (Join-Path $clientRoot 'release.json') -Raw | ConvertFrom-Json
-if (!$Version) { $Version = $release.version }
-if (!$Build) { $Build = $release.buildBase }
+. "$PSScriptRoot/release-config.ps1"
+$release = Get-BlueGrassRelease -Version $Version -Build $Build
+$Version = $release.Version
+$Build = $release.Build
 . "$PSScriptRoot/toolchain.ps1"
 $Python = Get-BlueGrassPython
 

@@ -16,11 +16,11 @@ Windows 主入口是 `Windows/scripts/package.ps1`。本地与 GitHub 都运行�
 
 ```powershell
 $env:BLUEGRASS_PYTHON = '你的 CPython python.exe 完整路径'
-& $env:BLUEGRASS_PYTHON -m pip install -r Windows/contracts/requirements-test.txt
+& $env:BLUEGRASS_PYTHON -m pip install -r contracts/requirements-test.txt
 ./Windows/scripts/package.ps1
 ```
 
-不指定版本时读取 `Windows/release.json` 的 `version` 和 `buildBase`。也可以显式指定，例如 `./Windows/scripts/package.ps1 -Version 0.1.0-beta.1 -Build 22`。`build.ps1` 仍保留用于开发时仅构建；CI 必须运行 `package.ps1`。
+公开版本读取根 `release.json`，内部构建号读取 `Windows/release.json` 的 `buildBase`。显式版本必须等于公共配置，例如 `./Windows/scripts/package.ps1 -Version 0.1.0 -Build 22`。开发时可使用 build.ps1，CI 必须运行完整 package.ps1。
 
 产物：
 
@@ -43,15 +43,15 @@ $env:BLUEGRASS_PYTHON = '你的 CPython python.exe 完整路径'
 | Actions 页面手动运行，选择 main | 同 main 推送 |
 | 手动选择其他分支 | 仅构建 artifact |
 
-触发路径为 `Windows/**`、`packages/**`、`core/**`、`contracts/**`、Windows 工作流本身、根 `.gitignore` 和 `.gitattributes`。其他平台或服务端的独立改动不重复生成 Windows Release。原有 macOS 工作流仍独立运行；共享 Windows 原生/Flutter 代码变化可能同时触发两端检查。
+触发路径包含根 `release.json`、Windows、packages、core、contracts、Windows 工作流及根 Git 属性/忽略规则。公共版本变更必须触发三端构建。
 
 云端构建号为 `buildBase + github.run_number`，客户端版本和构建号保持独立；构建号不能超过 65535，也不能重置工作流编号后倒退。
 
-成功构建由 `.github/workflows/publish-preview.yml` 汇总到固定 `preview` Pre-release，不再生成 `windows-v…` tag。Windows、Android 和 macOS 同页显示，各端分别更新。统一发布器复核来源运行、对应源码中的版本配置、元数据及包哈希；Windows 构建后的 `sourceDirty` 标记如实保留。先上传完整新附件，再更新下载表格，最后清理旧 Windows 附件，不影响其他端。
+成功构建由 publish-preview.yml 汇总到固定 preview；三端公开版本统一读取根配置。全部平台（Mac 含双架构）成功并验证来源、内部构建号和哈希后，先上传完整新附件，再整体更新页面，最后清理上一版本附件。任一平台缺失或验证失败均保留上一整组下载。Windows sourceDirty 标记如实保留。
 
 构建 job 保持 `contents: read`；统一发布 job 才拥有 `contents: write`，使用 Actions 自动提供的令牌，不需要个人令牌或测试账号。并发、重跑及中断恢复见 [统一发布手册](../../docs/development/github-releases.md)。
 
-下载入口：[统一开发预览版](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)。Windows ZIP、构建信息和 SHA256 校验文件都带平台、版本/构建号及 attempt 前缀；本地打包路径不变。历史 Windows Release 保留。当前仓库私有，下载者需要仓库访问权限。
+下载入口：[统一开发预览版](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)。公开 ZIP 示例为 `BlueGrass-Windows-0.1.0-x64.zip`，校验文件和构建信息使用平台/X.X.X 前缀，构建号仅保留在元数据。同版本文件不可覆盖，下一次发行先递增根版本。旧平台 Release 已清理，私有仓库下载仍需访问权限。
 
 ## 下载和检查
 

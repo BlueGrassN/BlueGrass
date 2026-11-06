@@ -42,9 +42,17 @@ def go_arch(value):
 
 
 def validate_version(value):
-    if re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.]+)?', value) is None:
-        raise ValueError('Invalid version')
+    if not isinstance(value, str) or re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)', value) is None:
+        raise ValueError('Root release.json version must be X.X.X without leading zeros or suffixes')
     return value
+
+
+def release_version(override=None):
+    release = json.loads((ROOT / 'release.json').read_text(encoding='utf-8'))
+    version = validate_version(release.get('version') if isinstance(release, dict) else None)
+    if override is not None and override != version:
+        raise ValueError('Version must match root release.json')
+    return version
 
 
 def validate_payload(app):
@@ -87,9 +95,9 @@ def build_native_helpers(executables, environment):
 
 
 def build(args):
+    version = release_version(args.version)
     if sys.platform != 'darwin':
         raise SystemExit('macOS + Xcode are required. Use the macOS development build GitHub workflow.')
-    version = validate_version(args.version)
     target = go_arch(args.arch)
     if args.build_number < 1:
         raise ValueError('Build number must be positive')
@@ -112,7 +120,7 @@ def build(args):
     })
     run([
         'flutter', 'build', 'macos', '--release',
-        f'--build-name={version.split("-", 1)[0]}', f'--build-number={args.build_number}',
+        f'--build-name={version}', f'--build-number={args.build_number}',
         f'--dart-define=BLUEGRASS_VERSION={version}',
         f'--dart-define=BLUEGRASS_BUILD={args.build_number}',
     ], cwd=APP_ROOT, env=environment)
@@ -167,9 +175,9 @@ def build(args):
 
     output = ROOT / 'Mac/dist' / args.arch
     output.mkdir(parents=True, exist_ok=True)
-    archive = output / f'BlueGrass-macOS-{args.arch}-{version}+{args.build_number}.zip'
+    archive = output / f'BlueGrass-macOS-{args.arch}-{version}.zip'
     if archive.exists():
-        raise ValueError('Refusing to overwrite an existing package; use a new build number or output directory')
+        raise ValueError('Refusing to overwrite an existing package; use a clean output directory')
     # ditto preserves .app symlinks, executable permissions and macOS metadata.
     run(['ditto', '-c', '-k', '--sequesterRsrc', '--keepParent', app, archive])
     verify_native(app, expected_worker_sha256=worker_sha256)
@@ -200,6 +208,6 @@ def build(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--arch', choices=['arm64', 'x86_64'], required=True)
-    parser.add_argument('--version', default='0.1.0-dev')
+    parser.add_argument('--version', help='Must match the version in root release.json')
     parser.add_argument('--build-number', type=int, default=1)
     build(parser.parse_args())

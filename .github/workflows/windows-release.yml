@@ -8,6 +8,7 @@ on:
       - 'packages/**'
       - 'core/**'
       - 'contracts/**'
+      - 'release.json'
       - '.github/workflows/windows-release.yml'
       - '.gitattributes'
       - '.gitignore'
@@ -17,6 +18,7 @@ on:
       - 'packages/**'
       - 'core/**'
       - 'contracts/**'
+      - 'release.json'
       - '.github/workflows/windows-release.yml'
       - '.gitattributes'
       - '.gitignore'
@@ -53,9 +55,10 @@ jobs:
           RUN_ID: ${{ github.run_id }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $tools = Get-Content Windows/toolchain.json -Raw | ConvertFrom-Json
-          $release = Get-Content Windows/release.json -Raw | ConvertFrom-Json
-          $build = [int]$release.buildBase + [int]$env:RUN_NUMBER
+          $tools = Get-Content Windows/toolchain.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          . ./Windows/scripts/release-config.ps1
+          $release = Get-BlueGrassRelease
+          $build = [long]$release.BuildBase + [long]$env:RUN_NUMBER
           if ($build -lt 1 -or $build -gt 65535) { throw 'Build number exceeds the Windows version range.' }
           "flutter=$($tools.flutter)" >> $env:GITHUB_OUTPUT
           "go=$($tools.go)" >> $env:GITHUB_OUTPUT
@@ -83,6 +86,10 @@ jobs:
           Get-Command go, flutter, python, gcc, windres | Format-Table Name, Source
           python -m pip install --requirement contracts/requirements-test.txt
           if ($LASTEXITCODE -ne 0) { throw 'Python dependency installation failed.' }
+      - name: Test release version wiring
+        run: |
+          python -m unittest discover -s Windows/scripts/tests -v
+          if ($LASTEXITCODE -ne 0) { throw 'Windows release version tests failed.' }
       - name: Check, build, extract and verify Windows client
         env:
           CLIENT_VERSION: ${{ steps.config.outputs.version }}

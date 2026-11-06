@@ -30,7 +30,7 @@ extension _AboutPage on _ShellState {
                 alignment: WrapAlignment.center,
                 children: [
                   _aboutPill(
-                    '${DesktopPlatform.current.name} 客户端 $clientVersionLabel',
+                    '${DesktopPlatform.current.name} 客户端 $clientVersion',
                     colors.primary,
                     colors.onPrimary,
                   ),
@@ -55,7 +55,7 @@ extension _AboutPage on _ShellState {
               onTap: () => showLicensePage(
                 context: context,
                 applicationName: 'BlueGrass',
-                applicationVersion: clientVersionLabel,
+                applicationVersion: clientVersion,
               ),
             ),
             ListTile(

@@ -9,6 +9,10 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+. "$PSScriptRoot/release-config.ps1"
+$release = Get-BlueGrassAndroidRelease -BuildNumber $BuildNumber
+$versionName = $release.Version
+$BuildNumber = $release.BuildNumber
 if (-not $AndroidSdk) { $AndroidSdk = 'E:\AndroidTools\sdk' }
 if (-not $JavaHome) { $JavaHome = 'D:\Android\Android Studio\jbr' }
 $AndroidSdk = [IO.Path]::GetFullPath($AndroidSdk)
@@ -21,11 +25,6 @@ if ($configured.Count -ne 0 -and $configured.Count -ne 4) { throw 'Provide all f
 if (($RequireReleaseSigning -or $env:BLUEGRASS_REQUIRE_RELEASE_SIGNING -eq 'true') -and $configured.Count -ne 4) { throw 'Publishing requires a persistent signing key. Configure the four Android Actions secrets first.' }
 if ($configured.Count -eq 4 -and -not (Test-Path -LiteralPath $env:BLUEGRASS_ANDROID_KEYSTORE -PathType Leaf)) { throw 'The configured Android keystore does not exist.' }
 $signingMode = if ($configured.Count -eq 4) { 'configured' } else { 'local-debug' }
-$versionMatch = [regex]::Match((Get-Content (Join-Path $root 'pubspec.yaml') -Raw), '(?m)^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$')
-if (-not $versionMatch.Success) { throw 'Expected version: major.minor.patch+build in Android/pubspec.yaml.' }
-$versionName = $versionMatch.Groups[1].Value
-if (-not $PSBoundParameters.ContainsKey('BuildNumber')) { $BuildNumber = [int]$versionMatch.Groups[2].Value }
-if ($BuildNumber -lt [int]$versionMatch.Groups[2].Value) { throw 'BuildNumber must not be below the pubspec build number.' }
 $sourceCommit = (& git -C $root rev-parse HEAD).Trim()
 if ($LASTEXITCODE -ne 0) { throw 'Unable to determine source commit.' }
 $sourceChanges = & git -C $root status --porcelain --untracked-files=normal
@@ -67,7 +66,7 @@ try {
     } finally { Pop-Location }
     & (Join-Path $PSScriptRoot 'build-native.ps1') -AndroidSdk $AndroidSdk -JavaHome $JavaHome -GoExecutable $GoExecutable
     # Do not use --no-pub: mode-specific plugin regeneration excludes integration_test.
-    Invoke-Checked $FlutterExecutable @('build', 'apk', '--release', '--target', 'lib/main.dart', '--target-platform', 'android-arm64', '--build-number', "$BuildNumber")
+    Invoke-Checked $FlutterExecutable @('build', 'apk', '--release', '--target', 'lib/main.dart', '--target-platform', 'android-arm64', "--build-name=$versionName", '--build-number', "$BuildNumber", "--dart-define=BLUEGRASS_VERSION=$versionName", "--dart-define=BLUEGRASS_BUILD=$BuildNumber")
     $verification = @(
         (Join-Path $PSScriptRoot 'verify-apk.py'),
         '--apk', (Join-Path $root 'build/app/outputs/flutter-apk/app-release.apk'),

@@ -2,12 +2,15 @@ param(
     [string]$ApiUrl = 'https://client-api.sunip.vip/api/client/v1',
     [string]$WebsiteUrl = 'https://sunipip.com/',
     [string]$ApiProxy = '',
-    [ValidateRange(1, 65535)][int]$Build = 1,
-    [ValidatePattern('^(0|[1-9][0-9]{0,4})\.(0|[1-9][0-9]{0,4})\.(0|[1-9][0-9]{0,4})(-(beta|rc)\.(0|[1-9][0-9]{0,4}))?$')][string]$Version = '0.1.0',
+    [ValidateRange(0, 65535)][int]$Build = 0,
+    [string]$Version = '',
     [switch]$NoExpand
 )
 $ErrorActionPreference = 'Stop'
-if (@(($Version -split '-')[0].Split('.') | Where-Object { [int]$_ -gt 65535 }).Count -gt 0) { throw 'Version must fit Windows version resources.' }
+. "$PSScriptRoot/release-config.ps1"
+$release = Get-BlueGrassRelease -Version $Version -Build $Build
+$Version = $release.Version
+$Build = $release.Build
 . "$PSScriptRoot\toolchain.ps1"
 $api = [Uri]$ApiUrl
 if (!$api.IsAbsoluteUri -or $api.Scheme -ne 'https' -or $api.UserInfo -or $api.Query -or $api.Fragment) {

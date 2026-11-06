@@ -30,7 +30,7 @@
 输出：
 
 - `Android/build/app/outputs/flutter-apk/app-release.apk`：Flutter 标准产物。
-- `Android/dist/<版本>+<构建号>/BlueGrass-Android-<版本>+<构建号>-arm64.apk`：可分发文件。
+- `Android/dist/<版本>+<构建号>/BlueGrass-Android-<版本>-arm64.apk`：可分发文件。
 - 同目录 `SHA256SUMS`、`build-info.json`：文件校验和、签名证书指纹、源码提交及原生库清单。
 
 本地有未提交内容时，构建信息会标记 `sourceDirty: true`，其中的提交 SHA 仅代表基线；GitHub 发布只接受干净检出的源码。
@@ -66,15 +66,15 @@ keytool -genkeypair -v -keystore 'E:/private/bluegrass-android.jks' -alias blueg
 
 配置好 Secrets 并将流程文件随代码推送后：
 
-1. **每次 push 到 `main`**：测试 → 编译 → APK 校验 → 上传 Actions artifact → 更新统一 `preview` Release 的 Android 附件。
+1. **每次 push 到 `main`**：测试 → 编译 → APK 校验 → 上传 Actions artifact → 等待全部平台公共版本一致后整体更新 preview。
 2. **Pull Request 到 `main`**：执行同样构建检查，上传测试签名的 APK artifact；不读取发行密钥、不创建 Release。
-3. **手动运行**：Actions → Android build and release → Run workflow。选择 `main` 会发布；其他分支只生成测试 artifact。
+3. **手动运行**：Actions → Android build and release → Run workflow。选择 main 的产物参与整组发布；其他分支只生成测试 artifact。
 
-客户端版本名读取 `Android/pubspec.yaml`；CI `versionCode = 100000 + github.run_number`。重跑保持 versionCode，发布附件名称包含 attempt，不能重置工作流编号或使 versionCode 回退。
+客户端公开版本读取根 `release.json`，通过 build-name 与 BLUEGRASS_VERSION 注入；CI versionCode 仍为 100000 + github.run_number，本地默认内部构建号读取 pubspec。公开包名如 `BlueGrass-Android-0.1.0-arm64.apk`，不带 build/attempt。内部 versionCode 不得回退；同版本重跑保持现有发行，新内容先递增公共版本。
 
-成功构建后由 `.github/workflows/publish-preview.yml` 统一汇总至固定 `preview` Pre-release；Android 工作流不再创建独立 tag/Release。与 Windows、macOS 共用下载页，平台版本独立。发布器只接受本仓库 main 的成功运行，复核固定签名、干净源码、提交、构建号和包哈希；失败时保留上一次 Android 下载，其余平台继续独立更新。
+成功构建后由 publish-preview.yml 汇总至固定 preview，Android 不生成独立 tag/Release。Windows、Android、macOS 共用 X.X.X 版本；全部平台版本一致、来源和包哈希验证成功才整体切换。固定签名、干净源码和内部构建号检查继续保留，任一单端失败时保留上一整组下载。
 
-下载入口：[统一开发预览版](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)。下载 Android ARM64 的 `.apk` 及同前缀 SHA256 文件；不要下载 Source code。元数据和校验文件采用带平台的独立名称，避免覆盖其他平台。Actions artifact 保留 14 天，Release 附件保留到本平台下次成功更新。原有平台 Release 仅作历史记录。
+下载入口：[统一开发预览版](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)。下载 ARM64 APK 和同平台/X.X.X 前缀的 SHA256 文件。Actions artifact 保留 14 天，Release 附件保留到下一公共版本整体发布。非 preview Release 已清理。
 
 并发、重跑、失败恢复及首次汇总规则见 [统一发布手册](../../docs/development/github-releases.md)。
 

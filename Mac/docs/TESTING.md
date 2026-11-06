@@ -49,6 +49,6 @@ TUN 的受保护状态位于 `/Library/Application Support/BlueGrass/Tunnel`，�
 
 ## 构建方式
 
-工作流上传到 GitHub 后，向 `main` 推送 Mac 或其共享依赖源码会触发 `macOS development build`。工作流存在于默认分支时，也可在 Actions 页面使用 `Run workflow` 手动选择分支，或在已有运行页面重新运行。两个架构分别上传 artifact，保留 14 天；两架构同一次运行成功后，由 `publish-preview.yml` 自动更新到固定 [preview Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)，与 Windows/Android 集中展示。失败时保留前一次 macOS 下载，不再新增独立 macOS tag。附件带版本和 attempt 前缀，原始 BUILD.json 信息保留在同前缀元数据中。并发与重跑规则见 [统一发布手册](../../docs/development/github-releases.md)。源码中的 `Mac/tools/build.py` 也可在配置好同版本 Flutter/Go/Xcode 的 Mac 上运行。
+向 main 推送根 release.json、Mac 或共享依赖会触发 macOS development build，也可在 Actions 手动运行。公开版本从根 release.json 读取，显示和包名只用 X.X.X，例如 `BlueGrass-macOS-0.1.0-arm64.zip`；内部构建号及来源保留在 BUILD.json。两个架构须同一次成功运行，且 Windows/Android 相同版本均就绪后，由 publish-preview.yml 整体更新固定 [preview Release](https://github.com/BlueGrassN/BlueGrass/releases/tag/preview)。任一平台失败保留上一整组下载。同版本文件不可覆盖，新发行先递增根版本。artifact 保留 14 天。构建、并发与恢复见 [统一发布手册](../../docs/development/github-releases.md)；Mac/tools/build.py 也可在配置同版本 Flutter/Go/Xcode 的 Mac 上运行。
 
 统一发布器读取 main 分支运行列表，再逐条核验成功状态与来源，避免 GitHub 状态筛选索引滞后漏掉新包。以 preview 页面逐端 commit/run 和附件摘要确认更新；补发使用共享发布手册中的统一工作流。
